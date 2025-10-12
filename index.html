@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TRÁI TIM MẬP</title>
+<title>TẶNG NGƯỜI ĐẸP 20-10</title>
 <style>
 * {
   margin: 0;
@@ -16,7 +16,6 @@ html, body {
   width: 100%;
   background: #000;
   overflow: hidden;
-  font-family: Arial, sans-serif;
 }
 
 canvas {
@@ -27,80 +26,15 @@ canvas {
   height: 100%;
   display: block;
 }
-
-#startScreen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #000;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  cursor: pointer;
-}
-
-#chubbyHeart {
-  width: 280px;
-  height: 280px;
-  position: relative;
-  animation: heartbeat 1.5s ease-in-out infinite;
-  filter: drop-shadow(0 0 50px #ff1493) drop-shadow(0 0 80px #ff69b4);
-}
-
-@keyframes heartbeat {
-  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 50px #ff1493) drop-shadow(0 0 80px #ff69b4); }
-  50% { transform: scale(1.15); filter: drop-shadow(0 0 70px #ff1493) drop-shadow(0 0 120px #ff69b4); }
-}
-
-#startText {
-  margin-top: 40px;
-  color: #ff69b4;
-  font-size: 28px;
-  font-weight: bold;
-  text-shadow: 0 0 30px #ff1493, 0 0 50px #ff69b4;
-  animation: pulse 2s ease-in-out infinite;
-  letter-spacing: 3px;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: translateY(0); }
-  50% { opacity: 0.7; transform: translateY(-5px); }
-}
-
-.hide {
-  display: none !important;
-}
 </style>
 </head>
 <body>
-<div id="startScreen">
-  <svg id="chubbyHeart" viewBox="0 0 100 100">
-    <defs>
-      <radialGradient id="heartGradient" cx="50%" cy="50%">
-        <stop offset="0%" style="stop-color:#ff1493;stop-opacity:1" />
-        <stop offset="50%" style="stop-color:#ff69b4;stop-opacity:1" />
-        <stop offset="100%" style="stop-color:#ff1493;stop-opacity:1" />
-      </radialGradient>
-    </defs>
-    <path d="M50,85 C50,85 15,60 15,40 C15,25 25,20 35,25 C40,27 45,32 50,40 C55,32 60,27 65,25 C75,20 85,25 85,40 C85,60 50,85 50,85 Z" 
-          fill="url(#heartGradient)" 
-          stroke="#ff1493" 
-          stroke-width="0.5"/>
-  </svg>
-  <div id="startText">NHẤN VÀO ĐỂ BẮT ĐẦU</div>
-</div>
-
 <canvas id="pinkboard"></canvas>
 <audio id="bgMusic" loop>
-  <source src="https://drive.google.com/uc?export=download&id=1oyNbqUrrHASbE9Ne7rY9JQXJ8YJTRy1I" type="audio/mpeg">
+  <source src="https://jumpshare.com/s/myXgMcTMYbHWW73IDSkQ" type="audio/mpeg">
 </audio>
 
 <script>
-var started = false;
 var settings = {
   particles: {
     length: 750,
@@ -110,34 +44,6 @@ var settings = {
     size: 8,
   },
 };
-
-document.getElementById('startScreen').addEventListener('click', function() {
-  if (!started) {
-    started = true;
-    var music = document.getElementById('bgMusic');
-    
-    // Thử nhiều cách để phát nhạc
-    music.volume = 1.0;
-    var playPromise = music.play();
-    
-    if (playPromise !== undefined) {
-      playPromise.then(function() {
-        console.log('Music started successfully');
-      }).catch(function(e) {
-        console.log('Autoplay prevented:', e);
-        // Thử lại sau khi user đã tương tác
-        setTimeout(function() {
-          music.play();
-        }, 100);
-      });
-    }
-    
-    this.classList.add('hide');
-    setTimeout(function() {
-      startAnimation();
-    }, 100);
-  }
-});
 
 (function(){var b=0;var c=["ms","moz","webkit","o"];for(var a=0;a<c.length&&!window.requestAnimationFrame;++a){window.requestAnimationFrame=window[c[a]+"RequestAnimationFrame"];window.cancelAnimationFrame=window[c[a]+"CancelAnimationFrame"]||window[c[a]+"CancelRequestRequestAnimationFrame"]}if(!window.requestAnimationFrame){window.requestAnimationFrame=function(h,e){var d=new Date().getTime();var f=Math.max(0,16-(d-b));var g=window.setTimeout(function(){h(d+f)},f);b=d+f;return g}}if(!window.cancelAnimationFrame){window.cancelAnimationFrame=function(d){clearTimeout(d)}}}());
 
@@ -215,7 +121,7 @@ var Particle = (function() {
       var dy = this.targetPosition.y - this.position.y;
       var distance = Math.sqrt(dx * dx + dy * dy);
       if (distance > 1) {
-        var speed = 450;
+        var speed = 450; 
         this.velocity.x = (dx / distance) * speed;
         this.velocity.y = (dy / distance) * speed;
         this.position.x += this.velocity.x * deltaTime;
@@ -238,20 +144,20 @@ var Particle = (function() {
         this.velocity.x *= 0.95;
         this.velocity.y *= 0.95;
       } else {
-        var force = 2000 / Math.max(distance * 0.06, 1);
+        var force = 2000 / Math.max(distance * 0.06, 1); 
         var angle = Math.atan2(dy, dx);
-        var spiralAngle = angle + (Math.PI / 5);
+        var spiralAngle = angle + (Math.PI / 5); 
         var targetVX = Math.cos(spiralAngle) * force;
         var targetVY = Math.sin(spiralAngle) * force;
         
-        this.velocity.x += (targetVX - this.velocity.x) * deltaTime * 5;
+        this.velocity.x += (targetVX - this.velocity.x) * deltaTime * 5; 
         this.velocity.y += (targetVY - this.velocity.y) * deltaTime * 5;
       }
 
       this.position.x += this.velocity.x * deltaTime;
       this.position.y += this.velocity.y * deltaTime;
       
-      this.fadeAlpha = 1;
+      this.fadeAlpha = 1; 
       
       if (distance < 120) {
         this.inVortex = true;
@@ -288,7 +194,7 @@ var Particle = (function() {
         var spiralAngle = angle + (Math.PI / 6);
         var targetVX = Math.cos(spiralAngle) * force;
         var targetVY = Math.sin(spiralAngle) * force;
-        this.velocity.x += (targetVX - this.velocity.x) * deltaTime * 5;
+        this.velocity.x += (targetVX - this.velocity.x) * deltaTime * 5; 
         this.velocity.y += (targetVY - this.velocity.y) * deltaTime * 5;
       } else {
         this.inVortex = true;
@@ -362,7 +268,7 @@ var ParticlePool = (function() {
     particles[firstFree].initialize(x, y, dx, dy);
     firstFree++;
     if (firstFree == particles.length) firstFree = 0;
-    if (firstActive == firstFree) firstActive++;
+    if (firstActive == firstFree ) firstActive++;
     if (firstActive == particles.length) firstActive = 0;
   };
   ParticlePool.prototype.update = function(deltaTime, vortexActive, vortexCenter, currentTime, vortexAlpha) {
@@ -510,7 +416,7 @@ var ParticlePool = (function() {
         var dy = particles[i].position.y - vortexCenter.y;
         var dist = Math.sqrt(dx*dx + dy*dy) || 1;
         
-        var speed = 100 + Math.random() * 200;
+        var speed = 100 + Math.random() * 200; 
         
         particles[i].velocity.x = (dx / dist) * speed * (0.5 + Math.random());
         particles[i].velocity.y = (dy / dist) * speed * (0.5 + Math.random());
@@ -523,12 +429,36 @@ var ParticlePool = (function() {
   return ParticlePool;
 })();
 
-function startAnimation() {
 (function(canvas) {
   var context = canvas.getContext('2d'),
       particles = new ParticlePool(settings.particles.length),
       particleRate = settings.particles.length / settings.particles.duration,
       time;
+
+  // Phát nhạc khi user tương tác (yêu cầu của trình duyệt)
+  var music = document.getElementById('bgMusic');
+  var musicStarted = false;
+  
+  function startMusic() {
+    if (!musicStarted) {
+      music.play().catch(function(e) {
+        console.log('Autoplay prevented:', e);
+      });
+      musicStarted = true;
+      document.removeEventListener('click', startMusic);
+      document.removeEventListener('touchstart', startMusic);
+      document.removeEventListener('keydown', startMusic);
+    }
+  }
+  
+  document.addEventListener('click', startMusic);
+  document.addEventListener('touchstart', startMusic);
+  document.addEventListener('keydown', startMusic);
+  
+  // Thử tự động phát (một số trình duyệt cho phép)
+  setTimeout(function() {
+    startMusic();
+  }, 500);
 
   var stopCreating = false;
   var vortexActive = false;
@@ -545,18 +475,14 @@ function startAnimation() {
   var planetRiseStart = 0;
   var suppressPoolDraw = false;
   var planetScale = 0;
+  var shootingStars = [];
 
   var secondSphere = [];
   var secondSphereActive = false;
   var secondSphereStart = 0;
   var secondSphereExploded = false;
 
-  var flyingLetters = [];
-  var flyingLettersActive = false;
-  var flyingLettersStartTime = 0;
-  var letterPhase = 1;
-  var phaseChangeTime = 0;
-
+  // Tạo trái tim cho ảnh giữa
   function createHeartImage(color, size) {
     var canvas = document.createElement('canvas');
     var ctx = canvas.getContext('2d');
@@ -593,6 +519,13 @@ function startAnimation() {
   let currentImageIndex = 0;
   let imageSwitchInterval = 3;
   let lastImageSwitchTime = 0;
+
+  // Thêm mảng chữ cái bay
+  var flyingLetters = [];
+  var flyingLettersActive = false;
+  var flyingLettersStartTime = 0;
+  var letterPhase = 1; // 1: VUI VẺ, 2: HẠNH PHÚC, 3: I LOVE V
+  var phaseChangeTime = 0;
 
   function pointOnHeart(t) {
     return new Point(
@@ -636,26 +569,27 @@ function startAnimation() {
   setTimeout(function() {
     vortexActive = true;
     vortexStartTime = new Date().getTime() / 1000;
-  }, 7000);
+  }, 7000); 
 
   setTimeout(function() {
     textFormationStart = new Date().getTime() / 1000;
     textWaveIndex = 0;
     lastWaveTime = (new Date().getTime() / 1000) - 0.5;
-  }, 10000);
+  }, 10000); 
 
   setTimeout(function() {
     textExploded = true;
-  }, 20000);
+  }, 20000); 
 
   setTimeout(function() {
     suppressPoolDraw = false;
     createPlanet(vortexCenter);
-    lastImageSwitchTime = new Date().getTime() / 1000;
+    lastImageSwitchTime = new Date().getTime() / 1000; 
+    // Bắt đầu chữ bay vào sau 2 giây
     setTimeout(function() {
       createFlyingLetters(vortexCenter);
     }, 2000);
-  }, 23000);
+  }, 23000); 
 
   function createPlanet(vortexCenter) {
     planetParticles = [];
@@ -692,6 +626,7 @@ function startAnimation() {
     var canvasW = canvas.width;
     var canvasH = canvas.height;
     
+    // Phase 1: VUI VẺ
     var letters = ['V', 'U', 'I', ' ', 'V', 'Ẻ'];
     
     var positions = [
@@ -710,6 +645,9 @@ function startAnimation() {
       var pos = positions[i];
       flyingLetters.push({
         letter: letters[i],
+        originalLetter: letters[i],
+        phase2Letter: ['H', 'Ạ', 'N', 'H', ' ', 'P'][i],
+        phase3Letter: ['I', ' ', 'L', 'O', 'V', 'E'][i],
         x: pos.startX,
         y: pos.startY,
         targetX: startX + i * spacing,
@@ -734,6 +672,7 @@ function startAnimation() {
     flyingLettersActive = true;
     letterPhase = 1;
     
+    // Sau 4 giây chuyển sang phase 2
     setTimeout(function() {
       explodeAndReform(2, vortexCenter);
     }, 4000);
@@ -746,15 +685,18 @@ function startAnimation() {
     var letters, spacing, startX;
     
     if (phase === 2) {
+      // HẠNH PHÚC
       letters = ['H', 'Ạ', 'N', 'H', ' ', 'P', 'H', 'Ú', 'C'];
       spacing = 65;
       startX = vortexCenter.x - 260;
     } else if (phase === 3) {
+      // I LOVE V
       letters = ['I', ' ', 'L', 'O', 'V', 'E', ' ', 'V'];
       spacing = 70;
       startX = vortexCenter.x - 245;
     }
     
+    // Nổ các chữ hiện tại
     for (var i = 0; i < flyingLetters.length; i++) {
       var letter = flyingLetters[i];
       letter.exploding = true;
@@ -765,6 +707,7 @@ function startAnimation() {
       letter.explodeVY = Math.sin(angle) * speed;
     }
     
+    // Tạo chữ mới sau 0.8 giây
     setTimeout(function() {
       flyingLetters = [];
       var canvasW = canvas.width;
@@ -804,6 +747,7 @@ function startAnimation() {
         });
       }
       
+      // Nếu là phase 2, sau 4 giây chuyển sang phase 3
       if (phase === 2) {
         setTimeout(function() {
           explodeAndReform(3, vortexCenter);
@@ -821,6 +765,7 @@ function startAnimation() {
       var letter = flyingLetters[i];
       
       if (letter.exploding) {
+        // Hiệu ứng nổ
         var explodeElapsed = now - phaseChangeTime;
         if (explodeElapsed < 0.8) {
           letter.x += letter.explodeVX * 0.016;
@@ -1035,7 +980,7 @@ function startAnimation() {
     const currentImage = centerImages[currentImageIndex];
 
     if (currentImage && currentImage.complete) {
-      const imgSize = 90 * planetScale;
+      const imgSize = 90 * planetScale; 
       ctx.save();
       let fadeEffect = 1;
       const timeSinceSwitch = now - lastImageSwitchTime;
@@ -1045,7 +990,7 @@ function startAnimation() {
         fadeEffect = 1 - (timeSinceSwitch - (imageSwitchInterval - 0.5)) / 0.5;
       }
 
-      ctx.globalAlpha = 0.95 * planetScale * fadeEffect;
+      ctx.globalAlpha = 0.95 * planetScale * fadeEffect; 
       ctx.drawImage(
         currentImage,
         vortexCenter.x - imgSize / 2,
@@ -1097,7 +1042,7 @@ function startAnimation() {
     ctx.save();
     ctx.globalAlpha = Math.min(scaleProgress * 1.5, 1) * 0.5;
     ctx.translate(vortexCenter.x, vortexCenter.y + riseOffset);
-    ctx.scale(planetScale * 1.2, planetScale * 1.2);
+    ctx.scale(planetScale * 1.2, planetScale * 1.2); 
     
     ctx.beginPath();
     for (var t = 0; t <= Math.PI * 2 + 0.01; t += 0.05) {
@@ -1206,6 +1151,7 @@ function startAnimation() {
       drawSecondSphere(context, vortexCenter, newTime);
     }
     
+    // Vẽ chữ bay
     if (flyingLettersActive) {
       drawFlyingLetters(context, newTime);
     }
@@ -1228,7 +1174,6 @@ function startAnimation() {
   onResize();
   render();
 })(document.getElementById('pinkboard'));
-}
 </script>
 </body>
 </html>
