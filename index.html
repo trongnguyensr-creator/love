@@ -1,220 +1,1234 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="utf-8">
-<title>Trái tim dễ thương 💖</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRÁI TIM MẬP</title>
 <style>
-    html, body {
-        margin: 0;
-        height: 100%;
-        overflow: hidden;
-        background: radial-gradient(circle at center, #fff0fa 0%, #ffd9f2 40%, #ffb6e6 100%);
-    }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-    canvas {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        filter: drop-shadow(0 0 15px #ff99cc);
-        animation: pulse 3s ease-in-out infinite;
-    }
+html, body {
+  height: 100%;
+  width: 100%;
+  background: #000;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
 
-    @keyframes pulse {
-        0%, 100% { filter: drop-shadow(0 0 10px #ff99cc); transform: scale(1); }
-        50% { filter: drop-shadow(0 0 25px #ff66cc); transform: scale(1.05); }
-    }
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
 
-    .orbit-text {
-        position: absolute;
-        font-family: "Poppins", "Comic Sans MS", cursive;
-        font-weight: 600;
-        font-size: 24px;
-        color: #ff66b2;
-        text-shadow: 0 0 10px #ffd6eb, 0 0 25px #ffc1e5;
-        white-space: nowrap;
-        pointer-events: none;
-        animation: glow 2.5s ease-in-out infinite;
-    }
+#startScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  cursor: pointer;
+}
 
-    @keyframes glow {
-        0%, 100% { opacity: 1; text-shadow: 0 0 10px #ffcce6, 0 0 20px #ffb3e6; }
-        50% { opacity: 0.7; text-shadow: 0 0 20px #ff99dd, 0 0 35px #ff80cc; }
-    }
+#chubbyHeart {
+  width: 280px;
+  height: 280px;
+  position: relative;
+  animation: heartbeat 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 50px #ff1493) drop-shadow(0 0 80px #ff69b4);
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 50px #ff1493) drop-shadow(0 0 80px #ff69b4); }
+  50% { transform: scale(1.15); filter: drop-shadow(0 0 70px #ff1493) drop-shadow(0 0 120px #ff69b4); }
+}
+
+#startText {
+  margin-top: 40px;
+  color: #ff69b4;
+  font-size: 28px;
+  font-weight: bold;
+  text-shadow: 0 0 30px #ff1493, 0 0 50px #ff69b4;
+  animation: pulse 2s ease-in-out infinite;
+  letter-spacing: 3px;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: translateY(0); }
+  50% { opacity: 0.7; transform: translateY(-5px); }
+}
+
+.hide {
+  display: none !important;
+}
 </style>
 </head>
 <body>
-    <canvas id="pinkboard"></canvas>
+<div id="startScreen">
+  <svg id="chubbyHeart" viewBox="0 0 100 100">
+    <defs>
+      <radialGradient id="heartGradient" cx="50%" cy="50%">
+        <stop offset="0%" style="stop-color:#ff1493;stop-opacity:1" />
+        <stop offset="50%" style="stop-color:#ff69b4;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#ff1493;stop-opacity:1" />
+      </radialGradient>
+    </defs>
+    <path d="M50,85 C50,85 15,60 15,40 C15,25 25,20 35,25 C40,27 45,32 50,40 C55,32 60,27 65,25 C75,20 85,25 85,40 C85,60 50,85 50,85 Z" 
+          fill="url(#heartGradient)" 
+          stroke="#ff1493" 
+          stroke-width="0.5"/>
+  </svg>
+  <div id="startText">NHẤN VÀO ĐỂ BẮT ĐẦU</div>
+</div>
 
-    <!-- Dòng chữ xoay quanh trái tim -->
-    <div id="orbit1" class="orbit-text">Chuẩn bị đi ăn chưa cô bé ơi</div>
-    <div id="orbit2" class="orbit-text">Đi ăn lẩu cá nhó</div>
-    <div id="orbit3" class="orbit-text">Sắp được đi ăn rồi ó</div>
+<canvas id="pinkboard"></canvas>
+<audio id="bgMusic" loop>
+  <source src="https://drive.google.com/uc?export=download&id=1oyNbqUrrHASbE9Ne7rY9JQXJ8YJTRy1I" type="audio/mpeg">
+</audio>
 
 <script>
-/* 💗 HIỆU ỨNG HẠT TRÁI TIM */
+var started = false;
 var settings = {
-    particles: { length: 8000, duration: 4, velocity: 80, effect: -1.3, size: 8 },
+  particles: {
+    length: 750,
+    duration: 5,
+    velocity: 100,
+    effect: -1.5,
+    size: 8,
+  },
 };
 
-(function() {
-    var lastTime = 0, vendors = ['ms', 'moz', 'webkit', 'o'];
-    for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-        window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
+document.getElementById('startScreen').addEventListener('click', function() {
+  if (!started) {
+    started = true;
+    var music = document.getElementById('bgMusic');
+    
+    // Thử nhiều cách để phát nhạc
+    music.volume = 1.0;
+    var playPromise = music.play();
+    
+    if (playPromise !== undefined) {
+      playPromise.then(function() {
+        console.log('Music started successfully');
+      }).catch(function(e) {
+        console.log('Autoplay prevented:', e);
+        // Thử lại sau khi user đã tương tác
+        setTimeout(function() {
+          music.play();
+        }, 100);
+      });
     }
+    
+    this.classList.add('hide');
+    setTimeout(function() {
+      startAnimation();
+    }, 100);
+  }
+});
+
+(function(){var b=0;var c=["ms","moz","webkit","o"];for(var a=0;a<c.length&&!window.requestAnimationFrame;++a){window.requestAnimationFrame=window[c[a]+"RequestAnimationFrame"];window.cancelAnimationFrame=window[c[a]+"CancelAnimationFrame"]||window[c[a]+"CancelRequestRequestAnimationFrame"]}if(!window.requestAnimationFrame){window.requestAnimationFrame=function(h,e){var d=new Date().getTime();var f=Math.max(0,16-(d-b));var g=window.setTimeout(function(){h(d+f)},f);b=d+f;return g}}if(!window.cancelAnimationFrame){window.cancelAnimationFrame=function(d){clearTimeout(d)}}}());
+
+var Point = (function() {
+  function Point(x, y) {
+    this.x = (typeof x !== 'undefined') ? x : 0;
+    this.y = (typeof y !== 'undefined') ? y : 0;
+  }
+  Point.prototype.clone = function() {
+    return new Point(this.x, this.y);
+  };
+  Point.prototype.length = function(length) {
+    if (typeof length == 'undefined')
+      return Math.sqrt(this.x * this.x + this.y * this.y);
+    this.normalize();
+    this.x *= length;
+    this.y *= length;
+    return this;
+  };
+  Point.prototype.normalize = function() {
+    var length = this.length();
+    this.x /= length;
+    this.y /= length;
+    return this;
+  };
+  return Point;
 })();
 
-var Point = function(x, y) { this.x = x || 0; this.y = y || 0; };
-Point.prototype.clone = function() { return new Point(this.x, this.y); };
-Point.prototype.length = function(length) {
-    if (typeof length == 'undefined')
-        return Math.sqrt(this.x * this.x + this.y * this.y);
-    this.normalize(); this.x *= length; this.y *= length; return this;
-};
-Point.prototype.normalize = function() {
-    var length = this.length();
-    this.x /= length; this.y /= length; return this;
-};
-
-var Particle = function() { this.position = new Point(); this.velocity = new Point(); this.acceleration = new Point(); this.age = 0; };
-Particle.prototype.initialize = function(x, y, dx, dy) {
-    this.position.x = x; this.position.y = y;
-    this.velocity.x = dx; this.velocity.y = dy;
+var Particle = (function() {
+  function Particle() {
+    this.position = new Point();
+    this.velocity = new Point();
+    this.acceleration = new Point();
+    this.age = 0;
+    this.inVortex = false;
+    this.vortexStartTime = 0;
+    this.targetPosition = null;
+    this.isFormingText = false;
+    this.fadeOut = false;
+    this.fadeAlpha = 1;
+    this.glow = 0;
+    this.glowDirection = 1;
+    this.explodeTime = 0;
+  }
+  Particle.prototype.initialize = function(x, y, dx, dy) {
+    this.position.x = x;
+    this.position.y = y;
+    this.velocity.x = dx;
+    this.velocity.y = dy;
     this.acceleration.x = dx * settings.particles.effect;
     this.acceleration.y = dy * settings.particles.effect;
     this.age = 0;
-};
-Particle.prototype.update = function(deltaTime) {
+    this.inVortex = false;
+    this.vortexStartTime = 0;
+    this.targetPosition = null;
+    this.isFormingText = false;
+    this.fadeOut = false;
+    this.fadeAlpha = 1;
+    this.glow = Math.random();
+    this.glowDirection = 1;
+    this.explodeTime = 0;
+  };
+  Particle.prototype.update = function(deltaTime, vortexActive, vortexCenter, currentTime, vortexAlpha) {
+    this.glow += this.glowDirection * deltaTime * 3;
+    if (this.glow >= 1) {
+      this.glow = 1;
+      this.glowDirection = -1;
+    } else if (this.glow <= 0) {
+      this.glow = 0;
+      this.glowDirection = 1;
+    }
+
+    if (this.isFormingText && this.targetPosition) {
+      var dx = this.targetPosition.x - this.position.x;
+      var dy = this.targetPosition.y - this.position.y;
+      var distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance > 1) {
+        var speed = 450;
+        this.velocity.x = (dx / distance) * speed;
+        this.velocity.y = (dy / distance) * speed;
+        this.position.x += this.velocity.x * deltaTime;
+        this.position.y += this.velocity.y * deltaTime;
+      } else {
+        this.velocity.x = 0;
+        this.velocity.y = 0;
+        this.position.x = this.targetPosition.x;
+        this.position.y = this.targetPosition.y;
+      }
+      return;
+    }
+
+    if (this.fadeOut) {
+      var dx = vortexCenter.x - this.position.x;
+      var dy = vortexCenter.y - this.position.y;
+      var distance = Math.sqrt(dx * dx + dy * dy);
+      
+      if (currentTime - this.explodeTime < 0.2) {
+        this.velocity.x *= 0.95;
+        this.velocity.y *= 0.95;
+      } else {
+        var force = 2000 / Math.max(distance * 0.06, 1);
+        var angle = Math.atan2(dy, dx);
+        var spiralAngle = angle + (Math.PI / 5);
+        var targetVX = Math.cos(spiralAngle) * force;
+        var targetVY = Math.sin(spiralAngle) * force;
+        
+        this.velocity.x += (targetVX - this.velocity.x) * deltaTime * 5;
+        this.velocity.y += (targetVY - this.velocity.y) * deltaTime * 5;
+      }
+
+      this.position.x += this.velocity.x * deltaTime;
+      this.position.y += this.velocity.y * deltaTime;
+      
+      this.fadeAlpha = 1;
+      
+      if (distance < 120) {
+        this.inVortex = true;
+        this.fadeOut = false;
+        var randomAngle = Math.random() * Math.PI * 2;
+        var randomTheta = Math.acos(2 * Math.random() - 1);
+        this.sphereAngle = randomAngle;
+        this.sphereTheta = randomTheta;
+        this.sphereRadius = 115 + Math.random() * 10;
+        this.sphereSpeed = 0.3 + Math.random() * 0.2;
+      }
+      return;
+    }
+
+    if (this.inVortex) {
+      return;
+    }
+
+    if (vortexActive && this.vortexStartTime === 0) {
+      var dx = this.position.x - vortexCenter.x;
+      var dy = this.position.y - vortexCenter.y;
+      var distance = Math.sqrt(dx * dx + dy * dy);
+      this.vortexStartTime = currentTime + distance * 0.0001;
+    }
+
+    if (vortexActive && currentTime >= this.vortexStartTime && this.vortexStartTime > 0 && vortexAlpha > 0.3) {
+      var dx = vortexCenter.x - this.position.x;
+      var dy = vortexCenter.y - this.position.y;
+      var distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance > 3) {
+        var angle = Math.atan2(dy, dx);
+        var force = 4000 * vortexAlpha / Math.max(distance * 0.1, 1);
+        var spiralAngle = angle + (Math.PI / 6);
+        var targetVX = Math.cos(spiralAngle) * force;
+        var targetVY = Math.sin(spiralAngle) * force;
+        this.velocity.x += (targetVX - this.velocity.x) * deltaTime * 5;
+        this.velocity.y += (targetVY - this.velocity.y) * deltaTime * 5;
+      } else {
+        this.inVortex = true;
+      }
+    } else if (!vortexActive || this.vortexStartTime === 0 || currentTime < this.vortexStartTime || vortexAlpha <= 0.3) {
+      this.velocity.x += this.acceleration.x * deltaTime;
+      this.velocity.y += this.acceleration.y * deltaTime;
+    }
+
     this.position.x += this.velocity.x * deltaTime;
     this.position.y += this.velocity.y * deltaTime;
-    this.velocity.x += this.acceleration.x * deltaTime;
-    this.velocity.y += this.acceleration.y * deltaTime;
     this.age += deltaTime;
-};
-Particle.prototype.draw = function(context, image) {
-    function ease(t){ return (--t)*t*t+1; }
-    var size = image.width * ease(this.age / settings.particles.duration);
-    context.globalAlpha = 1 - this.age / settings.particles.duration;
-    context.drawImage(image, this.position.x - size/2, this.position.y - size/2, size, size);
-};
+  };
+  
+  Particle.prototype.draw = function(context, image, vortexActive, vortexCenter, currentTime) {
+    function ease(t) {
+      return (--t) * t * t + 1;
+    }
+    
+    if (this.inVortex && this.sphereAngle !== undefined) {
+      var perspective = 1;
+      if (this.position.z !== undefined) {
+        perspective = 1 / (1 + this.position.z * 0.002);
+      }
+      
+      context.globalAlpha = 0.8 * perspective;
+      context.shadowBlur = 10;
+      context.shadowColor = '#ff69b4';
+      context.fillStyle = "#ff69b4";
+      context.beginPath();
+      context.arc(this.position.x, this.position.y, 2.5 * perspective, 0, 2 * Math.PI);
+      context.fill();
+      context.shadowBlur = 0;
+      return;
+    }
+    
+    var size = image.width * ease(Math.min(this.age / settings.particles.duration, 1));
+    context.shadowBlur = 15 + this.glow * 10;
+    context.shadowColor = '#ff69b4';
 
-var ParticlePool = function(length) {
-    var particles = new Array(length);
-    for (var i = 0; i < particles.length; i++) particles[i] = new Particle();
-    var firstActive = 0, firstFree = 0, duration = settings.particles.duration;
-    return {
-        add: function(x, y, dx, dy) {
-            particles[firstFree].initialize(x, y, dx, dy);
-            firstFree++; if (firstFree == particles.length) firstFree = 0;
-            if (firstActive == firstFree) firstActive++;
-            if (firstActive == particles.length) firstActive = 0;
-        },
-        update: function(deltaTime) {
-            if (firstActive < firstFree)
-                for (i = firstActive; i < firstFree; i++) particles[i].update(deltaTime);
-            else {
-                for (i = firstActive; i < particles.length; i++) particles[i].update(deltaTime);
-                for (i = 0; i < firstFree; i++) particles[i].update(deltaTime);
-            }
-            while (particles[firstActive].age >= duration && firstActive != firstFree) {
-                firstActive++; if (firstActive == particles.length) firstActive = 0;
-            }
-        },
-        draw: function(context, image) {
-            if (firstActive < firstFree)
-                for (i = firstActive; i < firstFree; i++) particles[i].draw(context, image);
-            else {
-                for (i = firstActive; i < particles.length; i++) particles[i].draw(context, image);
-                for (i = 0; i < firstFree; i++) particles[i].draw(context, image);
-            }
+    if (this.inVortex) {
+      context.globalAlpha = this.fadeAlpha;
+    } else if (this.fadeOut) {
+      context.globalAlpha = this.fadeAlpha;
+    } else if (this.isFormingText) {
+      context.globalAlpha = 1;
+    } else if (vortexActive) {
+      context.globalAlpha = 0.9 * (1 - this.glow * 0.3);
+    } else {
+      context.globalAlpha = 1 - Math.min(this.age / settings.particles.duration, 1);
+    }
+
+    context.drawImage(image, this.position.x - size / 2, this.position.y - size / 2, size, size);
+    context.shadowBlur = 0;
+  };
+  return Particle;
+})();
+
+var ParticlePool = (function() {
+  var particles,
+      firstActive = 0,
+      firstFree = 0,
+      duration = settings.particles.duration;
+
+  function ParticlePool(length) {
+    particles = new Array(length);
+    for (var i = 0; i < particles.length; i++)
+      particles[i] = new Particle();
+  }
+  ParticlePool.prototype.add = function(x, y, dx, dy) {
+    particles[firstFree].initialize(x, y, dx, dy);
+    firstFree++;
+    if (firstFree == particles.length) firstFree = 0;
+    if (firstActive == firstFree) firstActive++;
+    if (firstActive == particles.length) firstActive = 0;
+  };
+  ParticlePool.prototype.update = function(deltaTime, vortexActive, vortexCenter, currentTime, vortexAlpha) {
+    var i;
+    if (firstActive < firstFree) {
+      for (i = firstActive; i < firstFree; i++) {
+        particles[i].update(deltaTime, vortexActive, vortexCenter, currentTime, vortexAlpha);
+        if (particles[i].inVortex && particles[i].sphereAngle !== undefined) {
+          particles[i].sphereAngle += deltaTime * particles[i].sphereSpeed;
+          
+          var x = Math.cos(particles[i].sphereAngle) * Math.sin(particles[i].sphereTheta) * particles[i].sphereRadius;
+          var y = Math.sin(particles[i].sphereAngle) * Math.sin(particles[i].sphereTheta) * particles[i].sphereRadius;
+          var z = Math.cos(particles[i].sphereTheta) * particles[i].sphereRadius;
+          
+          var rotationY = currentTime * 0.3;
+          var xRot = x * Math.cos(rotationY) - z * Math.sin(rotationY);
+          var zRot = x * Math.sin(rotationY) + z * Math.cos(rotationY);
+          
+          particles[i].position.x = vortexCenter.x + xRot;
+          particles[i].position.y = vortexCenter.y + y;
+          particles[i].position.z = zRot;
         }
+      }
+    }
+    if (firstFree < firstActive) {
+      for (i = firstActive; i < particles.length; i++) {
+        particles[i].update(deltaTime, vortexActive, vortexCenter, currentTime, vortexAlpha);
+        if (particles[i].inVortex && particles[i].sphereAngle !== undefined) {
+          particles[i].sphereAngle += deltaTime * particles[i].sphereSpeed;
+          
+          var x = Math.cos(particles[i].sphereAngle) * Math.sin(particles[i].sphereTheta) * particles[i].sphereRadius;
+          var y = Math.sin(particles[i].sphereAngle) * Math.sin(particles[i].sphereTheta) * particles[i].sphereRadius;
+          var z = Math.cos(particles[i].sphereTheta) * particles[i].sphereRadius;
+          
+          var rotationY = currentTime * 0.3;
+          var xRot = x * Math.cos(rotationY) - z * Math.sin(rotationY);
+          var zRot = x * Math.sin(rotationY) + z * Math.cos(rotationY);
+          
+          particles[i].position.x = vortexCenter.x + xRot;
+          particles[i].position.y = vortexCenter.y + y;
+          particles[i].position.z = zRot;
+        }
+      }
+      for (i = 0; i < firstFree; i++) {
+        particles[i].update(deltaTime, vortexActive, vortexCenter, currentTime, vortexAlpha);
+        if (particles[i].inVortex && particles[i].sphereAngle !== undefined) {
+          particles[i].sphereAngle += deltaTime * particles[i].sphereSpeed;
+          
+          var x = Math.cos(particles[i].sphereAngle) * Math.sin(particles[i].sphereTheta) * particles[i].sphereRadius;
+          var y = Math.sin(particles[i].sphereAngle) * Math.sin(particles[i].sphereTheta) * particles[i].sphereRadius;
+          var z = Math.cos(particles[i].sphereTheta) * particles[i].sphereRadius;
+          
+          var rotationY = currentTime * 0.3;
+          var xRot = x * Math.cos(rotationY) - z * Math.sin(rotationY);
+          var zRot = x * Math.sin(rotationY) + z * Math.cos(rotationY);
+          
+          particles[i].position.x = vortexCenter.x + xRot;
+          particles[i].position.y = vortexCenter.y + y;
+          particles[i].position.z = zRot;
+        }
+      }
+    }
+    if (!vortexActive) {
+      while (particles[firstActive].age >= duration && firstActive != firstFree) {
+        firstActive++;
+        if (firstActive == particles.length) firstActive = 0;
+      }
+    }
+  };
+
+  ParticlePool.prototype.formTextWave = function(vortexCenter, waveIndex) {
+    var tempCanvas = document.createElement("canvas");
+    var tempCtx = tempCanvas.getContext("2d");
+    
+    tempCanvas.width = 600;
+    tempCanvas.height = 180;
+
+    tempCtx.fillStyle = "#000";
+    tempCtx.font = "bold 120px 'Courier New', monospace";
+    tempCtx.textAlign = "center";
+    tempCtx.textBaseline = "middle";
+    tempCtx.fillText("20-10", tempCanvas.width / 2, tempCanvas.height / 2);
+
+    var imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+    var data = imageData.data;
+    var textPositions = [];
+
+    var xOffset = vortexCenter.x - tempCanvas.width / 2;
+    var yOffset = vortexCenter.y - tempCanvas.height / 2 - 300;
+
+    for (var y = 0; y < imageData.height; y += 5) {
+      for (var x = 0; x < imageData.width; x += 5) {
+        var index = (y * imageData.width + x) * 4;
+        if (data[index + 3] > 200) {
+          textPositions.push(new Point(xOffset + x, yOffset + y));
+        }
+      }
+    }
+
+    var waveCount = 8;
+    var sliceSize = Math.floor(textPositions.length / waveCount);
+    var start = waveIndex * sliceSize;
+    var end = (waveIndex === waveCount - 1) ? textPositions.length : (waveIndex + 1) * sliceSize;
+    var slice = textPositions.slice(start, end);
+
+    var particleIndex = 0;
+
+    var assignTarget = function(p) {
+      if (!p.isFormingText && particleIndex < slice.length) {
+        p.targetPosition = slice[particleIndex++];
+        p.isFormingText = true;
+        p.inVortex = false;
+        p.fadeOut = false;
+      }
     };
-};
 
+    if (firstActive < firstFree) {
+      for (var i = firstActive; i < firstFree; i++) assignTarget(particles[i]);
+    } else {
+      for (var i = firstActive; i < particles.length; i++) assignTarget(particles[i]);
+      for (var i = 0; i < firstFree; i++) assignTarget(particles[i]);
+    }
+  };
+
+  ParticlePool.prototype.draw = function(context, image, vortexActive, vortexCenter, currentTime) {
+    var i;
+    if (firstActive < firstFree) {
+      for (i = firstActive; i < firstFree; i++)
+        particles[i].draw(context, image, vortexActive, vortexCenter, currentTime);
+    }
+    if (firstFree < firstActive) {
+      for (i = firstActive; i < particles.length; i++)
+        particles[i].draw(context, image, vortexActive, vortexCenter, currentTime);
+      for (i = 0; i < firstFree; i++)
+        particles[i].draw(context, image, vortexActive, vortexCenter, currentTime);
+    }
+  };
+
+  ParticlePool.prototype.explode = function(vortexCenter, currentTime) {
+    for (var i = 0; i < particles.length; i++) {
+      if (particles[i].isFormingText) {
+        particles[i].isFormingText = false;
+        
+        var dx = particles[i].position.x - vortexCenter.x;
+        var dy = particles[i].position.y - vortexCenter.y;
+        var dist = Math.sqrt(dx*dx + dy*dy) || 1;
+        
+        var speed = 100 + Math.random() * 200;
+        
+        particles[i].velocity.x = (dx / dist) * speed * (0.5 + Math.random());
+        particles[i].velocity.y = (dy / dist) * speed * (0.5 + Math.random());
+        
+        particles[i].fadeOut = true;
+        particles[i].explodeTime = currentTime;
+      }
+    }
+  };
+  return ParticlePool;
+})();
+
+function startAnimation() {
 (function(canvas) {
-    var context = canvas.getContext('2d'),
-        particles = new ParticlePool(settings.particles.length),
-        particleRate = settings.particles.length / settings.particles.duration, time;
+  var context = canvas.getContext('2d'),
+      particles = new ParticlePool(settings.particles.length),
+      particleRate = settings.particles.length / settings.particles.duration,
+      time;
 
-    function pointOnHeart(t) {
-        return new Point(
-            160 * Math.pow(Math.sin(t), 3),
-            130 * Math.cos(t) - 50 * Math.cos(2*t) - 20 * Math.cos(3*t) - 10 * Math.cos(4*t) + 25
-        );
+  var stopCreating = false;
+  var vortexActive = false;
+  var vortexAlpha = 0;
+  var vortexStartTime = 0;
+  var vortexCenter = new Point();
+  var textFormationStart = 0;
+  var textWaveIndex = 0;
+  var lastWaveTime = 0;
+  var textExploded = false;
+
+  var planetActive = false;
+  var planetParticles = [];
+  var planetRiseStart = 0;
+  var suppressPoolDraw = false;
+  var planetScale = 0;
+
+  var secondSphere = [];
+  var secondSphereActive = false;
+  var secondSphereStart = 0;
+  var secondSphereExploded = false;
+
+  var flyingLetters = [];
+  var flyingLettersActive = false;
+  var flyingLettersStartTime = 0;
+  var letterPhase = 1;
+  var phaseChangeTime = 0;
+
+  function createHeartImage(color, size) {
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d');
+    canvas.width = size;
+    canvas.height = size;
+    
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    var scale = size / 40;
+    for (var t = 0; t <= Math.PI * 2; t += 0.01) {
+      var x = 16 * Math.pow(Math.sin(t), 3);
+      var y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
+      x = size/2 + x * scale;
+      y = size/2 - y * scale;
+      if (t === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
     }
+    ctx.closePath();
+    ctx.fill();
+    
+    var img = new Image();
+    img.src = canvas.toDataURL();
+    return img;
+  }
 
-    var image = (function() {
-        var canvas2 = document.createElement('canvas'),
-            ctx = canvas2.getContext('2d');
-        canvas2.width = settings.particles.size;
-        canvas2.height = settings.particles.size;
-        function to(t) {
-            var p = pointOnHeart(t);
-            p.x = settings.particles.size/2 + p.x * settings.particles.size / 350;
-            p.y = settings.particles.size/2 - p.y * settings.particles.size / 350;
-            return p;
+  const centerImages = [
+    createHeartImage('#ff1493', 100),
+    createHeartImage('#ff69b4', 100),
+    createHeartImage('#ff85c1', 100),
+    createHeartImage('#ffa0d2', 100),
+    createHeartImage('#ffb6e0', 100)
+  ];
+  
+  let currentImageIndex = 0;
+  let imageSwitchInterval = 3;
+  let lastImageSwitchTime = 0;
+
+  function pointOnHeart(t) {
+    return new Point(
+      160 * Math.pow(Math.sin(t), 3),
+      130 * Math.cos(t) - 50 * Math.cos(2 * t) - 20 * Math.cos(3 * t) - 10 * Math.cos(4 * t) + 25
+    );
+  }
+
+  var image = (function() {
+    var canvas = document.createElement('canvas'),
+        context = canvas.getContext('2d');
+    canvas.width = settings.particles.size;
+    canvas.height = settings.particles.size;
+    function to(t) {
+      var point = pointOnHeart(t);
+      point.x = settings.particles.size / 2 + point.x * settings.particles.size / 350;
+      point.y = settings.particles.size / 2 - point.y * settings.particles.size / 350;
+      return point;
+    }
+    context.beginPath();
+    var t = -Math.PI;
+    var point = to(t);
+    context.moveTo(point.x, point.y);
+    while (t < Math.PI) {
+      t += 0.01;
+      point = to(t);
+      context.lineTo(point.x, point.y);
+    }
+    context.closePath();
+    context.fillStyle = '#ff69b4';
+    context.fill();
+    var image = new Image();
+    image.src = canvas.toDataURL();
+    return image;
+  })();
+
+  setTimeout(function() {
+    stopCreating = true;
+  }, 4000);
+
+  setTimeout(function() {
+    vortexActive = true;
+    vortexStartTime = new Date().getTime() / 1000;
+  }, 7000);
+
+  setTimeout(function() {
+    textFormationStart = new Date().getTime() / 1000;
+    textWaveIndex = 0;
+    lastWaveTime = (new Date().getTime() / 1000) - 0.5;
+  }, 10000);
+
+  setTimeout(function() {
+    textExploded = true;
+  }, 20000);
+
+  setTimeout(function() {
+    suppressPoolDraw = false;
+    createPlanet(vortexCenter);
+    lastImageSwitchTime = new Date().getTime() / 1000;
+    setTimeout(function() {
+      createFlyingLetters(vortexCenter);
+    }, 2000);
+  }, 23000);
+
+  function createPlanet(vortexCenter) {
+    planetParticles = [];
+    var radius = 80;
+    var total = 400;
+    for (var i = 0; i < total; i++) {
+      var phi = Math.random() * 2 * Math.PI;
+      var theta = Math.acos(2 * Math.random() - 1);
+      var r = radius * (0.75 + 0.5 * Math.random());
+      
+      var xOffset = r * Math.sin(theta) * Math.cos(phi);
+      var yOffset = r * Math.sin(theta) * Math.sin(phi);
+      var zOffset = r * Math.cos(theta);
+      
+      planetParticles.push({
+        xOffset: xOffset,
+        yOffset: yOffset,
+        zOffset: zOffset,
+        alpha: 0.5 + Math.random() * 0.4,
+        size: 0.8 + Math.random() * 1.5,
+        baseR: r
+      });
+    }
+    planetRiseStart = new Date().getTime() / 1000;
+    planetActive = true;
+    suppressPoolDraw = false;
+    planetScale = 0;
+
+    createSecondSphere(vortexCenter);
+  }
+
+  function createFlyingLetters(vortexCenter) {
+    flyingLetters = [];
+    var canvasW = canvas.width;
+    var canvasH = canvas.height;
+    
+    var letters = ['V', 'U', 'I', ' ', 'V', 'Ẻ'];
+    
+    var positions = [
+      {startX: -200, startY: canvasH / 2, angle: 0},
+      {startX: canvasW + 200, startY: canvasH / 2, angle: Math.PI},
+      {startX: canvasW / 2, startY: -200, angle: Math.PI / 2},
+      {startX: canvasW / 4, startY: canvasH + 200, angle: -Math.PI / 2},
+      {startX: canvasW * 3/4, startY: canvasH + 200, angle: -Math.PI / 2},
+      {startX: 0, startY: 0, angle: Math.PI / 4}
+    ];
+    
+    var startX = vortexCenter.x - 180;
+    var spacing = 72;
+    
+    for (var i = 0; i < 6; i++) {
+      var pos = positions[i];
+      flyingLetters.push({
+        letter: letters[i],
+        x: pos.startX,
+        y: pos.startY,
+        targetX: startX + i * spacing,
+        targetY: vortexCenter.y - 280,
+        rotation: pos.angle * 2,
+        rotationSpeed: (Math.random() - 0.5) * 8,
+        scale: 0.2,
+        targetScale: 1,
+        alpha: 0,
+        delay: i * 0.15,
+        arrived: false,
+        floatOffset: Math.random() * Math.PI * 2,
+        floatSpeed: 0.8 + Math.random() * 0.4,
+        color: ['#ff1493', '#ff69b4', '#ff85c1', '#ffa0d2', '#ffb6e0', '#ff1493'][i],
+        exploding: false,
+        explodeVX: 0,
+        explodeVY: 0
+      });
+    }
+    
+    flyingLettersStartTime = new Date().getTime() / 1000;
+    flyingLettersActive = true;
+    letterPhase = 1;
+    
+    setTimeout(function() {
+      explodeAndReform(2, vortexCenter);
+    }, 4000);
+  }
+
+  function explodeAndReform(phase, vortexCenter) {
+    letterPhase = phase;
+    phaseChangeTime = new Date().getTime() / 1000;
+    
+    var letters, spacing, startX;
+    
+    if (phase === 2) {
+      letters = ['H', 'Ạ', 'N', 'H', ' ', 'P', 'H', 'Ú', 'C'];
+      spacing = 65;
+      startX = vortexCenter.x - 260;
+    } else if (phase === 3) {
+      letters = ['I', ' ', 'L', 'O', 'V', 'E', ' ', 'V'];
+      spacing = 70;
+      startX = vortexCenter.x - 245;
+    }
+    
+    for (var i = 0; i < flyingLetters.length; i++) {
+      var letter = flyingLetters[i];
+      letter.exploding = true;
+      letter.arrived = false;
+      var angle = Math.random() * Math.PI * 2;
+      var speed = 300 + Math.random() * 200;
+      letter.explodeVX = Math.cos(angle) * speed;
+      letter.explodeVY = Math.sin(angle) * speed;
+    }
+    
+    setTimeout(function() {
+      flyingLetters = [];
+      var canvasW = canvas.width;
+      var canvasH = canvas.height;
+      
+      var positions = [
+        {startX: -200, startY: canvasH / 2},
+        {startX: canvasW + 200, startY: canvasH / 2},
+        {startX: canvasW / 2, startY: -200},
+        {startX: canvasW / 4, startY: canvasH + 200},
+        {startX: canvasW * 3/4, startY: canvasH + 200},
+        {startX: 0, startY: 0},
+        {startX: canvasW, startY: canvasH},
+        {startX: canvasW / 2, startY: canvasH + 200},
+        {startX: -200, startY: canvasH / 4}
+      ];
+      
+      for (var i = 0; i < letters.length; i++) {
+        var pos = positions[i % positions.length];
+        flyingLetters.push({
+          letter: letters[i],
+          x: pos.startX,
+          y: pos.startY,
+          targetX: startX + i * spacing,
+          targetY: vortexCenter.y - 280,
+          rotation: Math.random() * Math.PI * 4,
+          rotationSpeed: (Math.random() - 0.5) * 8,
+          scale: 0.2,
+          targetScale: 1,
+          alpha: 0,
+          delay: i * 0.12,
+          arrived: false,
+          floatOffset: Math.random() * Math.PI * 2,
+          floatSpeed: 0.8 + Math.random() * 0.4,
+          color: ['#ff1493', '#ff69b4', '#ff85c1', '#ffa0d2', '#ffb6e0', '#ff1493', '#ff69b4', '#ff85c1', '#ffa0d2'][i],
+          exploding: false
+        });
+      }
+      
+      if (phase === 2) {
+        setTimeout(function() {
+          explodeAndReform(3, vortexCenter);
+        }, 4000);
+      }
+    }, 800);
+  }
+
+  function drawFlyingLetters(ctx, now) {
+    if (!flyingLettersActive) return;
+    
+    var elapsed = now - flyingLettersStartTime;
+    
+    for (var i = 0; i < flyingLetters.length; i++) {
+      var letter = flyingLetters[i];
+      
+      if (letter.exploding) {
+        var explodeElapsed = now - phaseChangeTime;
+        if (explodeElapsed < 0.8) {
+          letter.x += letter.explodeVX * 0.016;
+          letter.y += letter.explodeVY * 0.016;
+          letter.rotation += letter.rotationSpeed * 0.016;
+          letter.alpha -= 0.016 * 2;
+          
+          if (letter.alpha > 0) {
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, letter.alpha);
+            ctx.translate(letter.x, letter.y);
+            ctx.rotate(letter.rotation);
+            ctx.scale(letter.scale, letter.scale);
+            
+            ctx.font = 'bold 70px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowBlur = 30;
+            ctx.shadowColor = letter.color;
+            ctx.fillStyle = letter.color;
+            ctx.fillText(letter.letter, 0, 0);
+            ctx.restore();
+          }
         }
+        continue;
+      }
+      
+      if (elapsed < letter.delay) continue;
+      
+      var letterElapsed = elapsed - letter.delay;
+      
+      if (!letter.arrived) {
+        var progress = Math.min(letterElapsed / 1.5, 1);
+        var eased = 1 - Math.pow(1 - progress, 3);
+        
+        letter.x = letter.x + (letter.targetX - letter.x) * eased * 0.15;
+        letter.y = letter.y + (letter.targetY - letter.y) * eased * 0.15;
+        letter.rotation += letter.rotationSpeed * 0.016;
+        letter.scale = letter.scale + (letter.targetScale - letter.scale) * eased * 0.15;
+        letter.alpha = Math.min(progress * 1.5, 1);
+        
+        var distX = letter.targetX - letter.x;
+        var distY = letter.targetY - letter.y;
+        if (Math.sqrt(distX*distX + distY*distY) < 15 && progress >= 0.9) {
+          letter.arrived = true;
+          letter.rotation = 0;
+        }
+      } else {
+        letter.floatOffset += letter.floatSpeed * 0.016;
+        var floatY = Math.sin(letter.floatOffset) * 8;
+        
+        ctx.save();
+        ctx.globalAlpha = letter.alpha;
+        ctx.translate(letter.targetX, letter.targetY + floatY);
+        
+        ctx.font = 'bold 70px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        ctx.shadowBlur = 25;
+        ctx.shadowColor = letter.color;
+        
+        ctx.fillStyle = letter.color;
+        ctx.fillText(letter.letter, 0, 0);
+        
+        ctx.shadowBlur = 40;
+        ctx.fillText(letter.letter, 0, 0);
+        
+        ctx.restore();
+        continue;
+      }
+      
+      ctx.save();
+      ctx.globalAlpha = letter.alpha;
+      ctx.translate(letter.x, letter.y);
+      ctx.rotate(letter.rotation);
+      ctx.scale(letter.scale, letter.scale);
+      
+      ctx.font = 'bold 70px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      ctx.shadowBlur = 35;
+      ctx.shadowColor = letter.color;
+      
+      ctx.fillStyle = letter.color;
+      ctx.fillText(letter.letter, 0, 0);
+      
+      ctx.restore();
+    }
+  }
+
+  function createSecondSphere(vortexCenter) {
+    secondSphere = [];
+    var radius = 120;
+    var total = 1200;
+    for (var i = 0; i < total; i++) {
+      var phi = Math.random() * 2 * Math.PI;
+      var theta = Math.acos(2 * Math.random() - 1);
+      var r = radius * (0.8 + 0.4 * Math.random());
+      
+      var xOffset = r * Math.sin(theta) * Math.cos(phi);
+      var yOffset = r * Math.sin(theta) * Math.sin(phi);
+      var zOffset = r * Math.cos(theta);
+      
+      secondSphere.push({
+        xOffset: xOffset,
+        yOffset: yOffset,
+        zOffset: zOffset,
+        x: vortexCenter.x + xOffset,
+        y: vortexCenter.y + yOffset,
+        z: zOffset,
+        vx: 0,
+        vy: 0,
+        vz: 0,
+        alpha: 0.6 + Math.random() * 0.4,
+        size: 1 + Math.random() * 2,
+        baseR: r
+      });
+    }
+    secondSphereStart = new Date().getTime() / 1000;
+    secondSphereActive = true;
+  }
+
+  function drawSecondSphere(ctx, vortexCenter, now) {
+    if (!secondSphereActive) return;
+    
+    var elapsed = now - secondSphereStart;
+    var scaleProgress = Math.min(elapsed / 3, 1);
+    var scale = 1 - Math.pow(1 - scaleProgress, 3);
+    
+    if (elapsed >= 5 && !secondSphereExploded) {
+      secondSphereExploded = true;
+      for (var i = 0; i < secondSphere.length; i++) {
+        var p = secondSphere[i];
+        var len = Math.sqrt(p.xOffset*p.xOffset + p.yOffset*p.yOffset + p.zOffset*p.zOffset) || 1;
+        var speed = 200 + Math.random() * 300;
+        p.vx = (p.xOffset / len) * speed;
+        p.vy = (p.yOffset / len) * speed;
+        p.vz = (p.zOffset / len) * speed;
+      }
+    }
+    
+    if (secondSphereExploded) {
+      var dt = 0.016;
+      for (var i = 0; i < secondSphere.length; i++) {
+        var p = secondSphere[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.z += p.vz * dt;
+        p.alpha -= dt * 0.5;
+        
+        if (p.alpha > 0) {
+          var perspective = 1 / (1 + p.z * 0.002);
+          ctx.globalAlpha = Math.max(0, p.alpha) * perspective;
+          ctx.fillStyle = "#ff69b4";
+          ctx.beginPath();
+          var sphereSize = Math.max(0.5, p.size * perspective);
+          ctx.arc(p.x, p.y, sphereSize, 0, 2 * Math.PI);
+          ctx.fill();
+        }
+      }
+    } else {
+      var rotation = elapsed * 0.4;
+      for (var i = 0; i < secondSphere.length; i++) {
+        var p = secondSphere[i];
+        var xRel = p.xOffset * scale;
+        var yRel = p.yOffset * scale;
+        var zRel = p.zOffset * scale;
+        
+        var xRot = xRel * Math.cos(rotation) - zRel * Math.sin(rotation);
+        var zRot = xRel * Math.sin(rotation) + zRel * Math.cos(rotation);
+        var perspective = 1 / (1 + zRot * 0.002);
+        var px = vortexCenter.x + xRot * perspective;
+        var py = vortexCenter.y + yRel * perspective;
+        
+        ctx.globalAlpha = p.alpha * perspective * scale;
+        ctx.fillStyle = "#ff69b4";
         ctx.beginPath();
-        var t = -Math.PI, point = to(t);
-        ctx.moveTo(point.x, point.y);
-        while (t < Math.PI) { t += 0.01; point = to(t); ctx.lineTo(point.x, point.y); }
-        ctx.closePath();
-        ctx.fillStyle = '#ff66cc';
+        var sphereParticleSize = Math.max(0.5, p.size * perspective);
+        ctx.arc(px, py, sphereParticleSize, 0, 2 * Math.PI);
         ctx.fill();
-        var image = new Image();
-        image.src = canvas2.toDataURL();
-        return image;
-    })();
+      }
+    }
+  }
 
-    function render() {
-        requestAnimationFrame(render);
-        var newTime = new Date().getTime()/1000, deltaTime = newTime - (time || newTime); time = newTime;
-        context.clearRect(0,0,canvas.width,canvas.height);
-        var amount = particleRate * deltaTime;
-        for (var i=0; i<amount; i++) {
-            var pos = pointOnHeart(Math.PI - 2*Math.PI*Math.random());
-            var dir = pos.clone().length(settings.particles.velocity);
-            particles.add(canvas.width/2 + pos.x, canvas.height/2 - pos.y, dir.x, -dir.y);
+  function drawHeartPlanet(ctx, vortexCenter, now) {
+    var riseTime = now - planetRiseStart;
+    
+    var scaleProgress = Math.min(riseTime / 3, 1);
+    planetScale = 1 - Math.pow(1 - scaleProgress, 3);
+    
+    var maxRise = 350;
+    var riseDuration = 5;
+    var riseProgress = Math.min(riseTime / riseDuration, 1);
+    var easedProgress = 1 - Math.pow(1 - riseProgress, 3);
+    var riseOffset = -maxRise * easedProgress;
+    
+    var rotation = riseTime * 0.3;
+    ctx.save();
+
+    var haloRadius = 140 * planetScale;
+    var grad = ctx.createRadialGradient(vortexCenter.x, vortexCenter.y + riseOffset, 10, vortexCenter.x, vortexCenter.y + riseOffset, haloRadius);
+    grad.addColorStop(0, 'rgba(255,102,204,0.35)');
+    grad.addColorStop(0.6, 'rgba(255,102,204,0.08)');
+    grad.addColorStop(1, 'rgba(255,102,204,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(vortexCenter.x, vortexCenter.y + riseOffset, haloRadius, 0, Math.PI*2);
+    ctx.fill();
+
+    const currentImage = centerImages[currentImageIndex];
+
+    if (currentImage && currentImage.complete) {
+      const imgSize = 90 * planetScale;
+      ctx.save();
+      let fadeEffect = 1;
+      const timeSinceSwitch = now - lastImageSwitchTime;
+      if (timeSinceSwitch < 0.5) {
+        fadeEffect = timeSinceSwitch / 0.5;
+      } else if (timeSinceSwitch > imageSwitchInterval - 0.5) {
+        fadeEffect = 1 - (timeSinceSwitch - (imageSwitchInterval - 0.5)) / 0.5;
+      }
+
+      ctx.globalAlpha = 0.95 * planetScale * fadeEffect;
+      ctx.drawImage(
+        currentImage,
+        vortexCenter.x - imgSize / 2,
+        vortexCenter.y + riseOffset - imgSize / 2,
+        imgSize,
+        imgSize
+      );
+      ctx.restore();
+
+      ctx.save();
+      ctx.shadowBlur = 25;
+      ctx.shadowColor = "rgba(255, 150, 255, 0.7)";
+      ctx.beginPath();
+      var circleRadius = Math.max(1, imgSize / 2.2);
+      ctx.arc(vortexCenter.x, vortexCenter.y + riseOffset, circleRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(255, 150, 255, 0.4)";
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    for (var i = 0; i < planetParticles.length; i++) {
+      var p = planetParticles[i];
+      var xRel = (p.xOffset) * planetScale;
+      var yRel = (p.yOffset) * planetScale;
+      var zRel = p.zOffset * planetScale;
+      
+      var swayX = Math.sin(riseTime * 1.5 + i) * 3 * (1 - easedProgress);
+      var swayY = Math.cos(riseTime * 1.2 + i) * 3 * (1 - easedProgress);
+      
+      var xRot = xRel * Math.cos(rotation) - zRel * Math.sin(rotation);
+      var zRot = xRel * Math.sin(rotation) + zRel * Math.cos(rotation);
+      var perspective = 1 / (1 + zRot * 0.002);
+      var px = vortexCenter.x + xRot * perspective + swayX;
+      var py = vortexCenter.y + yRel * perspective + riseOffset + swayY;
+      ctx.globalAlpha = p.alpha * perspective * planetScale;
+      ctx.fillStyle = "#ff69b4";
+      ctx.beginPath();
+      var particleSize = Math.max(0.6, p.size * perspective);
+      ctx.arc(px, py, particleSize, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = Math.min(scaleProgress * 1.5, 1);
+    ctx.translate(vortexCenter.x, vortexCenter.y + riseOffset);
+    ctx.scale(planetScale, planetScale);
+    
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalAlpha = Math.min(scaleProgress * 1.5, 1) * 0.5;
+    ctx.translate(vortexCenter.x, vortexCenter.y + riseOffset);
+    ctx.scale(planetScale * 1.2, planetScale * 1.2);
+    
+    ctx.beginPath();
+    for (var t = 0; t <= Math.PI * 2 + 0.01; t += 0.05) {
+      var hx = 16 * Math.pow(Math.sin(t),3);
+      var hy = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
+      if (t === 0) ctx.moveTo(hx, -hy);
+      else ctx.lineTo(hx, -hy);
+    }
+    ctx.closePath();
+    ctx.fillStyle = "#ff69b4";
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = "#ff69b4";
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.restore();
+  }
+
+  function render() {
+    requestAnimationFrame(render);
+    var newTime = new Date().getTime() / 1000,
+        deltaTime = newTime - (time || newTime);
+    time = newTime;
+
+    context.fillStyle = '#000000';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (vortexActive) {
+      var elapsed = newTime - vortexStartTime;
+      vortexAlpha = Math.min(elapsed / 1, 1);
+    }
+
+    if (vortexActive && vortexAlpha > 0) {
+      context.save();
+      context.strokeStyle = '#ff69b4';
+      context.lineWidth = 3;
+      context.shadowBlur = 20;
+      context.shadowColor = '#ff69b4';
+
+      var waveCount = 6;
+      for (var w = 0; w < waveCount; w++) {
+        var waveTime = (newTime * 0.8 + w * 0.8) % 3;
+        var progress = waveTime / 3;
+
+        var waveRadius = progress * 200;
+        if (waveRadius > 20) {
+          var waveAlpha = Math.max(0, 0.8 - progress) * vortexAlpha;
+
+          context.globalAlpha = waveAlpha;
+          context.beginPath();
+
+          var radiusX = 1.2;
+          var radiusY = 0.3;
+          var startAngle = newTime * 0.05;
+          for (var a = 0; a <= Math.PI * 2; a += 0.05) {
+            var angle = a + startAngle;
+            var x = vortexCenter.x + Math.cos(angle) * (waveRadius * radiusX);
+            var y = vortexCenter.y + Math.sin(angle) * (waveRadius * radiusY);
+
+            if (a === 0) {
+              context.moveTo(x, y);
+            } else {
+              context.lineTo(x, y);
+            }
+          }
+
+          context.closePath();
+          context.stroke();
         }
-        particles.update(deltaTime);
-        particles.draw(context, image);
+      }
+      context.shadowBlur = 0;
+      context.restore();
     }
 
-    function onResize() {
-        canvas.width = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
+    if (!stopCreating) {
+      var amount = particleRate * deltaTime;
+      for (var i = 0; i < amount; i++) {
+        var pos = pointOnHeart(Math.PI - 2 * Math.PI * Math.random());
+        var dir = pos.clone().length(settings.particles.velocity);
+        particles.add(canvas.width / 2 + pos.x, canvas.height / 2 - pos.y, dir.x, -dir.y);
+      }
     }
-    window.onresize = onResize;
-    setTimeout(function(){ onResize(); render(); }, 10);
+
+    if (textFormationStart > 0) {
+      if (newTime - lastWaveTime >= 0.5 && textWaveIndex < 8) {
+        particles.formTextWave(vortexCenter, textWaveIndex);
+        textWaveIndex++;
+        lastWaveTime = newTime;
+      }
+    }
+
+    if (textExploded && textFormationStart > 0) {
+      particles.explode(vortexCenter, newTime);
+      textExploded = false;
+    }
+    
+    if (planetActive && (newTime - lastImageSwitchTime >= imageSwitchInterval)) {
+      currentImageIndex = (currentImageIndex + 1) % centerImages.length;
+      lastImageSwitchTime = newTime;
+    }
+
+    particles.update(deltaTime, vortexActive, vortexCenter, newTime, vortexAlpha);
+    if (!suppressPoolDraw) particles.draw(context, image, vortexActive, vortexCenter, newTime);
+
+    if (planetActive) {
+      drawHeartPlanet(context, vortexCenter, newTime);
+      drawSecondSphere(context, vortexCenter, newTime);
+    }
+    
+    if (flyingLettersActive) {
+      drawFlyingLetters(context, newTime);
+    }
+    
+    if (secondSphereExploded && vortexAlpha > 0) {
+      vortexAlpha -= deltaTime * 0.3;
+      if (vortexAlpha < 0) vortexAlpha = 0;
+    }
+  }
+
+  function onResize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    vortexCenter.x = canvas.width / 2;
+    vortexCenter.y = canvas.height / 2 + 120;
+  }
+
+  window.addEventListener('resize', onResize);
+  
+  onResize();
+  render();
 })(document.getElementById('pinkboard'));
-
-/* 💫 CHỮ XOAY VÒNG 3D */
-const texts = [
-    document.getElementById('orbit1'),
-    document.getElementById('orbit2'),
-    document.getElementById('orbit3')
-];
-let angleOffsets = [0, 120, 240];
-let radius = 230;
-let speed = 0.35;
-
-function animateTexts() {
-    let time = Date.now() * 0.001 * speed;
-    let centerX = window.innerWidth / 2;
-    let centerY = window.innerHeight / 2;
-    for (let i = 0; i < texts.length; i++) {
-        let angle = time + angleOffsets[i] * Math.PI / 180;
-        let depth = Math.sin(angle) * 50;
-        let x = centerX + radius * Math.cos(angle);
-        let y = centerY + radius * Math.sin(angle) * 0.6;
-        texts[i].style.left = (x - 100) + 'px';
-        texts[i].style.top = (y - 20 + depth/3) + 'px';
-        texts[i].style.transform = `scale(${1 + depth/300}) rotate(${Math.sin(angle)*5}deg)`;
-        texts[i].style.zIndex = Math.round(1000 + depth);
-        texts[i].style.opacity = 0.7 + depth / 100;
-    }
-    requestAnimationFrame(animateTexts);
 }
-animateTexts();
 </script>
 </body>
 </html>
