@@ -167,51 +167,34 @@
             }
         };
 
-        // CẤU HÌNH PHÁO HOA - ĐIỀU CHỈNH VỚI PHÁO LỚN
+        // CẤU HÌNH PHÁO HOA - ĐIỀU CHỈNH NHỎ HƠN
         const FIREWORK_CONFIG = {
             maxParticlesPerExplosion: 70,
             maxIntensity: 2.5,
-            explosionIntervalMin: 1400,
-            explosionIntervalMax: 2200,
+            explosionIntervalMin: 1500,
+            explosionIntervalMax: 2500,
             targetFPS: 60,
-            maxActiveParticles: 1200, // Tăng lên để chứa pháo lớn
+            maxActiveParticles: 1000,
             particleSizeMultiplier: 0.5,
             rocketSpeedMultiplier: 0.8,
             explosionSpeedMultiplier: 0.7,
-            
-            // CẤU HÌNH PHÂN LOẠI PHÁO BÔNG
-            // 45% pháo lớn (gần) - 33% lớn hơn pháo thường
-            // 30% pháo thường gần - 25% pháo xa
-            fireworkTypes: {
-                largeNear: {
-                    probability: 0.45, // 45% pháo lớn gần
-                    sizeMultiplier: 1.33, // Lớn hơn 33%
-                    minHeight: 0.15,
-                    maxHeight: 0.35,
-                    speedMultiplier: 1.15,
-                    glowIntensity: 1.8,
-                    explosionRadius: 1.4,
-                    particleCountMultiplier: 1.5
-                },
-                normalNear: {
-                    probability: 0.30, // 30% pháo thường gần
-                    sizeMultiplier: 1.0,
-                    minHeight: 0.20,
-                    maxHeight: 0.45,
-                    speedMultiplier: 1.1,
-                    glowIntensity: 1.3,
-                    explosionRadius: 1.0,
-                    particleCountMultiplier: 1.0
+            // CẤU HÌNH KHOẢNG CÁCH: 30% gần, 70% xa
+            distanceDistribution: {
+                near: 0.3,    // 30% pháo bông gần
+                far: 0.7      // 70% pháo bông xa
+            },
+            distanceSettings: {
+                near: {
+                    minHeight: 0.15,    // 15% chiều cao màn hình
+                    maxHeight: 0.45,    // 45% chiều cao màn hình
+                    sizeMultiplier: 1.2, // Lớn hơn 20%
+                    speedMultiplier: 1.1 // Nhanh hơn 10%
                 },
                 far: {
-                    probability: 0.25, // 25% pháo xa
-                    sizeMultiplier: 0.8,
-                    minHeight: 0.55,
-                    maxHeight: 0.85,
-                    speedMultiplier: 0.9,
-                    glowIntensity: 1.0,
-                    explosionRadius: 0.9,
-                    particleCountMultiplier: 0.8
+                    minHeight: 0.55,    // 55% chiều cao màn hình
+                    maxHeight: 0.85,    // 85% chiều cao màn hình
+                    sizeMultiplier: 0.8, // Nhỏ hơn 20%
+                    speedMultiplier: 0.9 // Chậm hơn 10%
                 }
             }
         };
@@ -221,8 +204,7 @@
 
         let canvas, ctx, audioCtx, masterGain, backgroundMusic;
         let particles = [];
-        let glowEffects = []; // Mảng chứa hiệu ứng sáng khi nổ
-        let particlePoolSize = FIREWORK_CONFIG.maxParticlesPerExplosion * 30; // Tăng pool size
+        let particlePoolSize = FIREWORK_CONFIG.maxParticlesPerExplosion * 25;
         let lastTime = 0, startTime = 0;
         let isRunning = false;
         let nextExplosionTime = 0;
@@ -232,87 +214,6 @@
         let isMusicLoaded = false;
         let isMusicPlaying = false;
         let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-        // ====================== HỆ THỐNG HIỆU ỨNG SÁNG ======================
-        function createGlowEffect(x, y, type = 'largeNear') {
-            const types = FIREWORK_CONFIG.fireworkTypes;
-            const config = types[type];
-            
-            glowEffects.push({
-                x: x,
-                y: y,
-                radius: 0,
-                maxRadius: 80 * config.glowIntensity,
-                life: 0,
-                maxLife: 40 + Math.random() * 20,
-                color: `hsl(${Math.random() * 360}, 100%, 80%)`,
-                intensity: config.glowIntensity,
-                pulseSpeed: 0.1 + Math.random() * 0.15
-            });
-        }
-
-        function updateGlowEffects(delta) {
-            for (let i = glowEffects.length - 1; i >= 0; i--) {
-                const glow = glowEffects[i];
-                glow.life += delta;
-                
-                if (glow.life >= glow.maxLife) {
-                    glowEffects.splice(i, 1);
-                    continue;
-                }
-                
-                const progress = glow.life / glow.maxLife;
-                // Hiệu ứng mở rộng rồi co lại
-                const pulse = Math.sin(progress * Math.PI * 2 * glow.pulseSpeed);
-                glow.radius = glow.maxRadius * (1 - progress * 0.7) * (1 + pulse * 0.2);
-            }
-        }
-
-        function renderGlowEffects() {
-            for (const glow of glowEffects) {
-                const progress = glow.life / glow.maxLife;
-                const alpha = (1 - progress) * 0.6 * glow.intensity;
-                
-                // Vẽ glow core
-                const gradient = ctx.createRadialGradient(
-                    glow.x, glow.y, 0,
-                    glow.x, glow.y, glow.radius
-                );
-                
-                gradient.addColorStop(0, glow.color.replace(')', `, ${alpha})`).replace('hsl', 'hsla'));
-                gradient.addColorStop(0.5, glow.color.replace(')', `, ${alpha * 0.5})`).replace('hsl', 'hsla'));
-                gradient.addColorStop(1, glow.color.replace(')', `, 0)`).replace('hsl', 'hsla'));
-                
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(glow.x, glow.y, glow.radius, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Vẽ ánh sáng tỏa ra
-                ctx.save();
-                ctx.globalCompositeOperation = 'lighter';
-                
-                for (let i = 0; i < 8; i++) {
-                    const angle = (i * Math.PI) / 4;
-                    const length = glow.radius * 1.5;
-                    const x2 = glow.x + Math.cos(angle) * length;
-                    const y2 = glow.y + Math.sin(angle) * length;
-                    
-                    const lineGradient = ctx.createLinearGradient(glow.x, glow.y, x2, y2);
-                    lineGradient.addColorStop(0, glow.color.replace(')', `, ${alpha * 0.8})`).replace('hsl', 'hsla'));
-                    lineGradient.addColorStop(1, glow.color.replace(')', `, 0)`).replace('hsl', 'hsla'));
-                    
-                    ctx.strokeStyle = lineGradient;
-                    ctx.lineWidth = 3 + Math.random() * 4;
-                    ctx.beginPath();
-                    ctx.moveTo(glow.x, glow.y);
-                    ctx.lineTo(x2, y2);
-                    ctx.stroke();
-                }
-                
-                ctx.restore();
-            }
-        }
 
         // ====================== HỆ THỐNG NHẠC NỀN ======================
         function initBackgroundMusic() {
@@ -494,50 +395,133 @@
 
         // ====================== CÁC BỘ ÂM THANH BASS ======================
         
-        function playDeepBass(type = 'normalNear') {
-            const baseFreq = type === 'largeNear' ? 40 + Math.random() * 25 : 35 + Math.random() * 20;
-            const volumeMultiplier = type === 'largeNear' ? 1.4 : 1.0;
+        function playDeepBass() {
+            const baseFreq = 35 + Math.random() * 20;
             
             createBassSound(
                 baseFreq,
                 'sine',
-                type === 'largeNear' ? 1.6 : 1.4,
-                SOUND_CONFIG.layers.sub.weight * volumeMultiplier
+                1.4,
+                SOUND_CONFIG.layers.sub.weight * 1.0
             );
             
             setTimeout(() => {
                 createBassSound(
                     baseFreq * 0.5,
                     'sine',
-                    type === 'largeNear' ? 1.8 : 1.6,
-                    SOUND_CONFIG.layers.deep.weight * 0.6 * volumeMultiplier
+                    1.6,
+                    SOUND_CONFIG.layers.deep.weight * 0.6
                 );
             }, 200);
             
             setTimeout(() => {
                 createRumbleSound(
-                    type === 'largeNear' ? 0.8 : 0.6,
+                    0.6,
                     80 + Math.random() * 40,
-                    SOUND_CONFIG.layers.rumble.weight * 0.3 * volumeMultiplier
+                    SOUND_CONFIG.layers.rumble.weight * 0.3
                 );
             }, 150);
         }
 
-        function playSpecialBassExplosion(type = 'normalNear', intensity = 1.0) {
-            const baseFreq = type === 'largeNear' ? 45 + Math.random() * 30 : 
-                           type === 'normalNear' ? 40 + Math.random() * 25 : 35 + Math.random() * 15;
-            
-            const duration = type === 'largeNear' ? 1.6 + intensity * 0.4 : 
-                           type === 'normalNear' ? 1.4 + intensity * 0.5 : 1.2 + intensity * 0.3;
-            
-            const volumeMultiplier = type === 'largeNear' ? 1.8 : type === 'normalNear' ? 1.3 : 1.0;
+        function playBassGlide() {
+            const startFreq = 50 + Math.random() * 20;
+            const endFreq = startFreq * 0.6;
             
             createBassGlide(
-                baseFreq * (type === 'largeNear' ? 1.8 : 1.4),
+                startFreq,
+                endFreq,
+                'sine',
+                1.3,
+                SOUND_CONFIG.layers.sub.weight * 0.9
+            );
+            
+            setTimeout(() => {
+                createBassSound(
+                    startFreq * 1.5,
+                    'sine',
+                    1.0,
+                    SOUND_CONFIG.layers.sub.weight * 0.4
+                );
+            }, 300);
+        }
+
+        function playDualBass() {
+            const freq1 = 40 + Math.random() * 15;
+            const freq2 = 55 + Math.random() * 20;
+            
+            createBassSound(
+                freq1,
+                'sine',
+                1.2,
+                SOUND_CONFIG.layers.sub.weight * 0.8
+            );
+            
+            setTimeout(() => {
+                createBassSound(
+                    freq2,
+                    'sine',
+                    1.1,
+                    SOUND_CONFIG.layers.sub.weight * 0.7
+                );
+            }, 100);
+            
+            setTimeout(() => {
+                createBassSound(
+                    Math.min(freq1, freq2) * 0.4,
+                    'sine',
+                    1.5,
+                    SOUND_CONFIG.layers.deep.weight * 0.5
+                );
+            }, 250);
+        }
+
+        function playPowerBass() {
+            const now = Date.now();
+            const timeFactor = Math.sin(now * 0.001) * 0.5 + 0.5;
+            
+            const mainFreq = 30 + timeFactor * 20;
+            createBassSound(
+                mainFreq,
+                'sine',
+                1.6,
+                SOUND_CONFIG.layers.sub.weight * (0.9 + timeFactor * 0.3)
+            );
+            
+            setTimeout(() => {
+                createBassSound(
+                    mainFreq * 0.75,
+                    'sine',
+                    1.4,
+                    SOUND_CONFIG.layers.deep.weight * 0.6
+                );
+                
+                createBassSound(
+                    mainFreq * 0.6,
+                    'sine',
+                    1.5,
+                    SOUND_CONFIG.layers.deep.weight * 0.4
+                );
+            }, 150);
+            
+            setTimeout(() => {
+                createRumbleSound(
+                    0.9,
+                    60 + Math.random() * 30,
+                    SOUND_CONFIG.layers.rumble.weight * 0.5
+                );
+            }, 200);
+        }
+
+        function playSpecialBassExplosion(intensity = 1.0, isNear = false) {
+            const baseFreq = isNear ? 45 + Math.random() * 25 : 35 + Math.random() * 15;
+            const duration = isNear ? 1.2 + intensity * 0.3 : 1.4 + intensity * 0.5;
+            
+            createBassGlide(
+                baseFreq * (isNear ? 1.6 : 1.4),
                 baseFreq * 0.5,
                 'sine',
                 duration,
-                SOUND_CONFIG.layers.sub.weight * intensity * volumeMultiplier
+                SOUND_CONFIG.layers.sub.weight * intensity * (isNear ? 1.5 : 1.3)
             );
             
             setTimeout(() => {
@@ -545,27 +529,53 @@
                     baseFreq * 0.8,
                     'sine',
                     duration * 0.9,
-                    SOUND_CONFIG.layers.deep.weight * intensity * (type === 'largeNear' ? 1.2 : 0.8)
+                    SOUND_CONFIG.layers.deep.weight * intensity * (isNear ? 1.0 : 0.8)
                 );
                 
                 createBassSound(
                     baseFreq * 0.6,
                     'sine',
                     duration * 1.1,
-                    SOUND_CONFIG.layers.deep.weight * intensity * (type === 'largeNear' ? 1.0 : 0.6)
+                    SOUND_CONFIG.layers.deep.weight * intensity * (isNear ? 0.8 : 0.6)
                 );
             }, 100);
             
             setTimeout(() => {
                 createRumbleSound(
                     duration * 0.8,
-                    (type === 'largeNear' ? 90 : type === 'normalNear' ? 70 : 50) + Math.random() * 20,
-                    SOUND_CONFIG.layers.rumble.weight * intensity * (type === 'largeNear' ? 1.1 : 0.7)
+                    (isNear ? 70 : 50) + Math.random() * 20,
+                    SOUND_CONFIG.layers.rumble.weight * intensity * (isNear ? 0.9 : 0.7)
                 );
             }, 180);
         }
 
-        // ====================== HỆ THỐNG PHÁO HOA VỚI 3 LOẠI ======================
+        function playBassSound(isNear = false) {
+            if (!audioCtx || activeSounds.size > 4) return;
+            
+            soundSequence = (soundSequence + 1) % 4;
+            
+            const volumeMultiplier = isNear ? 1.2 : 1.0;
+            
+            switch(soundSequence) {
+                case 0:
+                    playDeepBass();
+                    break;
+                case 1:
+                    playBassGlide();
+                    break;
+                case 2:
+                    playDualBass();
+                    break;
+                case 3:
+                    playPowerBass();
+                    break;
+            }
+            
+            const variation = (Math.random() - 0.5) * SOUND_CONFIG.intervalVariation;
+            nextSoundTime = performance.now() + SOUND_CONFIG.baseInterval + variation;
+        }
+
+        // ====================== HỆ THỐNG PHÁO HOA VỚI KHOẢNG CÁCH ======================
         function createParticlePool() {
             particles = [];
             for (let i = 0; i < particlePoolSize; i++) {
@@ -576,9 +586,7 @@
                     color: '#fff',
                     size: 1.0 * FIREWORK_CONFIG.particleSizeMultiplier,
                     active: false,
-                    type: 'normalNear',
-                    glowPower: 0,
-                    initialGlow: 0
+                    isNear: false
                 });
             }
         }
@@ -628,78 +636,59 @@
             return count;
         }
 
-        function getRandomFireworkType() {
-            const rand = Math.random();
-            const types = FIREWORK_CONFIG.fireworkTypes;
-            let cumulative = 0;
-            
-            for (const [type, config] of Object.entries(types)) {
-                cumulative += config.probability;
-                if (rand < cumulative) {
-                    return type;
-                }
-            }
-            
-            return 'normalNear'; // Fallback
-        }
-
         function createRocket() {
             const activeCount = countActiveParticles();
             if (activeCount > FIREWORK_CONFIG.maxActiveParticles) return;
 
-            const type = getRandomFireworkType();
-            const config = FIREWORK_CONFIG.fireworkTypes[type];
+            // Xác định loại pháo hoa (gần hay xa)
+            const isNear = Math.random() < FIREWORK_CONFIG.distanceDistribution.near;
+            const settings = FIREWORK_CONFIG.distanceSettings[isNear ? 'near' : 'far'];
             
             const x = Math.random() * window.innerWidth;
             const yStart = window.innerHeight;
             const hue = Math.random() * 360;
-            const saturation = type === 'largeNear' ? 100 : type === 'normalNear' ? 95 : 90;
 
             const p = getParticle();
             if (p) {
                 p.x = x;
                 p.y = yStart;
-                p.vx = (Math.random() - 0.5) * 1.2 * config.speedMultiplier;
-                p.vy = - (12 + Math.random() * 6) * FIREWORK_CONFIG.rocketSpeedMultiplier * config.speedMultiplier;
+                p.vx = (Math.random() - 0.5) * 1.2;
+                p.vy = - (12 + Math.random() * 6) * FIREWORK_CONFIG.rocketSpeedMultiplier * settings.speedMultiplier;
                 p.life = 0;
                 p.maxLife = 50 + Math.random() * 20;
-                p.color = `hsl(${hue}, ${saturation}%, ${type === 'largeNear' ? 85 : 70}%)`;
-                p.size = (1.5 + Math.random() * 0.8) * FIREWORK_CONFIG.particleSizeMultiplier * config.sizeMultiplier;
+                p.color = `hsl(${hue}, 100%, ${isNear ? 80 : 70}%)`;
+                p.size = (1.5 + Math.random() * 0.8) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier;
                 p.active = true;
                 p.isRocket = true;
-                p.type = type;
+                p.isNear = isNear;
                 p.trailHue = hue;
-                p.glowPower = type === 'largeNear' ? 1.5 : type === 'normalNear' ? 1.2 : 1.0;
-                p.initialGlow = type === 'largeNear' ? 1.0 : type === 'normalNear' ? 0.8 : 0.6;
             }
 
             setTimeout(() => {
                 if (!isRunning) return;
                 
-                const minHeight = config.minHeight * window.innerHeight;
-                const maxHeight = config.maxHeight * window.innerHeight;
+                // Xác định độ cao nổ dựa trên loại pháo hoa
+                const minHeight = settings.minHeight * window.innerHeight;
+                const maxHeight = settings.maxHeight * window.innerHeight;
                 const yExplode = minHeight + Math.random() * (maxHeight - minHeight);
                 
-                createExplosion(x, yExplode, hue, type);
+                createExplosion(x, yExplode, hue, isNear);
                 
                 if (Math.random() > 0.7) {
-                    playSpecialBassExplosion(type, 1 + Math.random() * 0.5);
+                    playSpecialBassExplosion(1 + Math.random() * 0.5, isNear);
                 }
-            }, (type === 'largeNear' ? 800 : type === 'normalNear' ? 900 : 1100) + Math.random() * 600);
+            }, (isNear ? 900 : 1100) + Math.random() * 600);
         }
 
-        function createExplosion(x, y, baseHue, type) {
+        function createExplosion(x, y, baseHue, isNear) {
             const activeCount = countActiveParticles();
             if (activeCount > FIREWORK_CONFIG.maxActiveParticles * 0.8) return;
 
-            const config = FIREWORK_CONFIG.fireworkTypes[type];
+            const settings = FIREWORK_CONFIG.distanceSettings[isNear ? 'near' : 'far'];
             const numParticles = Math.floor(
-                (type === 'largeNear' ? 100 : type === 'normalNear' ? 80 : 60) * config.particleCountMultiplier
+                (isNear ? 80 : 60) + Math.random() * (isNear ? 80 : 60)
             );
             const explosionType = Math.random();
-            
-            // Tạo hiệu ứng sáng khi nổ
-            createGlowEffect(x, y, type);
             
             if (explosionType < 0.5) {
                 const segments = Math.floor(20 + Math.random() * 25);
@@ -711,21 +700,19 @@
                         if (!p) continue;
                         
                         const angle = (Math.PI * 2 * i) / segments + (Math.random() - 0.5) * 0.5;
-                        const speed = (5 + Math.random() * 8) * FIREWORK_CONFIG.explosionSpeedMultiplier * config.speedMultiplier;
+                        const speed = (5 + Math.random() * 8) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier;
                         
                         p.x = x;
                         p.y = y;
                         p.vx = Math.cos(angle) * speed;
                         p.vy = Math.sin(angle) * speed;
                         p.life = 0;
-                        p.maxLife = (type === 'largeNear' ? 80 : type === 'normalNear' ? 70 : 60) + Math.random() * 50;
-                        p.color = `hsl(${baseHue + Math.random()*80 - 40}, 100%, ${type === 'largeNear' ? 80 : type === 'normalNear' ? 75 : 70}%)`;
-                        p.size = (0.8 + Math.random() * 1.2) * FIREWORK_CONFIG.particleSizeMultiplier * config.sizeMultiplier;
+                        p.maxLife = (isNear ? 70 : 60) + Math.random() * 50;
+                        p.color = `hsl(${baseHue + Math.random()*80 - 40}, 100%, ${(isNear ? 70 : 60) + Math.random()*30}%)`;
+                        p.size = (0.8 + Math.random() * 1.2) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier;
                         p.active = true;
-                        p.type = type;
+                        p.isNear = isNear;
                         p.trail = true;
-                        p.glowPower = config.glowIntensity;
-                        p.initialGlow = config.glowIntensity * 0.8;
                     }
                 }
             } else {
@@ -736,25 +723,22 @@
                     p.x = x;
                     p.y = y;
                     const angle = Math.random() * Math.PI * 2;
-                    const speed = (4 + Math.random() * 10) * FIREWORK_CONFIG.explosionSpeedMultiplier * config.speedMultiplier;
+                    const speed = (4 + Math.random() * 10) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier;
                     p.vx = Math.cos(angle) * speed;
                     p.vy = Math.sin(angle) * speed * 0.8 - 2;
                     
                     p.life = 0;
-                    p.maxLife = (type === 'largeNear' ? 70 : type === 'normalNear' ? 60 : 50) + Math.random() * 70;
+                    p.maxLife = (isNear ? 60 : 50) + Math.random() * 70;
                     
                     const hueVariation = Math.random() * 100 - 50;
-                    p.color = `hsl(${baseHue + hueVariation}, ${type === 'largeNear' ? 100 : 95}%, ${type === 'largeNear' ? 85 : type === 'normalNear' ? 80 : 70}%)`;
+                    p.color = `hsl(${baseHue + hueVariation}, ${80 + Math.random()*20}%, ${(isNear ? 60 : 50) + Math.random()*40}%)`;
                     
-                    p.size = (0.6 + Math.random() * 1.6) * FIREWORK_CONFIG.particleSizeMultiplier * config.sizeMultiplier;
+                    p.size = (0.6 + Math.random() * 1.6) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier;
                     p.active = true;
-                    p.type = type;
+                    p.isNear = isNear;
                     p.trail = true;
                     p.sparkle = Math.random() > 0.3;
-                    p.trailLength = type === 'largeNear' ? 4 + Math.random() * 5 : 
-                                  type === 'normalNear' ? 3 + Math.random() * 4 : 2 + Math.random() * 3;
-                    p.glowPower = config.glowIntensity;
-                    p.initialGlow = config.glowIntensity * 0.9;
+                    p.trailLength = isNear ? 3 + Math.random() * 4 : 2 + Math.random() * 3;
                 }
             }
         }
@@ -767,20 +751,13 @@
             lastTime = time;
 
             if (time > nextSoundTime) {
-                const type = getRandomFireworkType();
-                playDeepBass(type);
-                nextSoundTime = time + SOUND_CONFIG.baseInterval + (Math.random() - 0.5) * SOUND_CONFIG.intervalVariation;
+                const isNear = Math.random() < FIREWORK_CONFIG.distanceDistribution.near;
+                playBassSound(isNear);
             }
 
-            // Xóa màn hình với hiệu ứng mờ dần
-            ctx.fillStyle = 'rgba(0,0,0,0.07)';
+            ctx.fillStyle = 'rgba(0,0,0,0.08)';
             ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
-            // Cập nhật và vẽ hiệu ứng sáng
-            updateGlowEffects(delta);
-            renderGlowEffects();
-
-            // Vẽ tất cả các particle
             ctx.save();
             for (let p of particles) {
                 if (!p.active) continue;
@@ -802,53 +779,22 @@
                 let alpha = p.isRocket ? (1 - progress**1.8) : (1 - progress**1.5);
 
                 if (p.sparkle && !p.isRocket) {
-                    alpha *= 0.7 + 0.3 * Math.sin(progress * 30);
+                    alpha *= 0.6 + 0.4 * Math.sin(progress * 25);
                 }
 
-                // Hiệu ứng sáng mờ dần
-                const glowDecay = Math.max(0, 1 - (progress * 1.5));
-                const glowIntensity = p.initialGlow * glowDecay;
-                alpha *= glowIntensity;
-
-                // Tăng độ sáng cho pháo lớn
-                if (p.type === 'largeNear' && progress < 0.5) {
-                    alpha *= 1.2;
+                // Điều chỉnh độ sáng dựa trên khoảng cách
+                if (p.isNear && !p.isRocket) {
+                    alpha *= 1.1;
                 }
 
-                const particleColor = p.color.replace(')', `, ${alpha})`).replace('hsl', 'hsla');
-                
-                // Vẽ bóng sáng
-                if (glowIntensity > 0.3) {
-                    ctx.save();
-                    ctx.globalCompositeOperation = 'lighter';
-                    
-                    const glowSize = p.size * glowIntensity * 2.5;
-                    const glowGradient = ctx.createRadialGradient(
-                        p.x, p.y, 0,
-                        p.x, p.y, glowSize
-                    );
-                    
-                    glowGradient.addColorStop(0, particleColor);
-                    glowGradient.addColorStop(0.5, p.color.replace(')', `, ${alpha * 0.3})`).replace('hsl', 'hsla'));
-                    glowGradient.addColorStop(1, p.color.replace(')', `, 0)`).replace('hsl', 'hsla'));
-                    
-                    ctx.fillStyle = glowGradient;
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, glowSize, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.restore();
-                }
-
-                // Vẽ particle chính
-                ctx.fillStyle = particleColor;
+                ctx.fillStyle = p.color.replace(')', `, ${alpha})`).replace('hsl', 'hsla');
                 ctx.beginPath();
                 
-                // Hiệu ứng trail
                 if (p.trailLength && progress < 0.4) {
-                    ctx.shadowBlur = p.trailLength * glowIntensity;
+                    ctx.shadowBlur = p.trailLength;
                     ctx.shadowColor = p.color;
                 } else if (p.trail && !p.isRocket && progress < 0.3) {
-                    ctx.shadowBlur = (p.type === 'largeNear' ? 5 : p.type === 'normalNear' ? 4 : 3) * glowIntensity;
+                    ctx.shadowBlur = (p.isNear ? 4 : 3) + Math.random() * 3;
                     ctx.shadowColor = p.color;
                 }
                 
@@ -860,7 +806,6 @@
             }
             ctx.restore();
 
-            // Tạo pháo mới
             if (time > nextExplosionTime) {
                 const intensity = Math.min(1 + (time - startTime) / 20000, FIREWORK_CONFIG.maxIntensity);
                 const minInt = FIREWORK_CONFIG.explosionIntervalMin / intensity;
@@ -906,7 +851,7 @@
                     }
 
                     setTimeout(() => {
-                        playSpecialBassExplosion('largeNear', 1.5);
+                        playPowerBass();
                     }, 500);
 
                     isRunning = true;
@@ -923,7 +868,7 @@
                     btn.classList.remove('clicked');
                     btn.style.visibility = 'visible';
                 }
-            }, 800);
+            }, 800); // Thời gian bằng với thời gian animation
         }
 
         // ====================== EVENT LISTENERS ======================
