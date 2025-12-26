@@ -180,6 +180,8 @@
     </div>
 
     <script>
+        console.log("Script đang chạy...");
+        
         // CẤU HÌNH ÂM THANH (CHỈ TRẦM)
         const SOUND_CONFIG = {
             masterVolume: 1.3,
@@ -774,6 +776,400 @@
             }
         }
 
+        // ====================== CÁC HÀM TẠO PHÁO HOA CHÍNH - ĐÃ BỔ SUNG ======================
+        
+        function getExplosionTypeForPhase() {
+            const types = climaxSystem.phase === 'climax' ? 
+                FIREWORK_CONFIG.explosionTypes.climax : 
+                FIREWORK_CONFIG.explosionTypes.normal;
+            
+            const rand = Math.random();
+            let cumulative = 0;
+            
+            for (const [type, probability] of Object.entries(types)) {
+                cumulative += probability;
+                if (rand <= cumulative) {
+                    return type;
+                }
+            }
+            
+            return 'peony';
+        }
+
+        // HÀM TẠO ROCKET CHÍNH
+        function createRocket() {
+            const activeCount = countActiveParticles();
+            if (activeCount > FIREWORK_CONFIG.maxActiveParticles * 0.9) return;
+
+            const isNear = Math.random() < FIREWORK_CONFIG.distanceDistribution.near;
+            const settings = FIREWORK_CONFIG.distanceSettings[isNear ? 'near' : 'far'];
+            
+            const x = Math.random() * window.innerWidth;
+            const yStart = window.innerHeight;
+            const hue = Math.random() * 360;
+
+            // Tạo rocket chính
+            const p = getParticle();
+            if (p) {
+                p.x = x;
+                p.y = yStart;
+                p.vx = (Math.random() - 0.5) * 1.5;
+                p.vy = -(13 + Math.random() * 7) * FIREWORK_CONFIG.rocketSpeedMultiplier * settings.speedMultiplier;
+                p.life = 0;
+                p.maxLife = 55 + Math.random() * 25;
+                p.color = `hsl(${hue}, 100%, ${isNear ? 85 : 75}%)`;
+                p.size = (1.8 + Math.random() * 1.0) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier;
+                p.active = true;
+                p.isRocket = true;
+                p.isNear = isNear;
+                p.trailHue = hue;
+                p.glowSize = p.size * 2.5;
+                p.trailLength = isNear ? 8 : 6;
+                
+                // Lên lịch nổ
+                setTimeout(() => {
+                    if (!isRunning) return;
+                    
+                    const minHeight = settings.minHeight * window.innerHeight;
+                    const maxHeight = settings.maxHeight * window.innerHeight;
+                    const yExplode = minHeight + Math.random() * (maxHeight - minHeight);
+                    
+                    // Chọn loại pháo hoa
+                    const explosionType = getExplosionTypeForPhase();
+                    
+                    createExplosion(x, yExplode, hue, isNear, explosionType);
+                }, (isNear ? 850 : 1150) + Math.random() * 700);
+            }
+        }
+
+        // HÀM TẠO VỤ NỔ
+        function createExplosion(x, y, baseHue, isNear, type = 'peony') {
+            const activeCount = countActiveParticles();
+            if (activeCount > FIREWORK_CONFIG.maxActiveParticles * 0.9) return;
+
+            const settings = FIREWORK_CONFIG.distanceSettings[isNear ? 'near' : 'far'];
+            const intensityMultiplier = climaxSystem.climaxIntensity;
+            
+            // Kiểm tra nếu là pháo đặc biệt
+            if (type === 'special') {
+                createSpecialExplosion(x, y, baseHue, isNear);
+                return;
+            }
+            
+            // Tạo vụ nổ theo loại
+            const particleMultiplier = 0.8 + intensityMultiplier * 0.4;
+            
+            switch(type) {
+                case 'chrysanthemum':
+                    createChrysanthemumExplosion(x, y, baseHue, isNear, settings, particleMultiplier);
+                    break;
+                case 'peony':
+                    createPeonyExplosion(x, y, baseHue, isNear, settings, particleMultiplier);
+                    break;
+                case 'palm':
+                    createPalmExplosion(x, y, baseHue, isNear, settings, particleMultiplier);
+                    break;
+                case 'willow':
+                    createWillowExplosion(x, y, baseHue, isNear, settings, particleMultiplier);
+                    break;
+                case 'ring':
+                    createRingExplosion(x, y, baseHue, isNear, settings, particleMultiplier);
+                    break;
+                case 'crossette':
+                    createCrossetteExplosion(x, y, baseHue, isNear, settings, particleMultiplier);
+                    break;
+                default:
+                    createPeonyExplosion(x, y, baseHue, isNear, settings, particleMultiplier);
+            }
+        }
+
+        // CÁC HÀM TẠO VỤ NỔ CHI TIẾT
+        function createChrysanthemumExplosion(x, y, baseHue, isNear, settings, multiplier = 1.0) {
+            const rays = Math.floor((25 + Math.random() * 20) * multiplier);
+            const particlesPerRay = Math.floor((8 + Math.random() * 6) * multiplier);
+            
+            for (let i = 0; i < rays; i++) {
+                const angle = (Math.PI * 2 * i) / rays;
+                
+                for (let j = 0; j < particlesPerRay; j++) {
+                    const p = getParticle();
+                    if (!p) continue;
+                    
+                    const speed = (6 + j * 0.8 + Math.random() * 2) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier * climaxSystem.climaxIntensity;
+                    
+                    p.x = x;
+                    p.y = y;
+                    p.vx = Math.cos(angle) * speed;
+                    p.vy = Math.sin(angle) * speed;
+                    p.life = 0;
+                    p.maxLife = (isNear ? 75 : 65) + Math.random() * 40;
+                    
+                    const hueShift = (Math.random() - 0.5) * 30;
+                    const brightness = (isNear ? 65 : 55) + Math.random() * 25;
+                    p.color = `hsl(${baseHue + hueShift}, 100%, ${brightness}%)`;
+                    
+                    p.size = (0.9 + Math.random() * 0.8) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * climaxSystem.climaxIntensity;
+                    p.active = true;
+                    p.isNear = isNear;
+                    p.trail = true;
+                    p.trailLength = (isNear ? 4 : 3) + Math.random() * 3;
+                    p.sparkle = j % 3 === 0;
+                    p.gravity = 0.08;
+                    p.drag = 0.985;
+                    p.glowSize = p.size * (isNear ? 2.2 : 1.8);
+                }
+            }
+        }
+
+        function createPeonyExplosion(x, y, baseHue, isNear, settings, multiplier = 1.0) {
+            const numParticles = Math.floor(((isNear ? 100 : 80) + Math.random() * 60) * multiplier);
+            
+            for (let i = 0; i < numParticles * 0.4; i++) {
+                const p = getParticle();
+                if (!p) continue;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const speed = (3 + Math.random() * 4) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier * climaxSystem.climaxIntensity;
+                
+                p.x = x;
+                p.y = y;
+                p.vx = Math.cos(angle) * speed;
+                p.vy = Math.sin(angle) * speed;
+                p.life = 0;
+                p.maxLife = (isNear ? 70 : 60) + Math.random() * 50;
+                p.color = `hsl(${baseHue}, 100%, ${(isNear ? 75 : 65) + Math.random() * 20}%)`;
+                p.size = (1.2 + Math.random() * 0.8) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * climaxSystem.climaxIntensity;
+                p.active = true;
+                p.isNear = isNear;
+                p.trail = true;
+                p.glitter = Math.random() > 0.6;
+                p.gravity = 0.09;
+                p.drag = 0.98;
+                p.glowSize = p.size * (isNear ? 2.5 : 2.0);
+            }
+            
+            for (let i = 0; i < numParticles * 0.6; i++) {
+                const p = getParticle();
+                if (!p) continue;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const speed = (5 + Math.random() * 6) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier * climaxSystem.climaxIntensity;
+                
+                p.x = x;
+                p.y = y;
+                p.vx = Math.cos(angle) * speed;
+                p.vy = Math.sin(angle) * speed * 0.9;
+                p.life = 0;
+                p.maxLife = (isNear ? 65 : 55) + Math.random() * 55;
+                
+                const hueShift = (Math.random() - 0.5) * 60;
+                p.color = `hsl(${baseHue + hueShift}, ${85 + Math.random() * 15}%, ${(isNear ? 65 : 55) + Math.random() * 30}%)`;
+                p.size = (0.8 + Math.random() * 1.0) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * climaxSystem.climaxIntensity;
+                p.active = true;
+                p.isNear = isNear;
+                p.trail = true;
+                p.sparkle = Math.random() > 0.5;
+                p.gravity = 0.1;
+                p.drag = 0.975;
+                p.glowSize = p.size * (isNear ? 2.0 : 1.6);
+            }
+        }
+
+        function createPalmExplosion(x, y, baseHue, isNear, settings, multiplier = 1.0) {
+            const numStrands = Math.floor((20 + Math.random() * 15) * multiplier);
+            const particlesPerStrand = Math.floor((12 + Math.random() * 8) * multiplier);
+            
+            for (let i = 0; i < numStrands; i++) {
+                const angle = (Math.PI * 2 * i) / numStrands + (Math.random() - 0.5) * 0.3;
+                const baseSpeed = (4 + Math.random() * 3) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier * climaxSystem.climaxIntensity;
+                
+                for (let j = 0; j < particlesPerStrand; j++) {
+                    const p = getParticle();
+                    if (!p) continue;
+                    
+                    const speed = baseSpeed * (1 - j * 0.05);
+                    
+                    p.x = x;
+                    p.y = y;
+                    p.vx = Math.cos(angle) * speed * 0.8;
+                    p.vy = Math.sin(angle) * speed * 0.3 - 2;
+                    p.life = 0;
+                    p.maxLife = (isNear ? 90 : 80) + Math.random() * 60;
+                    
+                    const goldShift = Math.random() * 40 - 20;
+                    p.color = `hsl(${45 + goldShift}, 100%, ${(isNear ? 60 : 50) + Math.random() * 30}%)`;
+                    p.size = (0.7 + Math.random() * 0.6) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * climaxSystem.climaxIntensity;
+                    p.active = true;
+                    p.isNear = isNear;
+                    p.trail = true;
+                    p.trailLength = (isNear ? 6 : 5) + Math.random() * 4;
+                    p.gravity = 0.15 + Math.random() * 0.05;
+                    p.drag = 0.96;
+                    p.isWillow = true;
+                }
+            }
+        }
+
+        function createWillowExplosion(x, y, baseHue, isNear, settings, multiplier = 1.0) {
+            const numBranches = Math.floor((18 + Math.random() * 12) * multiplier);
+            const particlesPerBranch = Math.floor((15 + Math.random() * 10) * multiplier);
+            
+            for (let i = 0; i < numBranches; i++) {
+                const angle = (Math.PI * 2 * i) / numBranches;
+                const baseSpeed = (3.5 + Math.random() * 2.5) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier * climaxSystem.climaxIntensity;
+                
+                for (let j = 0; j < particlesPerBranch; j++) {
+                    const p = getParticle();
+                    if (!p) continue;
+                    
+                    const speed = baseSpeed * (1 - j * 0.04);
+                    const angleOffset = (Math.random() - 0.5) * 0.4;
+                    
+                    p.x = x;
+                    p.y = y;
+                    p.vx = Math.cos(angle + angleOffset) * speed;
+                    p.vy = Math.sin(angle + angleOffset) * speed * 0.6;
+                    p.life = 0;
+                    p.maxLife = (isNear ? 100 : 90) + Math.random() * 70;
+                    
+                    p.color = `hsl(${baseHue + (Math.random() - 0.5) * 40}, 90%, ${(isNear ? 55 : 45) + Math.random() * 25}%)`;
+                    p.size = (0.6 + Math.random() * 0.5) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * climaxSystem.climaxIntensity;
+                    p.active = true;
+                    p.isNear = isNear;
+                    p.trail = true;
+                    p.trailLength = (isNear ? 7 : 6) + Math.random() * 5;
+                    p.gravity = 0.12 + Math.random() * 0.03;
+                    p.drag = 0.97;
+                    p.isWillow = true;
+                    p.sparkle = j % 4 === 0;
+                }
+            }
+        }
+
+        function createRingExplosion(x, y, baseHue, isNear, settings, multiplier = 1.0) {
+            const numRings = 2 + Math.floor(Math.random() * 2);
+            
+            for (let ring = 0; ring < numRings; ring++) {
+                const particlesInRing = Math.floor((60 + Math.random() * 40) * multiplier);
+                const ringDelay = ring * 100;
+                const ringSpeed = (5 + ring * 1.5 + Math.random() * 2) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier * climaxSystem.climaxIntensity;
+                
+                setTimeout(() => {
+                    if (!isRunning) return;
+                    
+                    for (let i = 0; i < particlesInRing; i++) {
+                        const p = getParticle();
+                        if (!p) continue;
+                        
+                        const angle = (Math.PI * 2 * i) / particlesInRing;
+                        
+                        p.x = x;
+                        p.y = y;
+                        p.vx = Math.cos(angle) * ringSpeed;
+                        p.vy = Math.sin(angle) * ringSpeed;
+                        p.life = 0;
+                        p.maxLife = (isNear ? 60 : 50) + Math.random() * 40;
+                        
+                        const hueShift = ring * 60 + (Math.random() - 0.5) * 20;
+                        p.color = `hsl(${baseHue + hueShift}, 100%, ${(isNear ? 70 : 60) + Math.random() * 20}%)`;
+                        p.size = (0.9 + Math.random() * 0.6) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * climaxSystem.climaxIntensity;
+                        p.active = true;
+                        p.isNear = isNear;
+                        p.trail = true;
+                        p.sparkle = i % 3 === 0;
+                        p.gravity = 0.08;
+                        p.drag = 0.99;
+                        p.glowSize = p.size * (isNear ? 2.3 : 1.9);
+                    }
+                }, ringDelay);
+            }
+        }
+
+        function createCrossetteExplosion(x, y, baseHue, isNear, settings, multiplier = 1.0) {
+            const numInitialBursts = Math.floor((8 + Math.random() * 6) * multiplier);
+            
+            for (let i = 0; i < numInitialBursts; i++) {
+                const p = getParticle();
+                if (!p) continue;
+                
+                const angle = (Math.PI * 2 * i) / numInitialBursts;
+                const speed = (7 + Math.random() * 3) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier * climaxSystem.climaxIntensity;
+                
+                p.x = x;
+                p.y = y;
+                p.vx = Math.cos(angle) * speed;
+                p.vy = Math.sin(angle) * speed;
+                p.life = 0;
+                p.maxLife = (isNear ? 80 : 70) + Math.random() * 50;
+                p.color = `hsl(${baseHue}, 100%, ${(isNear ? 70 : 60) + Math.random() * 20}%)`;
+                p.size = (1.1 + Math.random() * 0.7) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * climaxSystem.climaxIntensity;
+                p.active = true;
+                p.isNear = isNear;
+                p.trail = true;
+                p.isCrossette = true;
+                p.crossetteTimer = 15 + Math.random() * 10;
+                p.hasExploded = false;
+                p.gravity = 0.07;
+                p.drag = 0.98;
+                p.glowSize = p.size * (isNear ? 2.5 : 2.0);
+                p.baseHue = baseHue;
+                p.baseX = x;
+                p.baseY = y;
+            }
+        }
+
+        function createSpecialExplosion(x, y, baseHue, isNear) {
+            const activeCount = countActiveParticles();
+            if (activeCount > FIREWORK_CONFIG.maxActiveParticles * 0.9) return;
+
+            const settings = FIREWORK_CONFIG.distanceSettings[isNear ? 'near' : 'far'];
+            const numParticles = Math.floor(200 * climaxSystem.climaxIntensity);
+            
+            // Nhiều màu sắc hơn
+            const colorCount = 3 + Math.floor(Math.random() * 3);
+            const colors = [];
+            for (let i = 0; i < colorCount; i++) {
+                colors.push(`hsl(${(baseHue + i * 120) % 360}, 100%, ${isNear ? 80 : 70}%)`);
+            }
+            
+            // Tạo vụ nổ hình cầu đa sắc
+            for (let i = 0; i < numParticles; i++) {
+                const p = getParticle();
+                if (!p) continue;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const speed = (6 + Math.random() * 8) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier * climaxSystem.climaxIntensity;
+                
+                p.x = x;
+                p.y = y;
+                p.vx = Math.cos(angle) * speed;
+                p.vy = Math.sin(angle) * speed * 0.9;
+                p.life = 0;
+                p.maxLife = (isNear ? 90 : 80) + Math.random() * 60;
+                p.color = colors[Math.floor(Math.random() * colors.length)];
+                p.size = (1.2 + Math.random() * 1.0) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * climaxSystem.climaxIntensity;
+                p.active = true;
+                p.isNear = isNear;
+                p.trail = true;
+                p.sparkle = true;
+                p.glitter = true;
+                p.gravity = 0.12;
+                p.drag = 0.97;
+                p.glowSize = p.size * 3.0 * climaxSystem.climaxIntensity;
+                p.trailLength = (isNear ? 6 : 5) + Math.random() * 4;
+                p.isSpecial = true;
+            }
+        }
+
+        // HÀM ĐẾM PARTICLE HOẠT ĐỘNG
+        function countActiveParticles() {
+            let count = 0;
+            for (let p of particles) {
+                if (p.active) count++;
+            }
+            return count;
+        }
+
         // ====================== HỆ THỐNG NHẠC NỀN ======================
         function initBackgroundMusic() {
             return new Promise((resolve, reject) => {
@@ -846,6 +1242,13 @@
             }
             
             updateVolume();
+        }
+
+        function pauseBackgroundMusic() {
+            if (backgroundMusic && isMusicPlaying) {
+                backgroundMusic.pause();
+                isMusicPlaying = false;
+            }
         }
 
         // ====================== HỆ THỐNG ÂM THANH ======================
@@ -1166,43 +1569,45 @@
         const btn = document.getElementById('startBtn');
         
         async function start() {
+            console.log("Bắt đầu chương trình pháo hoa...");
             btn.classList.add('clicked');
             
             setTimeout(async () => {
                 try {
+                    console.log("1. Đang tải ảnh kết thúc...");
                     // Tải ảnh kết thúc trước
                     await loadEndingImages();
-                    await initBackgroundMusic();
                     
-                    if (!initAudioSystem()) {
-                        alert("Trình duyệt không hỗ trợ Web Audio API. Vui lòng dùng Chrome/Firefox/Safari mới nhất.");
-                        btn.classList.remove('clicked');
-                        btn.style.visibility = 'visible';
-                        return;
+                    console.log("2. Đang khởi tạo âm thanh...");
+                    // Bỏ qua âm nhạc nếu có lỗi
+                    try {
+                        await initBackgroundMusic();
+                        playBackgroundMusic();
+                    } catch (musicError) {
+                        console.warn("Không thể tải nhạc nền:", musicError);
                     }
                     
-                    playBackgroundMusic();
-                    
+                    console.log("3. Đang khởi tạo canvas...");
                     initCanvas();
+                    
+                    console.log("4. Đang tạo particle pool...");
                     createParticlePool();
 
-                    if (masterGain) {
-                        masterGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-                        masterGain.gain.exponentialRampToValueAtTime(SOUND_CONFIG.masterVolume, audioCtx.currentTime + 2.5);
-                    }
-
-                    setTimeout(() => {
-                        createBassSound(30, 'sine', 2.0, 1.5);
-                    }, 500);
-
+                    console.log("5. Đang bắt đầu animation...");
                     isRunning = true;
                     startTime = performance.now();
                     lastTime = startTime;
                     
+                    // Bắt đầu nhanh hơn
                     nextExplosionTime = startTime + 300;
-                    nextSoundTime = startTime + 800;
 
                     requestAnimationFrame(animate);
+                    
+                    // Tạo pháo đầu tiên ngay
+                    setTimeout(() => {
+                        console.log("Tạo pháo đầu tiên!");
+                        createRocket();
+                    }, 500);
                     
                 } catch (error) {
                     console.error("Lỗi khởi tạo:", error);
@@ -1214,42 +1619,32 @@
         }
 
         // ====================== EVENT LISTENERS ======================
+        console.log("Thêm event listeners cho nút bắt đầu...");
+        
+        // Thêm cả click và touchstart để đảm bảo hoạt động
+        btn.addEventListener('click', start);
         btn.addEventListener('touchstart', (e) => {
             e.preventDefault();
             start();
         }, { passive: false });
         
+        // Thêm pointerdown cho hỗ trợ đa nền tảng
         btn.addEventListener('pointerdown', start);
         
         window.addEventListener('resize', () => {
-            if (isRunning) initCanvas();
-        });
-        
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                isRunning = false;
-                pauseBackgroundMusic();
-                if (masterGain) {
-                    masterGain.gain.setValueAtTime(masterGain.gain.value, audioCtx.currentTime);
-                    masterGain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-                }
-            } else if (startTime > 0) {
-                isRunning = true;
-                if (masterGain) {
-                    masterGain.gain.setValueAtTime(masterGain.gain.value, audioCtx.currentTime);
-                    masterGain.gain.exponentialRampToValueAtTime(SOUND_CONFIG.masterVolume, audioCtx.currentTime + 0.5);
-                }
-                if (backgroundMusic && !isMusicPlaying) {
-                    playBackgroundMusic();
-                }
-                lastTime = performance.now();
-                requestAnimationFrame(animate);
+            if (isRunning && canvas) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
             }
         });
         
-        window.addEventListener('beforeunload', () => {
-            pauseBackgroundMusic();
+        // Kiểm tra khi DOM tải xong
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("DOM đã tải xong, sẵn sàng!");
+            console.log("Nút bắt đầu:", document.getElementById('startBtn'));
+            console.log("Canvas:", document.getElementById('canvas'));
         });
+        
     </script>
 </body>
 </html>
