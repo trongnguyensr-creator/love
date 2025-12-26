@@ -121,7 +121,7 @@
             }
         }
 
-        /* Container cho finale images */
+        /* Container cho finale image */
         #finaleContainer {
             position: absolute;
             top: 0;
@@ -135,27 +135,18 @@
             pointer-events: none;
         }
 
-        #imagesContainer {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 94%;
-            max-width: 1400px;
-            gap: 3%;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
         .finale-image-wrapper {
             position: relative;
-            width: 28%;
+            width: 60%;
+            max-width: 700px;
+            min-width: 300px;
             opacity: 0;
             transform: scale(0.7);
             transition: opacity 2s ease, transform 2s cubic-bezier(0.34, 1.56, 0.64, 1);
             border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 0 50px rgba(255, 255, 255, 0.15);
-            background: rgba(0, 0, 0, 0.3);
+            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.8));
+            background: transparent;
         }
 
         .finale-image {
@@ -163,26 +154,106 @@
             height: auto;
             display: block;
             border-radius: 20px;
-            filter: brightness(1.1) contrast(1.05);
             object-fit: cover;
-            aspect-ratio: 3/4;
+            aspect-ratio: 4/3;
+            position: relative;
+            z-index: 1;
+            box-shadow: 
+                0 0 80px rgba(255, 255, 255, 0.1),
+                inset 0 0 100px rgba(255, 255, 255, 0.05);
         }
 
-        .image-shimmer {
+        /* Hiệu ứng bóng đổ nâng cao */
+        .image-shadow {
+            position: absolute;
+            bottom: -30px;
+            left: 10%;
+            width: 80%;
+            height: 60px;
+            background: radial-gradient(ellipse at center, 
+                rgba(0, 0, 0, 0.6) 0%, 
+                rgba(0, 0, 0, 0) 70%);
+            filter: blur(15px);
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 2s ease 0.5s;
+        }
+
+        /* Hiệu ứng ánh sáng chạy viền */
+        .border-light {
             position: absolute;
             top: 0;
-            left: -100%;
-            width: 50%;
-            height: 100%;
-            background: linear-gradient(
-                90deg,
-                transparent,
-                rgba(255, 255, 255, 0.3),
-                transparent
-            );
-            transform: skewX(-20deg);
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 20px;
+            z-index: 2;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0;
         }
 
+        .border-light::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                from 0deg,
+                transparent,
+                rgba(255, 255, 255, 0.8),
+                rgba(255, 215, 0, 0.6),
+                rgba(255, 140, 0, 0.4),
+                transparent
+            );
+            animation: rotateLight 4s linear infinite;
+        }
+
+        .border-light::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            background: #000;
+            border-radius: 18px;
+            z-index: 1;
+        }
+
+        @keyframes rotateLight {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Hiệu ứng lấp lánh */
+        .sparkle-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            z-index: 3;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            filter: blur(1px);
+            opacity: 0;
+        }
+
+        /* Confetti particles */
         .confetti-particle {
             position: absolute;
             width: 8px;
@@ -208,20 +279,13 @@
 
         /* Responsive styles */
         @media (max-width: 768px) {
-            #imagesContainer {
-                flex-direction: column;
-                gap: 30px;
-                width: 100%;
-                padding: 40px 20px;
-            }
-            
             .finale-image-wrapper {
-                width: 80%;
-                max-height: 50vh;
+                width: 85%;
+                max-width: 500px;
             }
             
             .finale-image {
-                aspect-ratio: 4/5;
+                aspect-ratio: 3/4;
             }
         }
     </style>
@@ -235,19 +299,11 @@
     <!-- Finale Section -->
     <div id="finaleOverlay"></div>
     <div id="finaleContainer">
-        <div id="imagesContainer">
-            <div class="finale-image-wrapper" id="imageWrapper1">
-                <img class="finale-image" id="image1" src="" alt="Finale 1">
-                <div class="image-shimmer" id="shimmer1"></div>
-            </div>
-            <div class="finale-image-wrapper" id="imageWrapper2">
-                <img class="finale-image" id="image2" src="" alt="Finale 2">
-                <div class="image-shimmer" id="shimmer2"></div>
-            </div>
-            <div class="finale-image-wrapper" id="imageWrapper3">
-                <img class="finale-image" id="image3" src="" alt="Finale 3">
-                <div class="image-shimmer" id="shimmer3"></div>
-            </div>
+        <div class="finale-image-wrapper">
+            <img class="finale-image" id="finaleImage" src="" alt="Finale">
+            <div class="image-shadow" id="imageShadow"></div>
+            <div class="border-light" id="borderLight"></div>
+            <div class="sparkle-overlay" id="sparkleOverlay"></div>
         </div>
     </div>
 
@@ -351,21 +407,24 @@
                 }
             },
             
-            // Cấu hình finale
+            // Cấu hình finale - CHỈ 1 ẢNH
             finale: {
                 fireworkCount: 3,
                 delayBetween: 1200, // 1.2 giây giữa các pháo
-                positions: [0.25, 0.5, 0.75], // 25%, 50%, 75% width
+                positions: [0.5], // CHỈ 50% width (trung tâm)
                 fadeDuration: 2000, // 2 giây fade out particles
                 imageFadeIn: 2000, // 2 giây fade in ảnh
                 imageScale: { from: 0.7, to: 1.0 },
-                glowBlur: 50, // blur 50px
-                glowColor: 'rgba(255, 255, 255, 0.15)',
-                borderRadius: 20,
-                confettiCount: 30, // số confetti xung quanh mỗi ảnh
+                confettiCount: 50, // số confetti xung quanh ảnh
                 confettiColors: [
                     '#ff6b6b', '#4ecdc4', '#45b7d1', 
-                    '#96ceb4', '#ffeaa7', '#fab1a0'
+                    '#96ceb4', '#ffeaa7', '#fab1a0',
+                    '#a29bfe', '#fd79a8', '#fdcb6e'
+                ],
+                sparkleCount: 20, // số điểm lấp lánh
+                sparkleColors: [
+                    '#ffffff', '#fffacd', '#f0f8ff',
+                    '#e6e6fa', '#fff0f5'
                 ]
             }
         };
@@ -407,48 +466,40 @@
             fireworkIndex: 0,
             finaleStartTime: 0,
             finaleFireworks: [],
-            imagesShown: 0,
+            imageShown: false,
             backgroundDim: 0,
             confettiParticles: [],
-            imagesPreloaded: false
+            sparkles: [],
+            imagePreloaded: false
         };
 
         // ====================== FINALE SYSTEM ======================
         
-        // Preload images
-        function preloadFinaleImages() {
+        // Preload image
+        function preloadFinaleImage() {
             return new Promise((resolve) => {
-                const imageUrls = ['1.png', '2.png', '3.png'];
-                let loadedCount = 0;
+                const imageUrl = '1.png'; // CHỈ 1 ẢNH
+                const img = new Image();
                 
-                imageUrls.forEach((url, index) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        loadedCount++;
-                        // Store reference to preloaded image
-                        document.getElementById(`image${index + 1}`).src = url;
-                        
-                        if (loadedCount === imageUrls.length) {
-                            finaleSystem.imagesPreloaded = true;
-                            resolve(true);
-                        }
-                    };
-                    img.onerror = () => {
-                        console.error(`Failed to load image: ${url}`);
-                        // Use placeholder if image fails to load
-                        document.getElementById(`image${index + 1}`).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="600" viewBox="0 0 400 600"><rect width="400" height="600" fill="%23222"/><text x="50%" y="50%" font-family="Arial" font-size="24" fill="white" text-anchor="middle" dy=".3em">Image ${index + 1}</text></svg>`;
-                        loadedCount++;
-                        if (loadedCount === imageUrls.length) {
-                            finaleSystem.imagesPreloaded = true;
-                            resolve(true);
-                        }
-                    };
-                    img.src = url;
-                });
+                img.onload = () => {
+                    document.getElementById('finaleImage').src = imageUrl;
+                    finaleSystem.imagePreloaded = true;
+                    resolve(true);
+                };
+                
+                img.onerror = () => {
+                    console.error(`Failed to load image: ${imageUrl}`);
+                    // Use placeholder if image fails to load
+                    document.getElementById('finaleImage').src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="600" height="400" fill="%23222"/><text x="50%" y="50%" font-family="Arial" font-size="48" fill="white" text-anchor="middle" dy=".3em">FINALE</text></svg>`;
+                    finaleSystem.imagePreloaded = true;
+                    resolve(true);
+                };
+                
+                img.src = imageUrl;
             });
         }
 
-        // Create finale firework
+        // Create finale firework - BẮN 3 PHÁO Ở TRUNG TÂM
         function createFinaleFirework(positionPercent, index) {
             const activeCount = countActiveParticles();
             if (activeCount > FIREWORK_CONFIG.maxActiveParticles * 0.8) return;
@@ -539,9 +590,10 @@
                             particlesFaded++;
                             clearInterval(fadeInterval);
                             
-                            // Khi tất cả particles đã fade, hiện ảnh
-                            if (particlesFaded >= totalParticles * 0.9) { // 90% particles đã fade
-                                showFinaleImage(fireworkIndex);
+                            // Khi tất cả particles đã fade, hiện ảnh (sau pháo cuối cùng)
+                            if (particlesFaded >= totalParticles * 0.9 && 
+                                fireworkIndex === FIREWORK_CONFIG.finale.fireworkCount - 1) {
+                                showFinaleImage();
                                 finaleSystem.finaleFireworks[fireworkIndex].particlesFaded = true;
                             }
                         }
@@ -551,9 +603,13 @@
         }
 
         // Show image với hiệu ứng
-        function showFinaleImage(imageIndex) {
-            const wrapper = document.getElementById(`imageWrapper${imageIndex + 1}`);
-            const shimmer = document.getElementById(`shimmer${imageIndex + 1}`);
+        function showFinaleImage() {
+            if (finaleSystem.imageShown) return;
+            
+            const wrapper = document.querySelector('.finale-image-wrapper');
+            const shadow = document.getElementById('imageShadow');
+            const borderLight = document.getElementById('borderLight');
+            const sparkleOverlay = document.getElementById('sparkleOverlay');
             
             // Hiện container finale
             document.getElementById('finaleContainer').style.display = 'flex';
@@ -562,49 +618,163 @@
             setTimeout(() => {
                 wrapper.style.opacity = '1';
                 wrapper.style.transform = 'scale(1)';
-                wrapper.style.boxShadow = `0 0 ${FIREWORK_CONFIG.finale.glowBlur}px ${FIREWORK_CONFIG.finale.glowColor}`;
                 
-                // Hiệu ứng shimmer sau khi fade in xong
+                // Hiệu ứng bóng đổ
                 setTimeout(() => {
-                    shimmer.style.transition = 'left 1.5s ease-in-out';
-                    shimmer.style.left = '150%';
-                    
-                    // Tạo confetti xung quanh ảnh
-                    createConfettiAroundImage(wrapper, imageIndex);
-                }, FIREWORK_CONFIG.finale.imageFadeIn);
+                    shadow.style.opacity = '1';
+                }, 500);
                 
-                finaleSystem.imagesShown++;
+                // Hiệu ứng ánh sáng viền
+                setTimeout(() => {
+                    borderLight.style.opacity = '0.8';
+                }, 1000);
                 
-                // Khi tất cả ảnh đã hiện, tăng background dim
-                if (finaleSystem.imagesShown === FIREWORK_CONFIG.finale.fireworkCount) {
-                    dimBackground();
-                }
+                // Hiệu ứng lấp lánh
+                setTimeout(() => {
+                    sparkleOverlay.style.opacity = '1';
+                    createSparkleEffects();
+                }, 1500);
+                
+                // Tạo confetti xung quanh ảnh
+                createConfettiAroundImage(wrapper);
+                
+                finaleSystem.imageShown = true;
+                
+                // Làm tối background
+                dimBackground();
+                
             }, 100);
         }
 
+        // Tạo hiệu ứng lấp lánh
+        function createSparkleEffects() {
+            const sparkleOverlay = document.getElementById('sparkleOverlay');
+            const colors = FIREWORK_CONFIG.finale.sparkleColors;
+            
+            // Xóa sparkles cũ nếu có
+            finaleSystem.sparkles.forEach(sparkle => {
+                if (sparkle.parentNode === sparkleOverlay) {
+                    sparkleOverlay.removeChild(sparkle);
+                }
+            });
+            finaleSystem.sparkles = [];
+            
+            for (let i = 0; i < FIREWORK_CONFIG.finale.sparkleCount; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                
+                // Random position
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                
+                sparkle.style.left = `${x}%`;
+                sparkle.style.top = `${y}%`;
+                sparkle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                sparkle.style.width = `${3 + Math.random() * 4}px`;
+                sparkle.style.height = sparkle.style.width;
+                
+                sparkleOverlay.appendChild(sparkle);
+                finaleSystem.sparkles.push(sparkle);
+                
+                // Animation sparkle
+                const delay = i * 200;
+                const duration = 800 + Math.random() * 800;
+                
+                setTimeout(() => {
+                    // Sparkle in
+                    sparkle.style.transition = `opacity ${duration/2}ms ease`;
+                    sparkle.style.opacity = '0.9';
+                    
+                    // Sparkle out
+                    setTimeout(() => {
+                        sparkle.style.transition = `opacity ${duration/2}ms ease ${duration/2}ms`;
+                        sparkle.style.opacity = '0';
+                        
+                        // Loop sparkle
+                        setTimeout(() => {
+                            if (finaleSystem.isActive) {
+                                restartSparkle(sparkle);
+                            }
+                        }, duration);
+                    }, duration/2);
+                }, delay);
+            }
+        }
+
+        function restartSparkle(sparkle) {
+            // Random new position
+            const x = Math.random() * 100;
+            const y = Math.random() * 100;
+            
+            sparkle.style.left = `${x}%`;
+            sparkle.style.top = `${y}%`;
+            
+            const duration = 800 + Math.random() * 800;
+            
+            // Sparkle in
+            sparkle.style.transition = `opacity ${duration/2}ms ease`;
+            sparkle.style.opacity = '0.9';
+            
+            // Sparkle out
+            setTimeout(() => {
+                sparkle.style.transition = `opacity ${duration/2}ms ease ${duration/2}ms`;
+                sparkle.style.opacity = '0';
+                
+                // Loop sparkle
+                if (finaleSystem.isActive) {
+                    setTimeout(() => restartSparkle(sparkle), duration);
+                }
+            }, duration/2);
+        }
+
         // Tạo confetti bay xung quanh ảnh
-        function createConfettiAroundImage(wrapper, imageIndex) {
+        function createConfettiAroundImage(wrapper) {
             const rect = wrapper.getBoundingClientRect();
             const colors = FIREWORK_CONFIG.finale.confettiColors;
             
             for (let i = 0; i < FIREWORK_CONFIG.finale.confettiCount; i++) {
                 const confetti = document.createElement('div');
                 confetti.className = 'confetti-particle';
-                confetti.style.left = `${rect.left + rect.width / 2}px`;
-                confetti.style.top = `${rect.top + rect.height / 2}px`;
+                
+                // Random starting position around image
+                const side = Math.floor(Math.random() * 4);
+                let startX, startY;
+                
+                switch(side) {
+                    case 0: // top
+                        startX = rect.left + Math.random() * rect.width;
+                        startY = rect.top - 20;
+                        break;
+                    case 1: // right
+                        startX = rect.right + 20;
+                        startY = rect.top + Math.random() * rect.height;
+                        break;
+                    case 2: // bottom
+                        startX = rect.left + Math.random() * rect.width;
+                        startY = rect.bottom + 20;
+                        break;
+                    case 3: // left
+                        startX = rect.left - 20;
+                        startY = rect.top + Math.random() * rect.height;
+                        break;
+                }
+                
+                confetti.style.left = `${startX}px`;
+                confetti.style.top = `${startY}px`;
                 confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
                 confetti.style.width = `${6 + Math.random() * 8}px`;
                 confetti.style.height = confetti.style.width;
                 
                 document.getElementById('finaleContainer').appendChild(confetti);
                 
-                // Animation confetti
-                const angle = Math.random() * Math.PI * 2;
-                const distance = 80 + Math.random() * 120;
-                const targetX = rect.left + rect.width / 2 + Math.cos(angle) * distance;
-                const targetY = rect.top + rect.height / 2 + Math.sin(angle) * distance;
-                const duration = 1200 + Math.random() * 800;
-                const delay = i * 30;
+                // Animation confetti - bay vào trung tâm ảnh
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const distance = Math.sqrt(Math.pow(startX - centerX, 2) + Math.pow(startY - centerY, 2));
+                const targetX = centerX + (Math.random() - 0.5) * 100;
+                const targetY = centerY + (Math.random() - 0.5) * 100;
+                const duration = 1000 + Math.random() * 1000;
+                const delay = i * 50;
                 
                 setTimeout(() => {
                     confetti.style.opacity = '1';
@@ -617,14 +787,14 @@
                         const moveInterval = setInterval(() => {
                             const currentX = parseFloat(confetti.style.left);
                             const currentY = parseFloat(confetti.style.top);
-                            const driftX = (Math.random() - 0.5) * 4;
+                            const driftX = (Math.random() - 0.5) * 3;
                             const driftY = (Math.random() - 0.5) * 2;
                             
                             confetti.style.left = `${currentX + driftX}px`;
                             confetti.style.top = `${currentY + driftY}px`;
                         }, 100);
                         
-                        // Dừng confetti sau 10 giây
+                        // Dừng confetti sau 15 giây
                         setTimeout(() => {
                             clearInterval(moveInterval);
                             confetti.style.opacity = '0';
@@ -633,7 +803,7 @@
                                     confetti.parentNode.removeChild(confetti);
                                 }
                             }, 1000);
-                        }, 10000);
+                        }, 15000);
                     }, duration);
                 }, delay);
                 
@@ -704,18 +874,18 @@
             finaleSystem.finaleStartTime = performance.now();
             finaleSystem.fireworkIndex = 0;
             finaleSystem.finaleFireworks = [];
-            finaleSystem.imagesShown = 0;
+            finaleSystem.imageShown = false;
             
-            // Đảm bảo images đã preload
-            if (!finaleSystem.imagesPreloaded) {
-                preloadFinaleImages();
+            // Đảm bảo image đã preload
+            if (!finaleSystem.imagePreloaded) {
+                preloadFinaleImage();
             }
             
-            // Bắn 3 quả pháo finale cách nhau 1-1.5 giây
+            // Bắn 3 quả pháo finale ở TRUNG TÂM cách nhau 1-1.5 giây
             function launchNextFinaleFirework() {
                 if (finaleSystem.fireworkIndex < FIREWORK_CONFIG.finale.fireworkCount) {
-                    const position = FIREWORK_CONFIG.finale.positions[finaleSystem.fireworkIndex];
-                    createFinaleFirework(position, finaleSystem.fireworkIndex);
+                    // TẤT CẢ Ở VỊ TRÍ 50% (trung tâm)
+                    createFinaleFirework(0.5, finaleSystem.fireworkIndex);
                     
                     finaleSystem.fireworkIndex++;
                     
@@ -785,6 +955,8 @@
             return climaxSystem.climaxIntensity;
         }
 
+        // ====================== CÁC HÀM CŨ (GIỮ NGUYÊN) ======================
+        
         function getCurrentExplosionInterval() {
             const config = FIREWORK_CONFIG.adaptiveExplosionRate;
             
@@ -802,8 +974,6 @@
             }
         }
 
-        // ====================== CÁC HÀM CŨ (GIỮ NGUYÊN) ======================
-        
         function getExplosionTypeForPhase() {
             if (climaxSystem.phase === 'climax') {
                 const rand = Math.random();
@@ -1655,7 +1825,6 @@
         }
 
         function renderParticle(p, ctx, progress, delta) {
-            // Áp dụng fade cho finale particles
             let alpha = p.fade !== undefined ? p.fade : 1.0;
             
             if (!p.isFinale) {
@@ -1682,19 +1851,16 @@
                 }
             }
             
-            // Giảm độ sáng cho background particles
             if (p.isBackground) {
                 alpha *= 0.5;
             }
             
-            // Vẽ glow
             if (p.glowSize && progress < 0.6) {
                 const glowAlpha = alpha * (1 - progress * 1.2) * 0.8;
                 ctx.shadowBlur = p.glowSize * (1 - progress * 0.5);
                 ctx.shadowColor = p.color.replace(')', `, ${glowAlpha})`).replace('hsl', 'hsla');
             }
             
-            // Vẽ trail
             if (p.trailLength && progress < 0.5 && !p.isRocket) {
                 ctx.shadowBlur = p.trailLength * (1 - progress * 1.5);
                 ctx.shadowColor = p.color;
@@ -1703,7 +1869,6 @@
                 ctx.shadowColor = p.color;
             }
             
-            // Vẽ particle
             ctx.fillStyle = p.color.replace(')', `, ${alpha})`).replace('hsl', 'hsla');
             ctx.beginPath();
             
@@ -1729,7 +1894,6 @@
                 clearAlpha = 0.05;
             }
             
-            // Điều chỉnh clearAlpha dựa trên background dim
             if (finaleSystem.backgroundDim > 0) {
                 clearAlpha = Math.max(0.02, clearAlpha * (1 - finaleSystem.backgroundDim));
             }
@@ -1792,8 +1956,8 @@
             
             setTimeout(async () => {
                 try {
-                    // Preload images trước
-                    await preloadFinaleImages();
+                    // Preload image trước
+                    await preloadFinaleImage();
                     
                     await initBackgroundMusic();
                     
