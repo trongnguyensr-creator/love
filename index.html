@@ -42,55 +42,9 @@
             transform: scale(0.92);
             box-shadow: 0 4px 16px rgba(102,126,234,0.3);
         }
-        #orientationWarning {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 1000;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
-        }
-        #orientationWarning h2 {
-            color: #ffcc00;
-            font-size: 28px;
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
-        }
-        #orientationWarning p {
-            color: #fff;
-            font-size: 18px;
-            margin-bottom: 30px;
-            max-width: 80%;
-            line-height: 1.5;
-        }
-        .phone-icon {
-            font-size: 60px;
-            margin: 20px;
-            animation: rotatePhone 2s infinite ease-in-out;
-        }
-        @keyframes rotatePhone {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(90deg); }
-            50% { transform: rotate(90deg); }
-            75% { transform: rotate(90deg); }
-        }
     </style>
 </head>
 <body>
-    <div id="orientationWarning">
-        <h2>VUI LÒNG XOAY NGANG ĐIỆN THOẠI</h2>
-        <p>Pháo bông sắp bắn rồi người đẹp ơiiii!</p>
-        <div class="phone-icon">📱</div>
-        <p style="color: #ffcc00; font-size: 16px;">Chuẩn bị nào!!!</p>
-    </div>
-    
     <button id="startBtn">BẮT ĐẦU</button>
     <canvas id="canvas"></canvas>
 
@@ -114,15 +68,15 @@
             }
         };
 
-        // CẤU HÌNH PHÁO HOA - ĐIỀU CHỈNH CHO ĐIỆN THOẠI
+        // CẤU HÌNH PHÁO HOA - ĐIỀU CHỈNH NHỎ HƠN
         const FIREWORK_CONFIG = {
-            maxParticlesPerExplosion: 80,
+            maxParticlesPerExplosion: 70,  // Giảm từ 80
             maxIntensity: 2.5,
             explosionIntervalMin: 1500,
             explosionIntervalMax: 2500,
             targetFPS: 60,
-            maxActiveParticles: 1200,
-            particleSizeMultiplier: 0.7,
+            maxActiveParticles: 1000,  // Giảm từ 1200
+            particleSizeMultiplier: 0.5,  // Giảm từ 0.7
             rocketSpeedMultiplier: 0.8,
             explosionSpeedMultiplier: 0.7
         };
@@ -141,33 +95,7 @@
         let activeSounds = new Set();
         let isMusicLoaded = false;
         let isMusicPlaying = false;
-        let isPortrait = false;
         let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-        // ====================== KIỂM TRA HƯỚNG MÀN HÌNH ======================
-        function checkOrientation() {
-            const orientationWarning = document.getElementById('orientationWarning');
-            const startBtn = document.getElementById('startBtn');
-            
-            if (!isMobile) {
-                orientationWarning.style.display = 'none';
-                isPortrait = false;
-                return;
-            }
-            
-            const isPortraitMode = window.innerHeight > window.innerWidth;
-            isPortrait = isPortraitMode;
-            
-            if (isPortraitMode) {
-                orientationWarning.style.display = 'flex';
-                startBtn.style.display = 'none';
-            } else {
-                orientationWarning.style.display = 'none';
-                if (!isRunning) {
-                    startBtn.style.display = 'block';
-                }
-            }
-        }
 
         // ====================== HỆ THỐNG NHẠC NỀN ======================
         function initBackgroundMusic() {
@@ -527,7 +455,7 @@
             nextSoundTime = performance.now() + SOUND_CONFIG.baseInterval + variation;
         }
 
-        // ====================== HỆ THỐNG PHÁO HOA (ĐIỀU CHỈNH CHO MOBILE) ======================
+        // ====================== HỆ THỐNG PHÁO HOA (ĐIỀU CHỈNH NHỎ HƠN) ======================
         function createParticlePool() {
             particles = [];
             for (let i = 0; i < particlePoolSize; i++) {
@@ -536,7 +464,7 @@
                     vx: 0, vy: 0,
                     life: 0, maxLife: 0,
                     color: '#fff',
-                    size: 1.5 * FIREWORK_CONFIG.particleSizeMultiplier,
+                    size: 1.0 * FIREWORK_CONFIG.particleSizeMultiplier,  // Giảm từ 1.5
                     active: false
                 });
             }
@@ -604,7 +532,7 @@
                 p.life = 0;
                 p.maxLife = 50 + Math.random() * 20;
                 p.color = `hsl(${hue}, 100%, 70%)`;
-                p.size = (2.0 + Math.random() * 1.0) * FIREWORK_CONFIG.particleSizeMultiplier;
+                p.size = (1.5 + Math.random() * 0.8) * FIREWORK_CONFIG.particleSizeMultiplier;  // Giảm từ 2.0
                 p.active = true;
                 p.isRocket = true;
                 p.trailHue = hue;
@@ -625,7 +553,7 @@
             const activeCount = countActiveParticles();
             if (activeCount > FIREWORK_CONFIG.maxActiveParticles * 0.8) return;
 
-            const numParticles = Math.floor(80 + Math.random() * 70);
+            const numParticles = Math.floor(70 + Math.random() * 60);  // Giảm từ 80+70
             const explosionType = Math.random();
             
             if (explosionType < 0.5) {
@@ -647,7 +575,7 @@
                         p.life = 0;
                         p.maxLife = 60 + Math.random() * 50;
                         p.color = `hsl(${baseHue + Math.random()*80 - 40}, 100%, ${60 + Math.random()*30}%)`;
-                        p.size = (1.0 + Math.random() * 1.5) * FIREWORK_CONFIG.particleSizeMultiplier;
+                        p.size = (0.8 + Math.random() * 1.2) * FIREWORK_CONFIG.particleSizeMultiplier;  // Giảm từ 1.0+1.5
                         p.active = true;
                         p.trail = true;
                     }
@@ -670,7 +598,7 @@
                     const hueVariation = Math.random() * 100 - 50;
                     p.color = `hsl(${baseHue + hueVariation}, ${80 + Math.random()*20}%, ${50 + Math.random()*40}%)`;
                     
-                    p.size = (0.8 + Math.random() * 2.0) * FIREWORK_CONFIG.particleSizeMultiplier;
+                    p.size = (0.6 + Math.random() * 1.6) * FIREWORK_CONFIG.particleSizeMultiplier;  // Giảm từ 0.8+2.0
                     p.active = true;
                     p.trail = true;
                     p.sparkle = Math.random() > 0.3;
@@ -755,11 +683,6 @@
         const btn = document.getElementById('startBtn');
         
         async function start() {
-            if (isMobile && isPortrait) {
-                alert("Vui lòng xoay ngang điện thoại để bắt đầu xem pháo hoa!");
-                return;
-            }
-            
             btn.disabled = true;
             btn.textContent = "ĐANG TẢI";
             
@@ -817,16 +740,8 @@
         btn.addEventListener('pointerdown', start);
         
         window.addEventListener('resize', () => {
-            checkOrientation();
             if (isRunning) initCanvas();
         });
-        
-        window.addEventListener('orientationchange', () => {
-            setTimeout(checkOrientation, 100);
-        });
-        
-        document.addEventListener('DOMContentLoaded', checkOrientation);
-        checkOrientation();
         
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
