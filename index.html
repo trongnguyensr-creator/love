@@ -27,25 +27,124 @@
         #startBtn {
             position: relative;
             z-index: 10;
-            padding: 18px 48px;
-            font-size: 28px;
+            padding: 22px 56px;
+            font-size: 32px;
             font-weight: bold;
-            color: white;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border: none;
-            border-radius: 50px;
+            color: rgba(255, 255, 255, 0.95);
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.15), 
+                rgba(255, 255, 255, 0.05));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
             cursor: pointer;
-            box-shadow: 0 8px 32px rgba(102,126,234,0.4);
-            transition: all 0.2s ease;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            box-shadow: 
+                0 10px 35px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            letter-spacing: 1px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            transform: translateY(0);
+            animation: float 3s ease-in-out infinite;
+            overflow: hidden;
         }
+        
+        #startBtn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.2), 
+                rgba(255, 255, 255, 0.1));
+            border-radius: 20px;
+            z-index: -1;
+        }
+        
+        #startBtn::after {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            right: 1px;
+            bottom: 1px;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1), 
+                rgba(255, 255, 255, 0.05));
+            border-radius: 19px;
+            z-index: -1;
+        }
+        
         #startBtn:active {
-            transform: scale(0.92);
-            box-shadow: 0 4px 16px rgba(102,126,234,0.3);
+            transform: scale(0.85) translateY(5px);
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1), 
+                rgba(255, 255, 255, 0.02));
+            box-shadow: 
+                0 5px 15px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            opacity: 0.7;
+            transition: all 0.2s ease-out;
+        }
+        
+        #startBtn.clicked {
+            animation: fadeInOut 0.8s ease-out forwards;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+                box-shadow: 
+                    0 10px 35px rgba(0, 0, 0, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+            }
+            50% {
+                transform: translateY(-10px);
+                box-shadow: 
+                    0 15px 40px rgba(0, 0, 0, 0.4),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                    inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+            }
+        }
+        
+        @keyframes fadeInOut {
+            0% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+            30% {
+                transform: scale(1.1) translateY(-20px);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(0) translateY(100px);
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+        
+        .btn-text {
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(45deg, 
+                rgba(255, 255, 255, 0.95), 
+                rgba(255, 255, 255, 0.8));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
     </style>
 </head>
 <body>
-    <button id="startBtn">BẮT ĐẦU</button>
+    <button id="startBtn">
+        <span class="btn-text">BẮT ĐẦU</span>
+    </button>
     <canvas id="canvas"></canvas>
 
     <script>
@@ -70,15 +169,34 @@
 
         // CẤU HÌNH PHÁO HOA - ĐIỀU CHỈNH NHỎ HƠN
         const FIREWORK_CONFIG = {
-            maxParticlesPerExplosion: 70,  // Giảm từ 80
+            maxParticlesPerExplosion: 70,
             maxIntensity: 2.5,
             explosionIntervalMin: 1500,
             explosionIntervalMax: 2500,
             targetFPS: 60,
-            maxActiveParticles: 1000,  // Giảm từ 1200
-            particleSizeMultiplier: 0.5,  // Giảm từ 0.7
+            maxActiveParticles: 1000,
+            particleSizeMultiplier: 0.5,
             rocketSpeedMultiplier: 0.8,
-            explosionSpeedMultiplier: 0.7
+            explosionSpeedMultiplier: 0.7,
+            // CẤU HÌNH KHOẢNG CÁCH: 30% gần, 70% xa
+            distanceDistribution: {
+                near: 0.3,    // 30% pháo bông gần
+                far: 0.7      // 70% pháo bông xa
+            },
+            distanceSettings: {
+                near: {
+                    minHeight: 0.15,    // 15% chiều cao màn hình
+                    maxHeight: 0.45,    // 45% chiều cao màn hình
+                    sizeMultiplier: 1.2, // Lớn hơn 20%
+                    speedMultiplier: 1.1 // Nhanh hơn 10%
+                },
+                far: {
+                    minHeight: 0.55,    // 55% chiều cao màn hình
+                    maxHeight: 0.85,    // 85% chiều cao màn hình
+                    sizeMultiplier: 0.8, // Nhỏ hơn 20%
+                    speedMultiplier: 0.9 // Chậm hơn 10%
+                }
+            }
         };
 
         // ĐƯỜNG DẪN FILE NHẠC
@@ -394,16 +512,16 @@
             }, 200);
         }
 
-        function playSpecialBassExplosion(intensity = 1.0) {
-            const baseFreq = 40 + Math.random() * 20;
-            const duration = 1.4 + intensity * 0.5;
+        function playSpecialBassExplosion(intensity = 1.0, isNear = false) {
+            const baseFreq = isNear ? 45 + Math.random() * 25 : 35 + Math.random() * 15;
+            const duration = isNear ? 1.2 + intensity * 0.3 : 1.4 + intensity * 0.5;
             
             createBassGlide(
-                baseFreq * 1.4,
+                baseFreq * (isNear ? 1.6 : 1.4),
                 baseFreq * 0.5,
                 'sine',
                 duration,
-                SOUND_CONFIG.layers.sub.weight * intensity * 1.3
+                SOUND_CONFIG.layers.sub.weight * intensity * (isNear ? 1.5 : 1.3)
             );
             
             setTimeout(() => {
@@ -411,30 +529,32 @@
                     baseFreq * 0.8,
                     'sine',
                     duration * 0.9,
-                    SOUND_CONFIG.layers.deep.weight * intensity * 0.8
+                    SOUND_CONFIG.layers.deep.weight * intensity * (isNear ? 1.0 : 0.8)
                 );
                 
                 createBassSound(
                     baseFreq * 0.6,
                     'sine',
                     duration * 1.1,
-                    SOUND_CONFIG.layers.deep.weight * intensity * 0.6
+                    SOUND_CONFIG.layers.deep.weight * intensity * (isNear ? 0.8 : 0.6)
                 );
             }, 100);
             
             setTimeout(() => {
                 createRumbleSound(
                     duration * 0.8,
-                    50 + Math.random() * 20,
-                    SOUND_CONFIG.layers.rumble.weight * intensity * 0.7
+                    (isNear ? 70 : 50) + Math.random() * 20,
+                    SOUND_CONFIG.layers.rumble.weight * intensity * (isNear ? 0.9 : 0.7)
                 );
             }, 180);
         }
 
-        function playBassSound() {
+        function playBassSound(isNear = false) {
             if (!audioCtx || activeSounds.size > 4) return;
             
             soundSequence = (soundSequence + 1) % 4;
+            
+            const volumeMultiplier = isNear ? 1.2 : 1.0;
             
             switch(soundSequence) {
                 case 0:
@@ -455,7 +575,7 @@
             nextSoundTime = performance.now() + SOUND_CONFIG.baseInterval + variation;
         }
 
-        // ====================== HỆ THỐNG PHÁO HOA (ĐIỀU CHỈNH NHỎ HƠN) ======================
+        // ====================== HỆ THỐNG PHÁO HOA VỚI KHOẢNG CÁCH ======================
         function createParticlePool() {
             particles = [];
             for (let i = 0; i < particlePoolSize; i++) {
@@ -464,8 +584,9 @@
                     vx: 0, vy: 0,
                     life: 0, maxLife: 0,
                     color: '#fff',
-                    size: 1.0 * FIREWORK_CONFIG.particleSizeMultiplier,  // Giảm từ 1.5
-                    active: false
+                    size: 1.0 * FIREWORK_CONFIG.particleSizeMultiplier,
+                    active: false,
+                    isNear: false
                 });
             }
         }
@@ -519,6 +640,10 @@
             const activeCount = countActiveParticles();
             if (activeCount > FIREWORK_CONFIG.maxActiveParticles) return;
 
+            // Xác định loại pháo hoa (gần hay xa)
+            const isNear = Math.random() < FIREWORK_CONFIG.distanceDistribution.near;
+            const settings = FIREWORK_CONFIG.distanceSettings[isNear ? 'near' : 'far'];
+            
             const x = Math.random() * window.innerWidth;
             const yStart = window.innerHeight;
             const hue = Math.random() * 360;
@@ -528,32 +653,41 @@
                 p.x = x;
                 p.y = yStart;
                 p.vx = (Math.random() - 0.5) * 1.2;
-                p.vy = - (12 + Math.random() * 6) * FIREWORK_CONFIG.rocketSpeedMultiplier;
+                p.vy = - (12 + Math.random() * 6) * FIREWORK_CONFIG.rocketSpeedMultiplier * settings.speedMultiplier;
                 p.life = 0;
                 p.maxLife = 50 + Math.random() * 20;
-                p.color = `hsl(${hue}, 100%, 70%)`;
-                p.size = (1.5 + Math.random() * 0.8) * FIREWORK_CONFIG.particleSizeMultiplier;  // Giảm từ 2.0
+                p.color = `hsl(${hue}, 100%, ${isNear ? 80 : 70}%)`;
+                p.size = (1.5 + Math.random() * 0.8) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier;
                 p.active = true;
                 p.isRocket = true;
+                p.isNear = isNear;
                 p.trailHue = hue;
             }
 
             setTimeout(() => {
                 if (!isRunning) return;
-                const yExplode = window.innerHeight * (0.15 + Math.random() * 0.45);
-                createExplosion(x, yExplode, hue);
+                
+                // Xác định độ cao nổ dựa trên loại pháo hoa
+                const minHeight = settings.minHeight * window.innerHeight;
+                const maxHeight = settings.maxHeight * window.innerHeight;
+                const yExplode = minHeight + Math.random() * (maxHeight - minHeight);
+                
+                createExplosion(x, yExplode, hue, isNear);
                 
                 if (Math.random() > 0.7) {
-                    playSpecialBassExplosion(1 + Math.random() * 0.5);
+                    playSpecialBassExplosion(1 + Math.random() * 0.5, isNear);
                 }
-            }, 1000 + Math.random() * 600);
+            }, (isNear ? 900 : 1100) + Math.random() * 600);
         }
 
-        function createExplosion(x, y, baseHue) {
+        function createExplosion(x, y, baseHue, isNear) {
             const activeCount = countActiveParticles();
             if (activeCount > FIREWORK_CONFIG.maxActiveParticles * 0.8) return;
 
-            const numParticles = Math.floor(70 + Math.random() * 60);  // Giảm từ 80+70
+            const settings = FIREWORK_CONFIG.distanceSettings[isNear ? 'near' : 'far'];
+            const numParticles = Math.floor(
+                (isNear ? 80 : 60) + Math.random() * (isNear ? 80 : 60)
+            );
             const explosionType = Math.random();
             
             if (explosionType < 0.5) {
@@ -566,17 +700,18 @@
                         if (!p) continue;
                         
                         const angle = (Math.PI * 2 * i) / segments + (Math.random() - 0.5) * 0.5;
-                        const speed = (5 + Math.random() * 8) * FIREWORK_CONFIG.explosionSpeedMultiplier;
+                        const speed = (5 + Math.random() * 8) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier;
                         
                         p.x = x;
                         p.y = y;
                         p.vx = Math.cos(angle) * speed;
                         p.vy = Math.sin(angle) * speed;
                         p.life = 0;
-                        p.maxLife = 60 + Math.random() * 50;
-                        p.color = `hsl(${baseHue + Math.random()*80 - 40}, 100%, ${60 + Math.random()*30}%)`;
-                        p.size = (0.8 + Math.random() * 1.2) * FIREWORK_CONFIG.particleSizeMultiplier;  // Giảm từ 1.0+1.5
+                        p.maxLife = (isNear ? 70 : 60) + Math.random() * 50;
+                        p.color = `hsl(${baseHue + Math.random()*80 - 40}, 100%, ${(isNear ? 70 : 60) + Math.random()*30}%)`;
+                        p.size = (0.8 + Math.random() * 1.2) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier;
                         p.active = true;
+                        p.isNear = isNear;
                         p.trail = true;
                     }
                 }
@@ -588,21 +723,22 @@
                     p.x = x;
                     p.y = y;
                     const angle = Math.random() * Math.PI * 2;
-                    const speed = (4 + Math.random() * 10) * FIREWORK_CONFIG.explosionSpeedMultiplier;
+                    const speed = (4 + Math.random() * 10) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier;
                     p.vx = Math.cos(angle) * speed;
                     p.vy = Math.sin(angle) * speed * 0.8 - 2;
                     
                     p.life = 0;
-                    p.maxLife = 50 + Math.random() * 70;
+                    p.maxLife = (isNear ? 60 : 50) + Math.random() * 70;
                     
                     const hueVariation = Math.random() * 100 - 50;
-                    p.color = `hsl(${baseHue + hueVariation}, ${80 + Math.random()*20}%, ${50 + Math.random()*40}%)`;
+                    p.color = `hsl(${baseHue + hueVariation}, ${80 + Math.random()*20}%, ${(isNear ? 60 : 50) + Math.random()*40}%)`;
                     
-                    p.size = (0.6 + Math.random() * 1.6) * FIREWORK_CONFIG.particleSizeMultiplier;  // Giảm từ 0.8+2.0
+                    p.size = (0.6 + Math.random() * 1.6) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier;
                     p.active = true;
+                    p.isNear = isNear;
                     p.trail = true;
                     p.sparkle = Math.random() > 0.3;
-                    p.trailLength = 2 + Math.random() * 3;
+                    p.trailLength = isNear ? 3 + Math.random() * 4 : 2 + Math.random() * 3;
                 }
             }
         }
@@ -615,7 +751,8 @@
             lastTime = time;
 
             if (time > nextSoundTime) {
-                playBassSound();
+                const isNear = Math.random() < FIREWORK_CONFIG.distanceDistribution.near;
+                playBassSound(isNear);
             }
 
             ctx.fillStyle = 'rgba(0,0,0,0.08)';
@@ -645,6 +782,11 @@
                     alpha *= 0.6 + 0.4 * Math.sin(progress * 25);
                 }
 
+                // Điều chỉnh độ sáng dựa trên khoảng cách
+                if (p.isNear && !p.isRocket) {
+                    alpha *= 1.1;
+                }
+
                 ctx.fillStyle = p.color.replace(')', `, ${alpha})`).replace('hsl', 'hsla');
                 ctx.beginPath();
                 
@@ -652,7 +794,7 @@
                     ctx.shadowBlur = p.trailLength;
                     ctx.shadowColor = p.color;
                 } else if (p.trail && !p.isRocket && progress < 0.3) {
-                    ctx.shadowBlur = 3 + Math.random() * 3;
+                    ctx.shadowBlur = (p.isNear ? 4 : 3) + Math.random() * 3;
                     ctx.shadowColor = p.color;
                 }
                 
@@ -679,56 +821,54 @@
             }
         }
 
-        // ====================== KHỞI ĐỘNG ======================
+        // ====================== KHỞI ĐỘNG VỚI HIỆU ỨNG NÚT ======================
         const btn = document.getElementById('startBtn');
         
         async function start() {
-            btn.disabled = true;
-            btn.textContent = "ĐANG TẢI";
+            // Thêm hiệu ứng nhấn
+            btn.classList.add('clicked');
             
-            try {
-                await initBackgroundMusic();
-                
-                btn.textContent = "BẮT ĐẦU";
-                btn.disabled = false;
-                
-                btn.style.opacity = '0';
-                btn.style.pointerEvents = 'none';
-                setTimeout(() => btn.style.display = 'none', 600);
+            // Đợi hiệu ứng hoàn thành
+            setTimeout(async () => {
+                try {
+                    await initBackgroundMusic();
+                    
+                    if (!initAudioSystem()) {
+                        alert("Trình duyệt không hỗ trợ Web Audio API. Vui lòng dùng Chrome/Firefox/Safari mới nhất.");
+                        btn.classList.remove('clicked');
+                        btn.style.visibility = 'visible';
+                        return;
+                    }
+                    
+                    playBackgroundMusic();
+                    
+                    initCanvas();
+                    createParticlePool();
 
-                if (!initAudioSystem()) {
-                    alert("Trình duyệt không hỗ trợ Web Audio API. Vui lòng dùng Chrome/Firefox/Safari mới nhất.");
-                    return;
+                    if (masterGain) {
+                        masterGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+                        masterGain.gain.exponentialRampToValueAtTime(SOUND_CONFIG.masterVolume, audioCtx.currentTime + 2.5);
+                    }
+
+                    setTimeout(() => {
+                        playPowerBass();
+                    }, 500);
+
+                    isRunning = true;
+                    startTime = performance.now();
+                    lastTime = startTime;
+                    nextExplosionTime = startTime + 500;
+                    nextSoundTime = startTime + 1200;
+
+                    requestAnimationFrame(animate);
+                    
+                } catch (error) {
+                    console.error("Lỗi khởi tạo:", error);
+                    alert("Có lỗi xảy ra khi khởi tạo. Vui lòng thử lại.");
+                    btn.classList.remove('clicked');
+                    btn.style.visibility = 'visible';
                 }
-                
-                playBackgroundMusic();
-                
-                initCanvas();
-                createParticlePool();
-
-                if (masterGain) {
-                    masterGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-                    masterGain.gain.exponentialRampToValueAtTime(SOUND_CONFIG.masterVolume, audioCtx.currentTime + 2.5);
-                }
-
-                setTimeout(() => {
-                    playPowerBass();
-                }, 500);
-
-                isRunning = true;
-                startTime = performance.now();
-                lastTime = startTime;
-                nextExplosionTime = startTime + 500;
-                nextSoundTime = startTime + 1200;
-
-                requestAnimationFrame(animate);
-                
-            } catch (error) {
-                console.error("Lỗi khởi tạo:", error);
-                alert("Có lỗi xảy ra khi khởi tạo. Vui lòng thử lại.");
-                btn.disabled = false;
-                btn.textContent = "BẮT ĐẦU";
-            }
+            }, 800); // Thời gian bằng với thời gian animation
         }
 
         // ====================== EVENT LISTENERS ======================
