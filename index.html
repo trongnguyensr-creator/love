@@ -30,31 +30,27 @@
     padding: 20px 54px;
     font-size: 30px;
     font-weight: 700;
-    color: #111; /* chữ đen */
+    color: #111;
     background: linear-gradient(
         135deg,
         #ffffff,
         #f3f3f3
     );
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 28px; /* bo tròn đẹp hơn */
+    border-radius: 28px;
     cursor: pointer;
-
     box-shadow:
         0 10px 25px rgba(0, 0, 0, 0.08),
         inset 0 1px 0 rgba(255, 255, 255, 0.9);
-
     transition:
         transform 0.35s cubic-bezier(.22,1,.36,1),
         box-shadow 0.35s ease,
         background 0.35s ease;
-
     letter-spacing: 0.5px;
     animation: floatSoft 4s ease-in-out infinite;
     overflow: hidden;
 }
 
-/* ánh sáng chạy ngang khi hover / tap */
 #startBtn::after {
     content: "";
     position: absolute;
@@ -75,7 +71,6 @@
     left: 120%;
 }
 
-/* hiệu ứng hover */
 #startBtn:hover {
     transform: translateY(-6px);
     box-shadow:
@@ -83,7 +78,6 @@
         inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
-/* hiệu ứng nhấn */
 #startBtn:active {
     transform: scale(0.92);
     box-shadow:
@@ -91,19 +85,15 @@
     transition: transform 0.15s ease;
 }
 
-/* sau khi click (biến mất mượt) */
 #startBtn.clicked {
     animation: fadeOutSmooth 0.9s cubic-bezier(.4,0,.2,1) forwards;
 }
 
-/* chữ */
 .btn-text {
     position: relative;
     z-index: 1;
     color: #111;
 }
-
-/* ===== ANIMATION ===== */
 
 @keyframes floatSoft {
     0%, 100% {
@@ -158,12 +148,39 @@
             }
         };
 
-        // CẤU HÌNH PHÁO HOA CHI TIẾT - PHIÊN BẢN CẢI THIỆN
+        // CẤU HÌNH PHÁO HOA CHI TIẾT - VỚI HỆ THỐNG CHỐNG LAG
         const FIREWORK_CONFIG = {
             maxParticlesPerExplosion: 120,
             maxIntensity: 2.5,
-            explosionIntervalMin: 1200,
-            explosionIntervalMax: 2300,
+            
+            // Hệ thống điều chỉnh tự động để tránh lag
+            adaptiveExplosionRate: {
+                baseMinInterval: 1200,    // Khoảng cách cơ bản tối thiểu
+                baseMaxInterval: 2300,    // Khoảng cách cơ bản tối đa
+                
+                // Các ngưỡng điều chỉnh
+                thresholds: [
+                    { particles: 400, minMultiplier: 1.0, maxMultiplier: 1.0 },   // Bình thường
+                    { particles: 700, minMultiplier: 1.5, maxMultiplier: 2.0 },   // Chậm 50%
+                    { particles: 1000, minMultiplier: 2.5, maxMultiplier: 3.5 },  // Chậm 150%
+                    { particles: 1300, minMultiplier: 4.0, maxMultiplier: 6.0 }   // Chậm 300%
+                ],
+                
+                // Tăng tốc theo thời gian (để bắt đầu nhanh)
+                intensityRampUp: {
+                    duration: 15000,       // 15 giây đầu tăng tốc
+                    startMultiplier: 0.7,  // Bắt đầu ở 70% tốc độ
+                    endMultiplier: 1.2     // Lên đến 120% tốc độ
+                },
+                
+                // Dao động theo chu kỳ
+                pulseEffect: {
+                    enabled: true,
+                    period: 20000,         // Chu kỳ 20 giây
+                    amplitude: 0.3         // Biên độ 30%
+                }
+            },
+            
             targetFPS: 60,
             maxActiveParticles: 1500,
             particleSizeMultiplier: 0.6,
@@ -197,12 +214,12 @@
             
             // CÁC LOẠI PHÁO HOA
             explosionTypes: {
-                chrysanthemum: 0.25,      // Cúc hoa (tia rõ ràng)
-                peony: 0.25,              // Hoa mẫu đơn (cầu sáng)
-                palm: 0.15,               // Lá cọ (rơi xuống)
-                willow: 0.15,             // Cành liễu (rơi chậm)
-                ring: 0.10,               // Vòng tròn
-                crossette: 0.10           // Tách đôi
+                chrysanthemum: 0.25,
+                peony: 0.25,
+                palm: 0.15,
+                willow: 0.15,
+                ring: 0.10,
+                crossette: 0.10
             }
         };
 
@@ -221,6 +238,86 @@
         let isMusicLoaded = false;
         let isMusicPlaying = false;
         let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        
+        // Hệ thống điều chỉnh tốc độ
+        let performanceMonitor = {
+            lastFrameTime: 0,
+            frameCount: 0,
+            fps: 60,
+            particleCountHistory: [],
+            adjustmentMultiplier: 1.0,
+            currentIntensity: 1.0,
+            timeSinceStart: 0
+        };
+
+        // ====================== HỆ THỐNG ĐIỀU CHỈNH TỐC ĐỘ ======================
+        function updatePerformanceMonitor(delta, activeParticles) {
+            // Cập nhật FPS
+            performanceMonitor.frameCount++;
+            const now = Date.now();
+            if (now - performanceMonitor.lastFrameTime >= 1000) {
+                performanceMonitor.fps = Math.min(60, performanceMonitor.frameCount);
+                performanceMonitor.frameCount = 0;
+                performanceMonitor.lastFrameTime = now;
+            }
+            
+            // Lưu lịch sử số lượng particle
+            performanceMonitor.particleCountHistory.push(activeParticles);
+            if (performanceMonitor.particleCountHistory.length > 60) {
+                performanceMonitor.particleCountHistory.shift();
+            }
+            
+            // Cập nhật thời gian
+            performanceMonitor.timeSinceStart += delta / 60;
+            
+            // Tính toán intensity dựa trên thời gian (tăng tốc dần)
+            let timeIntensity = 1.0;
+            const rampConfig = FIREWORK_CONFIG.adaptiveExplosionRate.intensityRampUp;
+            const timeProgress = Math.min(performanceMonitor.timeSinceStart / (rampConfig.duration / 1000), 1);
+            
+            if (timeProgress < 1) {
+                timeIntensity = rampConfig.startMultiplier + 
+                               (rampConfig.endMultiplier - rampConfig.startMultiplier) * 
+                               Math.sin(timeProgress * Math.PI * 0.5);
+            }
+            
+            // Thêm hiệu ứng dao động theo chu kỳ
+            let pulseIntensity = 1.0;
+            const pulseConfig = FIREWORK_CONFIG.adaptiveExplosionRate.pulseEffect;
+            if (pulseConfig.enabled) {
+                const pulseTime = performanceMonitor.timeSinceStart * 1000;
+                pulseIntensity = 1.0 + Math.sin(pulseTime / pulseConfig.period * Math.PI * 2) * pulseConfig.amplitude;
+            }
+            
+            // Tính toán multiplier dựa trên số particle
+            let particleMultiplier = 1.0;
+            const thresholds = FIREWORK_CONFIG.adaptiveExplosionRate.thresholds;
+            
+            for (let i = thresholds.length - 1; i >= 0; i--) {
+                const threshold = thresholds[i];
+                if (activeParticles >= threshold.particles) {
+                    particleMultiplier = threshold.minMultiplier;
+                    break;
+                }
+            }
+            
+            // Kết hợp tất cả các yếu tố
+            performanceMonitor.adjustmentMultiplier = particleMultiplier * timeIntensity * pulseIntensity;
+            performanceMonitor.currentIntensity = 1.0 / performanceMonitor.adjustmentMultiplier;
+            
+            return performanceMonitor.adjustmentMultiplier;
+        }
+
+        function getAdjustedExplosionInterval() {
+            const baseMin = FIREWORK_CONFIG.adaptiveExplosionRate.baseMinInterval;
+            const baseMax = FIREWORK_CONFIG.adaptiveExplosionRate.baseMaxInterval;
+            
+            // Áp dụng multiplier để điều chỉnh khoảng cách
+            const adjustedMin = baseMin * performanceMonitor.adjustmentMultiplier;
+            const adjustedMax = baseMax * performanceMonitor.adjustmentMultiplier;
+            
+            return Math.random() * (adjustedMax - adjustedMin) + adjustedMin;
+        }
 
         // ====================== HỆ THỐNG NHẠC NỀN ======================
         function initBackgroundMusic() {
@@ -400,16 +497,16 @@
             return Symbol();
         }
 
-        // ====================== CÁC BỘ ÂM THANH BASS ======================
-        
-        function playDeepBass() {
+        // ====================== CÁC BỘ ÂM THANH BASS (ĐIỀU CHỈNH THEO CƯỜNG ĐỘ) ======================
+        function playDeepBass(intensity = 1.0) {
             const baseFreq = 35 + Math.random() * 20;
+            const volumeMultiplier = Math.min(1.5, intensity);
             
             createBassSound(
                 baseFreq,
                 'sine',
                 1.4,
-                SOUND_CONFIG.layers.sub.weight * 1.0
+                SOUND_CONFIG.layers.sub.weight * volumeMultiplier
             );
             
             setTimeout(() => {
@@ -417,7 +514,7 @@
                     baseFreq * 0.5,
                     'sine',
                     1.6,
-                    SOUND_CONFIG.layers.deep.weight * 0.6
+                    SOUND_CONFIG.layers.deep.weight * 0.6 * volumeMultiplier
                 );
             }, 200);
             
@@ -425,21 +522,22 @@
                 createRumbleSound(
                     0.6,
                     80 + Math.random() * 40,
-                    SOUND_CONFIG.layers.rumble.weight * 0.3
+                    SOUND_CONFIG.layers.rumble.weight * 0.3 * volumeMultiplier
                 );
             }, 150);
         }
 
-        function playBassGlide() {
+        function playBassGlide(intensity = 1.0) {
             const startFreq = 50 + Math.random() * 20;
             const endFreq = startFreq * 0.6;
+            const volumeMultiplier = Math.min(1.5, intensity);
             
             createBassGlide(
                 startFreq,
                 endFreq,
                 'sine',
                 1.3,
-                SOUND_CONFIG.layers.sub.weight * 0.9
+                SOUND_CONFIG.layers.sub.weight * 0.9 * volumeMultiplier
             );
             
             setTimeout(() => {
@@ -447,20 +545,21 @@
                     startFreq * 1.5,
                     'sine',
                     1.0,
-                    SOUND_CONFIG.layers.sub.weight * 0.4
+                    SOUND_CONFIG.layers.sub.weight * 0.4 * volumeMultiplier
                 );
             }, 300);
         }
 
-        function playDualBass() {
+        function playDualBass(intensity = 1.0) {
             const freq1 = 40 + Math.random() * 15;
             const freq2 = 55 + Math.random() * 20;
+            const volumeMultiplier = Math.min(1.5, intensity);
             
             createBassSound(
                 freq1,
                 'sine',
                 1.2,
-                SOUND_CONFIG.layers.sub.weight * 0.8
+                SOUND_CONFIG.layers.sub.weight * 0.8 * volumeMultiplier
             );
             
             setTimeout(() => {
@@ -468,7 +567,7 @@
                     freq2,
                     'sine',
                     1.1,
-                    SOUND_CONFIG.layers.sub.weight * 0.7
+                    SOUND_CONFIG.layers.sub.weight * 0.7 * volumeMultiplier
                 );
             }, 100);
             
@@ -477,21 +576,22 @@
                     Math.min(freq1, freq2) * 0.4,
                     'sine',
                     1.5,
-                    SOUND_CONFIG.layers.deep.weight * 0.5
+                    SOUND_CONFIG.layers.deep.weight * 0.5 * volumeMultiplier
                 );
             }, 250);
         }
 
-        function playPowerBass() {
+        function playPowerBass(intensity = 1.0) {
             const now = Date.now();
             const timeFactor = Math.sin(now * 0.001) * 0.5 + 0.5;
+            const volumeMultiplier = Math.min(1.5, intensity);
             
             const mainFreq = 30 + timeFactor * 20;
             createBassSound(
                 mainFreq,
                 'sine',
                 1.6,
-                SOUND_CONFIG.layers.sub.weight * (0.9 + timeFactor * 0.3)
+                SOUND_CONFIG.layers.sub.weight * (0.9 + timeFactor * 0.3) * volumeMultiplier
             );
             
             setTimeout(() => {
@@ -499,14 +599,14 @@
                     mainFreq * 0.75,
                     'sine',
                     1.4,
-                    SOUND_CONFIG.layers.deep.weight * 0.6
+                    SOUND_CONFIG.layers.deep.weight * 0.6 * volumeMultiplier
                 );
                 
                 createBassSound(
                     mainFreq * 0.6,
                     'sine',
                     1.5,
-                    SOUND_CONFIG.layers.deep.weight * 0.4
+                    SOUND_CONFIG.layers.deep.weight * 0.4 * volumeMultiplier
                 );
             }, 150);
             
@@ -514,7 +614,7 @@
                 createRumbleSound(
                     0.9,
                     60 + Math.random() * 30,
-                    SOUND_CONFIG.layers.rumble.weight * 0.5
+                    SOUND_CONFIG.layers.rumble.weight * 0.5 * volumeMultiplier
                 );
             }, 200);
         }
@@ -522,13 +622,14 @@
         function playSpecialBassExplosion(intensity = 1.0, isNear = false) {
             const baseFreq = isNear ? 45 + Math.random() * 25 : 35 + Math.random() * 15;
             const duration = isNear ? 1.2 + intensity * 0.3 : 1.4 + intensity * 0.5;
+            const volumeMultiplier = Math.min(1.8, intensity);
             
             createBassGlide(
                 baseFreq * (isNear ? 1.6 : 1.4),
                 baseFreq * 0.5,
                 'sine',
                 duration,
-                SOUND_CONFIG.layers.sub.weight * intensity * (isNear ? 1.5 : 1.3)
+                SOUND_CONFIG.layers.sub.weight * intensity * (isNear ? 1.5 : 1.3) * volumeMultiplier
             );
             
             setTimeout(() => {
@@ -536,14 +637,14 @@
                     baseFreq * 0.8,
                     'sine',
                     duration * 0.9,
-                    SOUND_CONFIG.layers.deep.weight * intensity * (isNear ? 1.0 : 0.8)
+                    SOUND_CONFIG.layers.deep.weight * intensity * (isNear ? 1.0 : 0.8) * volumeMultiplier
                 );
                 
                 createBassSound(
                     baseFreq * 0.6,
                     'sine',
                     duration * 1.1,
-                    SOUND_CONFIG.layers.deep.weight * intensity * (isNear ? 0.8 : 0.6)
+                    SOUND_CONFIG.layers.deep.weight * intensity * (isNear ? 0.8 : 0.6) * volumeMultiplier
                 );
             }, 100);
             
@@ -551,7 +652,7 @@
                 createRumbleSound(
                     duration * 0.8,
                     (isNear ? 70 : 50) + Math.random() * 20,
-                    SOUND_CONFIG.layers.rumble.weight * intensity * (isNear ? 0.9 : 0.7)
+                    SOUND_CONFIG.layers.rumble.weight * intensity * (isNear ? 0.9 : 0.7) * volumeMultiplier
                 );
             }, 180);
         }
@@ -562,19 +663,20 @@
             soundSequence = (soundSequence + 1) % 4;
             
             const volumeMultiplier = isNear ? 1.2 : 1.0;
+            const intensityMultiplier = performanceMonitor.currentIntensity;
             
             switch(soundSequence) {
                 case 0:
-                    playDeepBass();
+                    playDeepBass(intensityMultiplier);
                     break;
                 case 1:
-                    playBassGlide();
+                    playBassGlide(intensityMultiplier);
                     break;
                 case 2:
-                    playDualBass();
+                    playDualBass(intensityMultiplier);
                     break;
                 case 3:
-                    playPowerBass();
+                    playPowerBass(intensityMultiplier);
                     break;
             }
             
@@ -582,9 +684,8 @@
             nextSoundTime = performance.now() + SOUND_CONFIG.baseInterval + variation;
         }
 
-        // ====================== HỆ THỐNG PHÁO HOA CHI TIẾT - PHIÊN BẢN CẢI THIỆN ======================
+        // ====================== HỆ THỐNG PHÁO HOA VỚI ĐIỀU CHỈNH TỰ ĐỘNG ======================
         
-        // Tạo pool particles với thuộc tính mở rộng
         function createParticlePool() {
             particles = [];
             const poolSize = FIREWORK_CONFIG.maxParticlesPerExplosion * 30;
@@ -669,13 +770,17 @@
             return count;
         }
 
-        // Tạo rocket với hiệu ứng đuôi khói
+        // Tạo rocket với điều chỉnh theo cường độ
         function createRocket() {
             const activeCount = countActiveParticles();
-            if (activeCount > FIREWORK_CONFIG.maxActiveParticles) return;
+            if (activeCount > FIREWORK_CONFIG.maxActiveParticles * 0.9) return;
 
             const isNear = Math.random() < FIREWORK_CONFIG.distanceDistribution.near;
             const settings = FIREWORK_CONFIG.distanceSettings[isNear ? 'near' : 'far'];
+            
+            // Điều chỉnh số lượng particle theo cường độ hiện tại
+            const intensityMultiplier = Math.min(1.5, performanceMonitor.currentIntensity);
+            const particleMultiplier = isNear ? 1.0 : 0.8;
             
             const x = Math.random() * window.innerWidth;
             const yStart = window.innerHeight;
@@ -691,21 +796,25 @@
                 p.life = 0;
                 p.maxLife = 55 + Math.random() * 25;
                 p.color = `hsl(${hue}, 100%, ${isNear ? 85 : 75}%)`;
-                p.size = (1.8 + Math.random() * 1.0) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier;
+                p.size = (1.8 + Math.random() * 1.0) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * intensityMultiplier;
                 p.active = true;
                 p.isRocket = true;
                 p.isNear = isNear;
                 p.trailHue = hue;
-                p.glowSize = p.size * 2.5;
-                p.trailLength = isNear ? 8 : 6;
+                p.glowSize = p.size * 2.5 * intensityMultiplier;
+                p.trailLength = (isNear ? 8 : 6) * intensityMultiplier;
             }
 
-            // Tạo dấu vết khói cho rocket
+            // Tạo dấu vết khói cho rocket (giảm tần suất khi cường độ thấp)
+            const trailFrequency = Math.max(50, 100 / intensityMultiplier); // Chậm lại khi nhiều particle
             let trailInterval = setInterval(() => {
                 if (!isRunning || !p || !p.active) {
                     clearInterval(trailInterval);
                     return;
                 }
+                
+                // Giảm số lượng trail khi FPS thấp
+                if (Math.random() > 0.7 * intensityMultiplier) return;
                 
                 const trail = getParticle();
                 if (trail) {
@@ -721,7 +830,7 @@
                     trail.fade = 0.7;
                     trail.drag = 0.95;
                 }
-            }, 30);
+            }, trailFrequency);
 
             // Lên lịch nổ
             setTimeout(() => {
@@ -745,49 +854,52 @@
                     }
                 }
                 
-                createExplosion(x, yExplode, hue, isNear, explosionType);
+                createExplosion(x, yExplode, hue, isNear, explosionType, intensityMultiplier);
                 
-                if (Math.random() > 0.65) {
-                    playSpecialBassExplosion(1 + Math.random() * 0.6, isNear);
+                if (Math.random() > 0.65 && intensityMultiplier > 0.7) {
+                    playSpecialBassExplosion(1 + Math.random() * 0.6 * intensityMultiplier, isNear);
                 }
-            }, (isNear ? 850 : 1150) + Math.random() * 700);
+            }, (isNear ? 850 : 1150) + Math.random() * 700 / intensityMultiplier);
         }
 
-        // Hàm tạo vụ nổ theo từng loại
-        function createExplosion(x, y, baseHue, isNear, type = 'peony') {
+        // Hàm tạo vụ nổ với điều chỉnh số lượng particle
+        function createExplosion(x, y, baseHue, isNear, type = 'peony', intensityMultiplier = 1.0) {
             const activeCount = countActiveParticles();
             if (activeCount > FIREWORK_CONFIG.maxActiveParticles * 0.85) return;
 
             const settings = FIREWORK_CONFIG.distanceSettings[isNear ? 'near' : 'far'];
             
+            // Giảm số lượng particle khi cường độ thấp
+            const particleCountMultiplier = Math.min(1.0, intensityMultiplier);
+            
             switch(type) {
                 case 'chrysanthemum':
-                    createChrysanthemumExplosion(x, y, baseHue, isNear, settings);
+                    createChrysanthemumExplosion(x, y, baseHue, isNear, settings, particleCountMultiplier);
                     break;
                 case 'peony':
-                    createPeonyExplosion(x, y, baseHue, isNear, settings);
+                    createPeonyExplosion(x, y, baseHue, isNear, settings, particleCountMultiplier);
                     break;
                 case 'palm':
-                    createPalmExplosion(x, y, baseHue, isNear, settings);
+                    createPalmExplosion(x, y, baseHue, isNear, settings, particleCountMultiplier);
                     break;
                 case 'willow':
-                    createWillowExplosion(x, y, baseHue, isNear, settings);
+                    createWillowExplosion(x, y, baseHue, isNear, settings, particleCountMultiplier);
                     break;
                 case 'ring':
-                    createRingExplosion(x, y, baseHue, isNear, settings);
+                    createRingExplosion(x, y, baseHue, isNear, settings, particleCountMultiplier);
                     break;
                 case 'crossette':
-                    createCrossetteExplosion(x, y, baseHue, isNear, settings);
+                    createCrossetteExplosion(x, y, baseHue, isNear, settings, particleCountMultiplier);
                     break;
                 default:
-                    createPeonyExplosion(x, y, baseHue, isNear, settings);
+                    createPeonyExplosion(x, y, baseHue, isNear, settings, particleCountMultiplier);
             }
         }
 
-        // 1. CHRYSANTHEMUM - Cúc hoa (tia rõ ràng, đều đặn)
-        function createChrysanthemumExplosion(x, y, baseHue, isNear, settings) {
-            const rays = 25 + Math.floor(Math.random() * 20);
-            const particlesPerRay = 8 + Math.floor(Math.random() * 6);
+        // Các hàm tạo explosion với parameter particleCountMultiplier
+        function createChrysanthemumExplosion(x, y, baseHue, isNear, settings, particleCountMultiplier = 1.0) {
+            const rays = Math.floor((25 + Math.random() * 20) * particleCountMultiplier);
+            const particlesPerRay = Math.floor((8 + Math.random() * 6) * particleCountMultiplier);
             
             for (let i = 0; i < rays; i++) {
                 const angle = (Math.PI * 2 * i) / rays;
@@ -809,7 +921,7 @@
                     const brightness = (isNear ? 65 : 55) + Math.random() * 25;
                     p.color = `hsl(${baseHue + hueShift}, 100%, ${brightness}%)`;
                     
-                    p.size = (0.9 + Math.random() * 0.8) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier;
+                    p.size = (0.9 + Math.random() * 0.8) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * particleCountMultiplier;
                     p.active = true;
                     p.isNear = isNear;
                     p.trail = true;
@@ -822,11 +934,9 @@
             }
         }
 
-        // 2. PEONY - Hoa mẫu đơn (cầu sáng, đối xứng)
-        function createPeonyExplosion(x, y, baseHue, isNear, settings) {
-            const numParticles = (isNear ? 100 : 80) + Math.floor(Math.random() * 60);
+        function createPeonyExplosion(x, y, baseHue, isNear, settings, particleCountMultiplier = 1.0) {
+            const numParticles = Math.floor(((isNear ? 100 : 80) + Math.random() * 60) * particleCountMultiplier);
             
-            // Tầng trong - sáng hơn
             for (let i = 0; i < numParticles * 0.4; i++) {
                 const p = getParticle();
                 if (!p) continue;
@@ -841,7 +951,7 @@
                 p.life = 0;
                 p.maxLife = (isNear ? 70 : 60) + Math.random() * 50;
                 p.color = `hsl(${baseHue}, 100%, ${(isNear ? 75 : 65) + Math.random() * 20}%)`;
-                p.size = (1.2 + Math.random() * 0.8) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier;
+                p.size = (1.2 + Math.random() * 0.8) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * particleCountMultiplier;
                 p.active = true;
                 p.isNear = isNear;
                 p.trail = true;
@@ -851,7 +961,6 @@
                 p.glowSize = p.size * (isNear ? 2.5 : 2.0);
             }
             
-            // Tầng ngoài - rộng hơn
             for (let i = 0; i < numParticles * 0.6; i++) {
                 const p = getParticle();
                 if (!p) continue;
@@ -868,7 +977,7 @@
                 
                 const hueShift = (Math.random() - 0.5) * 60;
                 p.color = `hsl(${baseHue + hueShift}, ${85 + Math.random() * 15}%, ${(isNear ? 65 : 55) + Math.random() * 30}%)`;
-                p.size = (0.8 + Math.random() * 1.0) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier;
+                p.size = (0.8 + Math.random() * 1.0) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * particleCountMultiplier;
                 p.active = true;
                 p.isNear = isNear;
                 p.trail = true;
@@ -879,10 +988,9 @@
             }
         }
 
-        // 3. PALM - Lá cọ (rơi xuống như thác)
-        function createPalmExplosion(x, y, baseHue, isNear, settings) {
-            const numStrands = 20 + Math.floor(Math.random() * 15);
-            const particlesPerStrand = 12 + Math.floor(Math.random() * 8);
+        function createPalmExplosion(x, y, baseHue, isNear, settings, particleCountMultiplier = 1.0) {
+            const numStrands = Math.floor((20 + Math.random() * 15) * particleCountMultiplier);
+            const particlesPerStrand = Math.floor((12 + Math.random() * 8) * particleCountMultiplier);
             
             for (let i = 0; i < numStrands; i++) {
                 const angle = (Math.PI * 2 * i) / numStrands + (Math.random() - 0.5) * 0.3;
@@ -903,7 +1011,7 @@
                     
                     const goldShift = Math.random() * 40 - 20;
                     p.color = `hsl(${45 + goldShift}, 100%, ${(isNear ? 60 : 50) + Math.random() * 30}%)`;
-                    p.size = (0.7 + Math.random() * 0.6) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier;
+                    p.size = (0.7 + Math.random() * 0.6) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * particleCountMultiplier;
                     p.active = true;
                     p.isNear = isNear;
                     p.trail = true;
@@ -915,10 +1023,9 @@
             }
         }
 
-        // 4. WILLOW - Cành liễu (rơi chậm, mềm mại)
-        function createWillowExplosion(x, y, baseHue, isNear, settings) {
-            const numBranches = 18 + Math.floor(Math.random() * 12);
-            const particlesPerBranch = 15 + Math.floor(Math.random() * 10);
+        function createWillowExplosion(x, y, baseHue, isNear, settings, particleCountMultiplier = 1.0) {
+            const numBranches = Math.floor((18 + Math.random() * 12) * particleCountMultiplier);
+            const particlesPerBranch = Math.floor((15 + Math.random() * 10) * particleCountMultiplier);
             
             for (let i = 0; i < numBranches; i++) {
                 const angle = (Math.PI * 2 * i) / numBranches;
@@ -939,7 +1046,7 @@
                     p.maxLife = (isNear ? 100 : 90) + Math.random() * 70;
                     
                     p.color = `hsl(${baseHue + (Math.random() - 0.5) * 40}, 90%, ${(isNear ? 55 : 45) + Math.random() * 25}%)`;
-                    p.size = (0.6 + Math.random() * 0.5) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier;
+                    p.size = (0.6 + Math.random() * 0.5) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * particleCountMultiplier;
                     p.active = true;
                     p.isNear = isNear;
                     p.trail = true;
@@ -952,12 +1059,11 @@
             }
         }
 
-        // 5. RING - Vòng tròn mở rộng
-        function createRingExplosion(x, y, baseHue, isNear, settings) {
+        function createRingExplosion(x, y, baseHue, isNear, settings, particleCountMultiplier = 1.0) {
             const numRings = 2 + Math.floor(Math.random() * 2);
             
             for (let ring = 0; ring < numRings; ring++) {
-                const particlesInRing = 60 + Math.floor(Math.random() * 40);
+                const particlesInRing = Math.floor((60 + Math.random() * 40) * particleCountMultiplier);
                 const ringDelay = ring * 100;
                 const ringSpeed = (5 + ring * 1.5 + Math.random() * 2) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier;
                 
@@ -979,7 +1085,7 @@
                         
                         const hueShift = ring * 60 + (Math.random() - 0.5) * 20;
                         p.color = `hsl(${baseHue + hueShift}, 100%, ${(isNear ? 70 : 60) + Math.random() * 20}%)`;
-                        p.size = (0.9 + Math.random() * 0.6) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier;
+                        p.size = (0.9 + Math.random() * 0.6) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * particleCountMultiplier;
                         p.active = true;
                         p.isNear = isNear;
                         p.trail = true;
@@ -992,9 +1098,8 @@
             }
         }
 
-        // 6. CROSSETTE - Tách đôi trong không trung
-        function createCrossetteExplosion(x, y, baseHue, isNear, settings) {
-            const numInitialBursts = 8 + Math.floor(Math.random() * 6);
+        function createCrossetteExplosion(x, y, baseHue, isNear, settings, particleCountMultiplier = 1.0) {
+            const numInitialBursts = Math.floor((8 + Math.random() * 6) * particleCountMultiplier);
             
             for (let i = 0; i < numInitialBursts; i++) {
                 const p = getParticle();
@@ -1010,7 +1115,7 @@
                 p.life = 0;
                 p.maxLife = (isNear ? 80 : 70) + Math.random() * 50;
                 p.color = `hsl(${baseHue}, 100%, ${(isNear ? 70 : 60) + Math.random() * 20}%)`;
-                p.size = (1.1 + Math.random() * 0.7) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier;
+                p.size = (1.1 + Math.random() * 0.7) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * particleCountMultiplier;
                 p.active = true;
                 p.isNear = isNear;
                 p.trail = true;
@@ -1027,7 +1132,9 @@
         }
 
         // Mini explosion cho crossette
-        function createMiniExplosion(x, y, baseHue, isNear, numParticles = 8) {
+        function createMiniExplosion(x, y, baseHue, isNear, numParticles = 8, particleCountMultiplier = 1.0) {
+            numParticles = Math.floor(numParticles * particleCountMultiplier);
+            
             for (let i = 0; i < numParticles; i++) {
                 const p = getParticle();
                 if (!p) continue;
@@ -1042,7 +1149,7 @@
                 p.life = 0;
                 p.maxLife = 30 + Math.random() * 20;
                 p.color = `hsl(${baseHue + (Math.random() - 0.5) * 60}, 100%, ${60 + Math.random() * 30}%)`;
-                p.size = 0.5 * FIREWORK_CONFIG.particleSizeMultiplier;
+                p.size = 0.5 * FIREWORK_CONFIG.particleSizeMultiplier * particleCountMultiplier;
                 p.active = true;
                 p.isNear = isNear;
                 p.sparkle = true;
@@ -1058,7 +1165,7 @@
             // Xử lý crossette
             if (p.isCrossette && !p.hasExploded && p.life > p.crossetteTimer) {
                 p.hasExploded = true;
-                createMiniExplosion(p.x, p.y, p.baseHue, p.isNear, 8);
+                createMiniExplosion(p.x, p.y, p.baseHue, p.isNear, 8, performanceMonitor.currentIntensity);
             }
             
             // Hiệu ứng sparkle/glitter
@@ -1106,7 +1213,7 @@
             ctx.shadowColor = 'transparent';
         }
 
-        // CẬP NHẬT HÀM ANIMATE ĐỂ SỬ DỤNG RENDER MỚI
+        // HÀM ANIMATE CHÍNH VỚI HỆ THỐNG ĐIỀU CHỈNH
         function animate(time) {
             if (!isRunning) return;
             requestAnimationFrame(animate);
@@ -1114,17 +1221,33 @@
             const delta = lastTime === 0 ? 1 : Math.min((time - lastTime) / (1000 / FIREWORK_CONFIG.targetFPS), 2);
             lastTime = time;
 
+            const activeParticles = countActiveParticles();
+            
+            // Cập nhật hệ thống điều chỉnh
+            updatePerformanceMonitor(delta, activeParticles);
+            
+            // Phát âm thanh với điều chỉnh theo cường độ
             if (time > nextSoundTime) {
                 const isNear = Math.random() < FIREWORK_CONFIG.distanceDistribution.near;
                 playBassSound(isNear);
             }
 
-            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            // Xóa màn hình với độ trong suốt thay đổi
+            const clearAlpha = performanceMonitor.fps < 45 ? 0.15 : 0.1;
+            ctx.fillStyle = `rgba(0,0,0,${clearAlpha})`;
             ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
+            // Render particles với tối ưu hóa
             ctx.save();
+            let renderedCount = 0;
+            const maxRenderPerFrame = performanceMonitor.fps < 40 ? 800 : 1200;
+            
             for (let p of particles) {
                 if (!p.active) continue;
+                
+                // Giới hạn số lượng particle render mỗi frame nếu FPS thấp
+                if (renderedCount > maxRenderPerFrame) break;
+                renderedCount++;
 
                 // Áp dụng vận tốc
                 p.x += p.vx * delta;
@@ -1151,18 +1274,16 @@
             }
             ctx.restore();
 
+            // Tạo pháo mới với điều chỉnh tự động
             if (time > nextExplosionTime) {
-                const intensity = Math.min(1 + (time - startTime) / 20000, FIREWORK_CONFIG.maxIntensity);
-                const minInt = FIREWORK_CONFIG.explosionIntervalMin / intensity;
-                const maxInt = FIREWORK_CONFIG.explosionIntervalMax / intensity;
+                // Tính toán khoảng cách dựa trên performance
+                const interval = getAdjustedExplosionInterval();
                 
-                const activeCount = countActiveParticles();
-                const activeFactor = Math.max(1, activeCount / (FIREWORK_CONFIG.maxActiveParticles * 0.6));
-                const adjustedMinInt = minInt * activeFactor;
-                const adjustedMaxInt = maxInt * activeFactor;
-                
+                // Tạo rocket mới
                 createRocket();
-                nextExplosionTime = time + Math.random() * (adjustedMaxInt - adjustedMinInt) + adjustedMinInt;
+                
+                // Lên lịch cho lần tiếp theo
+                nextExplosionTime = time + interval;
             }
         }
 
@@ -1196,13 +1317,15 @@
                     }
 
                     setTimeout(() => {
-                        playPowerBass();
+                        playPowerBass(1.2);
                     }, 500);
 
                     isRunning = true;
                     startTime = performance.now();
                     lastTime = startTime;
-                    nextExplosionTime = startTime + 500;
+                    
+                    // Sử dụng hệ thống điều chỉnh để thiết lập thời gian đầu
+                    nextExplosionTime = startTime + getAdjustedExplosionInterval() * 0.7;
                     nextSoundTime = startTime + 1200;
 
                     requestAnimationFrame(animate);
@@ -1213,7 +1336,7 @@
                     btn.classList.remove('clicked');
                     btn.style.visibility = 'visible';
                 }
-            }, 800); // Thời gian bằng với thời gian animation
+            }, 800);
         }
 
         // ====================== EVENT LISTENERS ======================
@@ -1256,4 +1379,3 @@
     </script>
 </body>
 </html>
-
