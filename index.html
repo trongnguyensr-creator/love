@@ -25,120 +25,111 @@
             display: none;
         }
         #startBtn {
-            position: relative;
-            z-index: 10;
-            padding: 22px 56px;
-            font-size: 32px;
-            font-weight: bold;
-            color: rgba(255, 255, 255, 0.95);
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.15), 
-                rgba(255, 255, 255, 0.05));
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            cursor: pointer;
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            box-shadow: 
-                0 10px 35px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2),
-                inset 0 -1px 0 rgba(0, 0, 0, 0.3);
-            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            letter-spacing: 1px;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-            transform: translateY(0);
-            animation: float 3s ease-in-out infinite;
-            overflow: hidden;
-        }
-        
-        #startBtn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.2), 
-                rgba(255, 255, 255, 0.1));
-            border-radius: 20px;
-            z-index: -1;
-        }
-        
-        #startBtn::after {
-            content: '';
-            position: absolute;
-            top: 1px;
-            left: 1px;
-            right: 1px;
-            bottom: 1px;
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.1), 
-                rgba(255, 255, 255, 0.05));
-            border-radius: 19px;
-            z-index: -1;
-        }
-        
-        #startBtn:active {
-            transform: scale(0.85) translateY(5px);
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.1), 
-                rgba(255, 255, 255, 0.02));
-            box-shadow: 
-                0 5px 15px rgba(0, 0, 0, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
-            opacity: 0.7;
-            transition: all 0.2s ease-out;
-        }
-        
-        #startBtn.clicked {
-            animation: fadeInOut 0.8s ease-out forwards;
-        }
-        
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0px);
-                box-shadow: 
-                    0 10px 35px rgba(0, 0, 0, 0.3),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-                    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
-            }
-            50% {
-                transform: translateY(-10px);
-                box-shadow: 
-                    0 15px 40px rgba(0, 0, 0, 0.4),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.25),
-                    inset 0 -1px 0 rgba(0, 0, 0, 0.35);
-            }
-        }
-        
-        @keyframes fadeInOut {
-            0% {
-                transform: scale(1) translateY(0);
-                opacity: 1;
-            }
-            30% {
-                transform: scale(1.1) translateY(-20px);
-                opacity: 0.8;
-            }
-            100% {
-                transform: scale(0) translateY(100px);
-                opacity: 0;
-                visibility: hidden;
-            }
-        }
-        
-        .btn-text {
-            position: relative;
-            z-index: 1;
-            background: linear-gradient(45deg, 
-                rgba(255, 255, 255, 0.95), 
-                rgba(255, 255, 255, 0.8));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+    position: relative;
+    z-index: 10;
+    padding: 20px 54px;
+    font-size: 30px;
+    font-weight: 700;
+    color: #111; /* chữ đen */
+    background: linear-gradient(
+        135deg,
+        #ffffff,
+        #f3f3f3
+    );
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 28px; /* bo tròn đẹp hơn */
+    cursor: pointer;
+
+    box-shadow:
+        0 10px 25px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+    transition:
+        transform 0.35s cubic-bezier(.22,1,.36,1),
+        box-shadow 0.35s ease,
+        background 0.35s ease;
+
+    letter-spacing: 0.5px;
+    animation: floatSoft 4s ease-in-out infinite;
+    overflow: hidden;
+}
+
+/* ánh sáng chạy ngang khi hover / tap */
+#startBtn::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 120%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255,255,255,0.7),
+        transparent
+    );
+    transition: left 0.6s ease;
+}
+
+#startBtn:hover::after {
+    left: 120%;
+}
+
+/* hiệu ứng hover */
+#startBtn:hover {
+    transform: translateY(-6px);
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+/* hiệu ứng nhấn */
+#startBtn:active {
+    transform: scale(0.92);
+    box-shadow:
+        0 6px 15px rgba(0, 0, 0, 0.15);
+    transition: transform 0.15s ease;
+}
+
+/* sau khi click (biến mất mượt) */
+#startBtn.clicked {
+    animation: fadeOutSmooth 0.9s cubic-bezier(.4,0,.2,1) forwards;
+}
+
+/* chữ */
+.btn-text {
+    position: relative;
+    z-index: 1;
+    color: #111;
+}
+
+/* ===== ANIMATION ===== */
+
+@keyframes floatSoft {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+@keyframes fadeOutSmooth {
+    0% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    40% {
+        opacity: 0.8;
+        transform: scale(1.05) translateY(-16px);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.7) translateY(60px);
+        visibility: hidden;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -1265,3 +1256,4 @@
     </script>
 </body>
 </html>
+
