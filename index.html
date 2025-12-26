@@ -17,7 +17,6 @@
             width: 100vw;
             font-family: system-ui, sans-serif;
             color: #fff;
-            -webkit-tap-highlight-color: transparent;
         }
         #canvas {
             position: absolute;
@@ -38,42 +37,11 @@
             cursor: pointer;
             box-shadow: 0 8px 32px rgba(102,126,234,0.4);
             transition: all 0.2s ease;
-            touch-action: manipulation;
         }
         #startBtn:active {
             transform: scale(0.92);
             box-shadow: 0 4px 16px rgba(102,126,234,0.3);
         }
-        
-        #fullscreenBtn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 100;
-            background: rgba(0, 0, 0, 0.5);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-            transition: all 0.3s ease;
-        }
-        
-        #fullscreenBtn:hover {
-            background: rgba(0, 0, 0, 0.7);
-            border-color: rgba(255, 255, 255, 0.8);
-        }
-        
-        #fullscreenBtn:active {
-            transform: scale(0.95);
-        }
-        
         #orientationWarning {
             position: fixed;
             top: 0;
@@ -113,23 +81,6 @@
             50% { transform: rotate(90deg); }
             75% { transform: rotate(90deg); }
         }
-        
-        /* Hiệu ứng chuyển tiếp fullscreen */
-        :fullscreen {
-            background: #000;
-        }
-        
-        :-webkit-full-screen {
-            background: #000;
-        }
-        
-        :-moz-full-screen {
-            background: #000;
-        }
-        
-        :-ms-fullscreen {
-            background: #000;
-        }
     </style>
 </head>
 <body>
@@ -141,7 +92,6 @@
     </div>
     
     <button id="startBtn">BẮT ĐẦU</button>
-    <button id="fullscreenBtn" title="Chế độ toàn màn hình">⛶</button>
     <canvas id="canvas"></canvas>
 
     <script>
@@ -193,136 +143,7 @@
         let isMusicPlaying = false;
         let isPortrait = false;
         let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        let isFullscreen = false;
 
-        // ====================== FULLSCREEN API ======================
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
-        
-        function toggleFullscreen() {
-            if (!document.fullscreenElement && !document.webkitFullscreenElement && 
-                !document.mozFullScreenElement && !document.msFullscreenElement) {
-                // Vào chế độ fullscreen
-                if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen();
-                } else if (document.documentElement.webkitRequestFullscreen) {
-                    document.documentElement.webkitRequestFullscreen();
-                } else if (document.documentElement.mozRequestFullScreen) {
-                    document.documentElement.mozRequestFullScreen();
-                } else if (document.documentElement.msRequestFullscreen) {
-                    document.documentElement.msRequestFullscreen();
-                }
-                isFullscreen = true;
-            } else {
-                // Thoát chế độ fullscreen
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-                isFullscreen = false;
-            }
-        }
-        
-        function updateFullscreenButton() {
-            const isFullscreenMode = !!(document.fullscreenElement || document.webkitFullscreenElement || 
-                                        document.mozFullScreenElement || document.msFullscreenElement);
-            
-            if (isFullscreenMode) {
-                fullscreenBtn.innerHTML = "🗗"; // Icon exit fullscreen
-                fullscreenBtn.title = "Thoát chế độ toàn màn hình";
-            } else {
-                fullscreenBtn.innerHTML = "⛶"; // Icon enter fullscreen
-                fullscreenBtn.title = "Chế độ toàn màn hình";
-            }
-        }
-        
-        function handleFullscreenChange() {
-            updateFullscreenButton();
-            // Điều chỉnh lại kích thước canvas khi thay đổi fullscreen
-            if (isRunning) {
-                setTimeout(() => {
-                    initCanvas();
-                }, 100);
-            }
-        }
-        
-        // ====================== MEDIA SESSION API ======================
-        function initMediaSession() {
-            if ('mediaSession' in navigator) {
-                // Thiết lập metadata
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: 'Màn Trình Diễn Pháo Hoa',
-                    artist: 'Pháo Hoa Việt Nam',
-                    album: 'Chương Trình Đặc Biệt',
-                    artwork: [
-                        { src: 'https://via.placeholder.com/96x96', sizes: '96x96', type: 'image/png' },
-                        { src: 'https://via.placeholder.com/128x128', sizes: '128x128', type: 'image/png' },
-                        { src: 'https://via.placeholder.com/192x192', sizes: '192x192', type: 'image/png' },
-                        { src: 'https://via.placeholder.com/256x256', sizes: '256x256', type: 'image/png' },
-                        { src: 'https://via.placeholder.com/384x384', sizes: '384x384', type: 'image/png' },
-                        { src: 'https://via.placeholder.com/512x512', sizes: '512x512', type: 'image/png' }
-                    ]
-                });
-                
-                // Thiết lập action handlers
-                navigator.mediaSession.setActionHandler('play', () => {
-                    if (backgroundMusic && !isMusicPlaying) {
-                        playBackgroundMusic();
-                        isMusicPlaying = true;
-                        updatePlaybackState();
-                    }
-                });
-                
-                navigator.mediaSession.setActionHandler('pause', () => {
-                    if (backgroundMusic && isMusicPlaying) {
-                        backgroundMusic.pause();
-                        isMusicPlaying = false;
-                        updatePlaybackState();
-                    }
-                });
-                
-                navigator.mediaSession.setActionHandler('stop', () => {
-                    if (backgroundMusic) {
-                        backgroundMusic.pause();
-                        backgroundMusic.currentTime = 0;
-                        isMusicPlaying = false;
-                        updatePlaybackState();
-                    }
-                });
-                
-                // Tạm thời vô hiệu hóa seekforward/seekbackward nếu không cần thiết
-                try {
-                    navigator.mediaSession.setActionHandler('seekforward', null);
-                    navigator.mediaSession.setActionHandler('seekbackward', null);
-                    navigator.mediaSession.setActionHandler('seekto', null);
-                } catch (error) {
-                    console.log('Media Session actions không được hỗ trợ');
-                }
-                
-                updatePlaybackState();
-            }
-        }
-        
-        function updatePlaybackState() {
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.playbackState = isMusicPlaying ? 'playing' : 'paused';
-            }
-        }
-        
-        function updateMediaPosition() {
-            if ('mediaSession' in navigator && backgroundMusic) {
-                navigator.mediaSession.setPositionState({
-                    duration: backgroundMusic.duration || 0,
-                    playbackRate: backgroundMusic.playbackRate || 1,
-                    position: backgroundMusic.currentTime || 0
-                });
-            }
-        }
-        
         // ====================== KIỂM TRA HƯỚNG MÀN HÌNH ======================
         function checkOrientation() {
             const orientationWarning = document.getElementById('orientationWarning');
@@ -340,15 +161,10 @@
             if (isPortraitMode) {
                 orientationWarning.style.display = 'flex';
                 startBtn.style.display = 'none';
-                fullscreenBtn.style.display = 'none';
             } else {
                 orientationWarning.style.display = 'none';
                 if (!isRunning) {
                     startBtn.style.display = 'block';
-                }
-                // Hiển thị nút fullscreen nếu đang chạy
-                if (isRunning) {
-                    fullscreenBtn.style.display = 'flex';
                 }
             }
         }
@@ -363,25 +179,8 @@
                     backgroundMusic.volume = 0.7;
                     backgroundMusic.preload = 'auto';
                     
-                    // Thêm event listeners cho Media Session
-                    backgroundMusic.addEventListener('play', () => {
-                        isMusicPlaying = true;
-                        updatePlaybackState();
-                    });
-                    
-                    backgroundMusic.addEventListener('pause', () => {
-                        isMusicPlaying = false;
-                        updatePlaybackState();
-                    });
-                    
-                    backgroundMusic.addEventListener('timeupdate', () => {
-                        updateMediaPosition();
-                    });
-                    
                     backgroundMusic.addEventListener('loadeddata', () => {
                         isMusicLoaded = true;
-                        // Khởi tạo Media Session khi nhạc đã load
-                        initMediaSession();
                         resolve(true);
                     });
                     
@@ -448,7 +247,6 @@
             if (backgroundMusic && isMusicPlaying) {
                 backgroundMusic.pause();
                 isMusicPlaying = false;
-                updatePlaybackState();
             }
         }
 
@@ -773,21 +571,10 @@
             canvas = document.getElementById('canvas');
             ctx = canvas.getContext('2d');
             const dpr = Math.min(window.devicePixelRatio || 1, 1.2);
-            
-            // Lấy kích thước thực tế của màn hình
-            let width, height;
-            if (isFullscreen || document.fullscreenElement) {
-                width = screen.width;
-                height = screen.height;
-            } else {
-                width = window.innerWidth;
-                height = window.innerHeight;
-            }
-            
-            canvas.width = width * dpr;
-            canvas.height = height * dpr;
-            canvas.style.width = `${width}px`;
-            canvas.style.height = `${height}px`;
+            canvas.width = window.innerWidth * dpr;
+            canvas.height = window.innerHeight * dpr;
+            canvas.style.width = `${window.innerWidth}px`;
+            canvas.style.height = `${window.innerHeight}px`;
             ctx.scale(dpr, dpr);
             canvas.style.display = 'block';
         }
@@ -804,11 +591,8 @@
             const activeCount = countActiveParticles();
             if (activeCount > FIREWORK_CONFIG.maxActiveParticles) return;
 
-            const width = canvas.width / (window.devicePixelRatio || 1);
-            const height = canvas.height / (window.devicePixelRatio || 1);
-            
-            const x = Math.random() * width;
-            const yStart = height;
+            const x = Math.random() * window.innerWidth;
+            const yStart = window.innerHeight;
             const hue = Math.random() * 360;
 
             const p = getParticle();
@@ -828,7 +612,7 @@
 
             setTimeout(() => {
                 if (!isRunning) return;
-                const yExplode = height * (0.15 + Math.random() * 0.45);
+                const yExplode = window.innerHeight * (0.15 + Math.random() * 0.45);
                 createExplosion(x, yExplode, hue);
                 
                 if (Math.random() > 0.7) {
@@ -906,12 +690,8 @@
                 playBassSound();
             }
 
-            // Lấy kích thước thực tế
-            const width = canvas.width / (window.devicePixelRatio || 1);
-            const height = canvas.height / (window.devicePixelRatio || 1);
-            
             ctx.fillStyle = 'rgba(0,0,0,0.08)';
-            ctx.fillRect(0, 0, width, height);
+            ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
             ctx.save();
             for (let p of particles) {
@@ -1003,10 +783,6 @@
                 initCanvas();
                 createParticlePool();
 
-                // Hiển thị nút fullscreen
-                fullscreenBtn.style.display = 'flex';
-                updateFullscreenButton();
-
                 if (masterGain) {
                     masterGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
                     masterGain.gain.exponentialRampToValueAtTime(SOUND_CONFIG.masterVolume, audioCtx.currentTime + 2.5);
@@ -1040,36 +816,9 @@
         
         btn.addEventListener('pointerdown', start);
         
-        fullscreenBtn.addEventListener('click', toggleFullscreen);
-        
-        // Fullscreen event listeners
-        document.addEventListener('fullscreenchange', handleFullscreenChange);
-        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-        document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-        document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-        
-        // Kiểm tra nút ESC để thoát fullscreen
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && isFullscreen) {
-                isFullscreen = false;
-                updateFullscreenButton();
-            }
-        });
-        
         window.addEventListener('resize', () => {
             checkOrientation();
-            if (isRunning) {
-                // Điều chỉnh kích thước canvas khi resize
-                const width = isFullscreen ? screen.width : window.innerWidth;
-                const height = isFullscreen ? screen.height : window.innerHeight;
-                const dpr = Math.min(window.devicePixelRatio || 1, 1.2);
-                
-                canvas.width = width * dpr;
-                canvas.height = height * dpr;
-                canvas.style.width = `${width}px`;
-                canvas.style.height = `${height}px`;
-                ctx.scale(dpr, dpr);
-            }
+            if (isRunning) initCanvas();
         });
         
         window.addEventListener('orientationchange', () => {
@@ -1103,26 +852,6 @@
         
         window.addEventListener('beforeunload', () => {
             pauseBackgroundMusic();
-        });
-        
-        // Hỗ trợ phím tắt media trên bàn phím
-        document.addEventListener('keydown', (e) => {
-            if (e.key === ' ' || e.key === 'Spacebar') {
-                e.preventDefault();
-                if (backgroundMusic) {
-                    if (isMusicPlaying) {
-                        backgroundMusic.pause();
-                    } else {
-                        backgroundMusic.play();
-                    }
-                }
-            }
-            
-            // Phím F cho fullscreen
-            if (e.key === 'f' || e.key === 'F') {
-                e.preventDefault();
-                toggleFullscreen();
-            }
         });
     </script>
 </body>
