@@ -59,475 +59,251 @@
         }
         #orientationWarning h2 {
             color: #ffcc00;
-            font-size: 28px;
+            font-size: 24px;
             margin-bottom: 20px;
             text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
         }
         #orientationWarning p {
             color: #fff;
-            font-size: 18px;
+            font-size: 16px;
             margin-bottom: 30px;
-            max-width: 80%;
+            max-width: 90%;
             line-height: 1.5;
         }
-        .phone-icon {
-            font-size: 60px;
-            margin: 20px;
-            animation: rotatePhone 2s infinite ease-in-out;
+        #openInBrowser {
+            margin-top: 20px;
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            transition: all 0.2s ease;
         }
-        @keyframes rotatePhone {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(90deg); }
-            50% { transform: rotate(90deg); }
-            75% { transform: rotate(90deg); }
+        #openInBrowser:active {
+            transform: scale(0.95);
+        }
+        .phone-icon {
+            font-size: 50px;
+            margin: 20px;
+        }
+        .browser-icons {
+            font-size: 40px;
+            margin: 15px 0;
         }
     </style>
 </head>
 <body>
     <div id="orientationWarning">
-        <h2>📱 VUI LÒNG XOAY NGANG ĐIỆN THOẠI 📱</h2>
-        <p>Để có trải nghiệm xem pháo hoa tốt nhất, vui lòng xoay ngang điện thoại của bạn.</p>
-        <div class="phone-icon">📱</div>
-        <p style="color: #ffcc00; font-size: 16px;">Màn hình sẽ tự động hiển thị khi điện thoại đã xoay ngang</p>
+        <h2>📱 TRẢI NGHIỆM TỐT NHẤT TRÊN TRÌNH DUYỆT 📱</h2>
+        <p>Trình duyệt trong Zalo không hỗ trợ xoay ngang và có thể bị giới hạn âm thanh.</p>
+        
+        <div class="phone-icon">🎆✨</div>
+        
+        <p>Để có trải nghiệm pháo hoa tuyệt vời nhất:</p>
+        
+        <div class="browser-icons">
+            <span title="Chrome">🌐</span>
+            <span title="Safari">🧭</span>
+            <span title="Firefox">🦊</span>
+        </div>
+        
+        <p style="color: #ffcc00; font-size: 14px;">
+            <strong>Khuyến nghị:</strong> Mở link này trong trình duyệt mặc định của điện thoại
+        </p>
+        
+        <button id="openInBrowser">MỞ TRONG TRÌNH DUYỆT</button>
+        
+        <p style="color: #aaa; font-size: 12px; margin-top: 20px;">
+            Hoặc tiếp tục trong Zalo (có thể bị giới hạn)
+        </p>
     </div>
     
     <button id="startBtn">BẮT ĐẦU</button>
     <canvas id="canvas"></canvas>
 
     <script>
-        // CẤU HÌNH ÂM THANH (CHỈ TRẦM)
-        const SOUND_CONFIG = {
-            masterVolume: 1.3,
-            baseInterval: 1600,
-            intervalVariation: 1000,
-            fadeInTime: 0.2,
-            fadeOutTime: 1.2,
-            frequencyBlend: {
-                min: 30,
-                max: 80,
-                glideTime: 0.6
-            },
-            layers: {
-                sub: { weight: 1.0, freqRange: [30, 70] },
-                deep: { weight: 0.7, freqRange: [20, 45] },
-                rumble: { weight: 0.4, freqRange: [100, 300] }
-            }
-        };
-
-        // CẤU HÌNH PHÁO HOA - ĐIỀU CHỈNH CHO ĐIỆN THOẠI
+        // CẤU HÌNH PHÁO HOA - TỐI ƯU CHO MOBILE/IN-APP BROWSERS
         const FIREWORK_CONFIG = {
-            maxParticlesPerExplosion: 80,
-            maxIntensity: 2.5,
-            explosionIntervalMin: 1500,
-            explosionIntervalMax: 2500,
-            targetFPS: 60,
-            maxActiveParticles: 1200,
-            particleSizeMultiplier: 0.7,
-            rocketSpeedMultiplier: 0.8,
-            explosionSpeedMultiplier: 0.7
+            maxParticlesPerExplosion: 60,           // GIẢM nhiều hơn cho in-app browsers
+            maxIntensity: 2.0,                      // GIẢM cường độ
+            explosionIntervalMin: 1800,             // TĂNG khoảng cách hơn nữa
+            explosionIntervalMax: 3000,
+            targetFPS: 45,                          // GIẢM FPS cho hiệu suất
+            maxActiveParticles: 800,                // GIẢM nhiều particle hơn
+            particleSizeMultiplier: 0.6,            // GIẢM kích thước nhiều hơn
+            rocketSpeedMultiplier: 0.7,
+            explosionSpeedMultiplier: 0.6
         };
 
         // ĐƯỜNG DẪN FILE NHẠC
         const MUSIC_FILE = 'phaobong.mp3';
 
-        let canvas, ctx, audioCtx, masterGain, backgroundMusic;
+        let canvas, ctx, backgroundMusic;
         let particles = [];
-        let particlePoolSize = FIREWORK_CONFIG.maxParticlesPerExplosion * 25;
+        let particlePoolSize = FIREWORK_CONFIG.maxParticlesPerExplosion * 20;
         let lastTime = 0, startTime = 0;
         let isRunning = false;
         let nextExplosionTime = 0;
-        let nextSoundTime = 0;
-        let soundSequence = 0;
-        let activeSounds = new Set();
         let isMusicLoaded = false;
         let isMusicPlaying = false;
-        let isPortrait = false;
-        let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        let isInZaloBrowser = false;
 
-        // ====================== KIỂM TRA HƯỚNG MÀN HÌNH ======================
-        function checkOrientation() {
-            const orientationWarning = document.getElementById('orientationWarning');
-            const startBtn = document.getElementById('startBtn');
+        // ====================== PHÁT HIỆN ZALO/IN-APP BROWSER ======================
+        function detectInAppBrowser() {
+            const userAgent = navigator.userAgent.toLowerCase();
             
-            if (!isMobile) {
-                orientationWarning.style.display = 'none';
-                isPortrait = false;
-                return;
-            }
+            // Kiểm tra các in-app browsers phổ biến
+            const isInAppBrowser = 
+                userAgent.includes('zalo') ||
+                userAgent.includes('fbios') ||
+                userAgent.includes('fban') ||
+                userAgent.includes('fbav') ||
+                userAgent.includes('messenger') ||
+                userAgent.includes('line') ||
+                userAgent.includes('twitter') ||
+                userAgent.includes('whatsapp') ||
+                (window.MessengerExtensions !== undefined) ||
+                (window.FB !== undefined && window.FB.__externalCallbacks) ||
+                (document.referrer && document.referrer.includes('zalo'));
             
-            const isPortraitMode = window.innerHeight > window.innerWidth;
-            isPortrait = isPortraitMode;
+            isInZaloBrowser = isInAppBrowser;
             
-            if (isPortraitMode) {
-                orientationWarning.style.display = 'flex';
+            // Nếu là in-app browser, hiển thị cảnh báo
+            if (isInAppBrowser) {
+                const warning = document.getElementById('orientationWarning');
+                const startBtn = document.getElementById('startBtn');
+                
+                warning.style.display = 'flex';
                 startBtn.style.display = 'none';
-            } else {
-                orientationWarning.style.display = 'none';
-                if (!isRunning) {
-                    startBtn.style.display = 'block';
-                }
+                
+                return true;
             }
+            
+            return false;
         }
 
-        // ====================== HỆ THỐNG NHẠC NỀN ======================
+        // ====================== MỞ TRONG TRÌNH DUYỆT ======================
+        function setupOpenInBrowser() {
+            const openBtn = document.getElementById('openInBrowser');
+            const startBtn = document.getElementById('startBtn');
+            const warning = document.getElementById('orientationWarning');
+            
+            openBtn.addEventListener('click', function() {
+                // Lấy URL hiện tại
+                const currentUrl = window.location.href;
+                
+                // Tạo URL để mở trong trình duyệt
+                const browserUrl = currentUrl;
+                
+                // Thử mở trong trình duyệt
+                try {
+                    // Phương pháp 1: window.open (có thể bị chặn)
+                    window.open(browserUrl, '_system');
+                    
+                    // Phương pháp 2: Chuyển hướng sau 1 giây nếu không thành công
+                    setTimeout(() => {
+                        window.location.href = browserUrl;
+                    }, 1000);
+                    
+                } catch (e) {
+                    // Phương pháp 3: Fallback đơn giản
+                    window.location.href = browserUrl;
+                }
+            });
+            
+            // Nút bắt đầu trong cảnh báo (cho những người muốn tiếp tục trong app)
+            const continueInApp = document.createElement('button');
+            continueInApp.textContent = 'TIẾP TỤC TRONG ỨNG DỤNG';
+            continueInApp.style.cssText = `
+                margin-top: 10px;
+                padding: 10px 20px;
+                font-size: 14px;
+                color: #aaa;
+                background: transparent;
+                border: 1px solid #555;
+                border-radius: 20px;
+                cursor: pointer;
+            `;
+            
+            continueInApp.addEventListener('click', function() {
+                warning.style.display = 'none';
+                startBtn.style.display = 'block';
+            });
+            
+            warning.appendChild(continueInApp);
+        }
+
+        // ====================== HỆ THỐNG NHẠC NỀN (TƯƠNG THÍCH TỐT HƠN) ======================
         function initBackgroundMusic() {
             return new Promise((resolve, reject) => {
                 try {
+                    // Kiểm tra xem trình duyệt có hỗ trợ audio không
+                    if (typeof Audio === 'undefined') {
+                        console.warn("Trình duyệt không hỗ trợ Audio API");
+                        resolve(false); // Không reject, chỉ không dùng nhạc
+                        return;
+                    }
+                    
                     backgroundMusic = new Audio();
                     backgroundMusic.src = MUSIC_FILE;
                     backgroundMusic.loop = true;
-                    backgroundMusic.volume = 0.7;
+                    backgroundMusic.volume = 0.5; // Âm lượng thấp hơn cho in-app browsers
                     backgroundMusic.preload = 'auto';
+                    
+                    // Giảm yêu cầu user interaction cho in-app browsers
+                    backgroundMusic.autoplay = false;
                     
                     backgroundMusic.addEventListener('loadeddata', () => {
                         isMusicLoaded = true;
+                        console.log("✅ Nhạc đã tải xong");
                         resolve(true);
                     });
                     
                     backgroundMusic.addEventListener('error', (e) => {
-                        console.error("❌ Lỗi tải nhạc:", e);
-                        reject(new Error("Không thể tải nhạc nền"));
+                        console.warn("⚠️ Không thể tải nhạc, tiếp tục không nhạc");
+                        resolve(false); // Không reject, tiếp tục không nhạc
                     });
                     
-                    backgroundMusic.load();
+                    // Thử tải nhạc
+                    backgroundMusic.load().catch(() => {
+                        resolve(false); // Tiếp tục không nhạc nếu lỗi
+                    });
                     
                 } catch (e) {
-                    console.error("❌ Lỗi khởi tạo nhạc:", e);
-                    reject(e);
+                    console.warn("⚠️ Lỗi khởi tạo nhạc:", e);
+                    resolve(false); // Tiếp tục không nhạc
                 }
             });
         }
 
         function playBackgroundMusic() {
-            if (!backgroundMusic || !isMusicLoaded) {
-                return false;
+            if (!backgroundMusic || !isMusicLoaded || isInZaloBrowser) {
+                return false; // Không phát nhạc trong Zalo để tránh lỗi
             }
             
             try {
-                backgroundMusic.volume = 0;
+                // Trong in-app browsers, cần user interaction trực tiếp
                 const playPromise = backgroundMusic.play();
                 
                 if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        fadeMusicVolume(0, 0.7, 1.5);
-                    }).catch(error => {
-                        console.error("❌ Lỗi phát nhạc:", error);
+                    playPromise.catch(error => {
+                        console.warn("⚠️ Không thể tự động phát nhạc:", error);
+                        // Không báo lỗi, chỉ không phát nhạc
                     });
                 }
                 
                 return true;
             } catch (e) {
-                console.error("❌ Lỗi khi phát nhạc:", e);
+                console.warn("⚠️ Lỗi phát nhạc:", e);
                 return false;
             }
         }
 
-        function fadeMusicVolume(from, to, duration) {
-            if (!backgroundMusic) return;
-            
-            const startTime = Date.now();
-            const endTime = startTime + duration * 1000;
-            
-            function updateVolume() {
-                const now = Date.now();
-                const progress = Math.min((now - startTime) / (duration * 1000), 1);
-                const currentVolume = from + (to - from) * progress;
-                
-                backgroundMusic.volume = Math.max(0, Math.min(1, currentVolume));
-                
-                if (progress < 1) {
-                    requestAnimationFrame(updateVolume);
-                }
-            }
-            
-            updateVolume();
-        }
-
-        function pauseBackgroundMusic() {
-            if (backgroundMusic && isMusicPlaying) {
-                backgroundMusic.pause();
-                isMusicPlaying = false;
-            }
-        }
-
-        // ====================== HỆ THỐNG ÂM THANH (CHỈ TRẦM) ======================
-        function initAudioSystem() {
-            try {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                
-                masterGain = audioCtx.createGain();
-                masterGain.gain.value = SOUND_CONFIG.masterVolume;
-                
-                const compressor = audioCtx.createDynamicsCompressor();
-                compressor.threshold.value = -20;
-                compressor.knee.value = 30;
-                compressor.ratio.value = 6;
-                compressor.attack.value = 0.03;
-                compressor.release.value = 0.3;
-                
-                const lowShelf = audioCtx.createBiquadFilter();
-                lowShelf.type = 'lowshelf';
-                lowShelf.frequency.value = 150;
-                lowShelf.gain.value = 8;
-                
-                masterGain.connect(lowShelf).connect(compressor).connect(audioCtx.destination);
-                
-                return true;
-            } catch (e) {
-                console.log("Audio không được hỗ trợ");
-                return false;
-            }
-        }
-
-        function createBassSound(frequency, type = 'sine', duration = 1.0, volume = 1.0) {
-            const now = audioCtx.currentTime;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            
-            osc.type = type;
-            osc.frequency.value = frequency;
-            
-            gain.gain.setValueAtTime(0.001, now);
-            gain.gain.exponentialRampToValueAtTime(volume, now + SOUND_CONFIG.fadeInTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-            
-            osc.connect(gain).connect(masterGain);
-            osc.start(now);
-            osc.stop(now + duration);
-            
-            const soundId = Symbol();
-            activeSounds.add(soundId);
-            
-            setTimeout(() => {
-                activeSounds.delete(soundId);
-            }, duration * 1000);
-            
-            return soundId;
-        }
-
-        function createBassGlide(startFreq, endFreq, type = 'sine', duration = 1.2, volume = 0.9) {
-            const now = audioCtx.currentTime;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            
-            osc.type = type;
-            osc.frequency.setValueAtTime(startFreq, now);
-            osc.frequency.exponentialRampToValueAtTime(endFreq, now + SOUND_CONFIG.frequencyBlend.glideTime);
-            
-            gain.gain.setValueAtTime(0.001, now);
-            gain.gain.exponentialRampToValueAtTime(volume, now + 0.1);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-            
-            osc.connect(gain).connect(masterGain);
-            osc.start(now);
-            osc.stop(now + duration);
-            
-            return Symbol();
-        }
-
-        function createRumbleSound(duration = 0.8, baseFreq = 120, volume = 0.5) {
-            const now = audioCtx.currentTime;
-            
-            for (let i = 0; i < 3; i++) {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                
-                osc.type = 'sine';
-                osc.frequency.value = baseFreq + (i * 15);
-                
-                gain.gain.setValueAtTime(0.001, now + (i * 0.05));
-                gain.gain.exponentialRampToValueAtTime(volume * (0.7 - i * 0.2), now + (i * 0.05) + 0.1);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-                
-                osc.connect(gain).connect(masterGain);
-                osc.start(now + (i * 0.05));
-                osc.stop(now + duration);
-            }
-            
-            return Symbol();
-        }
-
-        // ====================== CÁC BỘ ÂM THANH BASS ======================
-        
-        function playDeepBass() {
-            const baseFreq = 35 + Math.random() * 20;
-            
-            createBassSound(
-                baseFreq,
-                'sine',
-                1.4,
-                SOUND_CONFIG.layers.sub.weight * 1.0
-            );
-            
-            setTimeout(() => {
-                createBassSound(
-                    baseFreq * 0.5,
-                    'sine',
-                    1.6,
-                    SOUND_CONFIG.layers.deep.weight * 0.6
-                );
-            }, 200);
-            
-            setTimeout(() => {
-                createRumbleSound(
-                    0.6,
-                    80 + Math.random() * 40,
-                    SOUND_CONFIG.layers.rumble.weight * 0.3
-                );
-            }, 150);
-        }
-
-        function playBassGlide() {
-            const startFreq = 50 + Math.random() * 20;
-            const endFreq = startFreq * 0.6;
-            
-            createBassGlide(
-                startFreq,
-                endFreq,
-                'sine',
-                1.3,
-                SOUND_CONFIG.layers.sub.weight * 0.9
-            );
-            
-            setTimeout(() => {
-                createBassSound(
-                    startFreq * 1.5,
-                    'sine',
-                    1.0,
-                    SOUND_CONFIG.layers.sub.weight * 0.4
-                );
-            }, 300);
-        }
-
-        function playDualBass() {
-            const freq1 = 40 + Math.random() * 15;
-            const freq2 = 55 + Math.random() * 20;
-            
-            createBassSound(
-                freq1,
-                'sine',
-                1.2,
-                SOUND_CONFIG.layers.sub.weight * 0.8
-            );
-            
-            setTimeout(() => {
-                createBassSound(
-                    freq2,
-                    'sine',
-                    1.1,
-                    SOUND_CONFIG.layers.sub.weight * 0.7
-                );
-            }, 100);
-            
-            setTimeout(() => {
-                createBassSound(
-                    Math.min(freq1, freq2) * 0.4,
-                    'sine',
-                    1.5,
-                    SOUND_CONFIG.layers.deep.weight * 0.5
-                );
-            }, 250);
-        }
-
-        function playPowerBass() {
-            const now = Date.now();
-            const timeFactor = Math.sin(now * 0.001) * 0.5 + 0.5;
-            
-            const mainFreq = 30 + timeFactor * 20;
-            createBassSound(
-                mainFreq,
-                'sine',
-                1.6,
-                SOUND_CONFIG.layers.sub.weight * (0.9 + timeFactor * 0.3)
-            );
-            
-            setTimeout(() => {
-                createBassSound(
-                    mainFreq * 0.75,
-                    'sine',
-                    1.4,
-                    SOUND_CONFIG.layers.deep.weight * 0.6
-                );
-                
-                createBassSound(
-                    mainFreq * 0.6,
-                    'sine',
-                    1.5,
-                    SOUND_CONFIG.layers.deep.weight * 0.4
-                );
-            }, 150);
-            
-            setTimeout(() => {
-                createRumbleSound(
-                    0.9,
-                    60 + Math.random() * 30,
-                    SOUND_CONFIG.layers.rumble.weight * 0.5
-                );
-            }, 200);
-        }
-
-        function playSpecialBassExplosion(intensity = 1.0) {
-            const baseFreq = 40 + Math.random() * 20;
-            const duration = 1.4 + intensity * 0.5;
-            
-            createBassGlide(
-                baseFreq * 1.4,
-                baseFreq * 0.5,
-                'sine',
-                duration,
-                SOUND_CONFIG.layers.sub.weight * intensity * 1.3
-            );
-            
-            setTimeout(() => {
-                createBassSound(
-                    baseFreq * 0.8,
-                    'sine',
-                    duration * 0.9,
-                    SOUND_CONFIG.layers.deep.weight * intensity * 0.8
-                );
-                
-                createBassSound(
-                    baseFreq * 0.6,
-                    'sine',
-                    duration * 1.1,
-                    SOUND_CONFIG.layers.deep.weight * intensity * 0.6
-                );
-            }, 100);
-            
-            setTimeout(() => {
-                createRumbleSound(
-                    duration * 0.8,
-                    50 + Math.random() * 20,
-                    SOUND_CONFIG.layers.rumble.weight * intensity * 0.7
-                );
-            }, 180);
-        }
-
-        function playBassSound() {
-            if (!audioCtx || activeSounds.size > 4) return;
-            
-            soundSequence = (soundSequence + 1) % 4;
-            
-            switch(soundSequence) {
-                case 0:
-                    playDeepBass();
-                    break;
-                case 1:
-                    playBassGlide();
-                    break;
-                case 2:
-                    playDualBass();
-                    break;
-                case 3:
-                    playPowerBass();
-                    break;
-            }
-            
-            const variation = (Math.random() - 0.5) * SOUND_CONFIG.intervalVariation;
-            nextSoundTime = performance.now() + SOUND_CONFIG.baseInterval + variation;
-        }
-
-        // ====================== HỆ THỐNG PHÁO HOA (ĐIỀU CHỈNH CHO MOBILE) ======================
+        // ====================== HỆ THỐNG PHÁO HOA (ĐƠN GIẢN HƠN) ======================
         function createParticlePool() {
             particles = [];
             for (let i = 0; i < particlePoolSize; i++) {
@@ -536,30 +312,30 @@
                     vx: 0, vy: 0,
                     life: 0, maxLife: 0,
                     color: '#fff',
-                    size: 1.5 * FIREWORK_CONFIG.particleSizeMultiplier,
+                    size: 1.2 * FIREWORK_CONFIG.particleSizeMultiplier,
                     active: false
                 });
             }
         }
 
         function getParticle() {
+            // Tìm particle không active
             for (let p of particles) {
                 if (!p.active) return p;
             }
             
+            // Nếu không còn, tái sử dụng particle cũ nhất
             let oldestParticle = null;
             let oldestLife = 0;
+            
             for (let p of particles) {
-                if (p.active) {
-                    const lifeRatio = p.life / p.maxLife;
-                    if (lifeRatio > oldestLife) {
-                        oldestLife = lifeRatio;
-                        oldestParticle = p;
-                    }
+                if (p.active && p.life > oldestLife) {
+                    oldestLife = p.life;
+                    oldestParticle = p;
                 }
             }
             
-            if (oldestParticle && oldestLife > 0.8) {
+            if (oldestParticle) {
                 oldestParticle.active = false;
                 return oldestParticle;
             }
@@ -570,12 +346,18 @@
         function initCanvas() {
             canvas = document.getElementById('canvas');
             ctx = canvas.getContext('2d');
-            const dpr = Math.min(window.devicePixelRatio || 1, 1.2);
+            
+            // Sử dụng DPR thấp cho hiệu suất
+            const dpr = Math.min(window.devicePixelRatio || 1, 1.0);
             canvas.width = window.innerWidth * dpr;
             canvas.height = window.innerHeight * dpr;
             canvas.style.width = `${window.innerWidth}px`;
             canvas.style.height = `${window.innerHeight}px`;
-            ctx.scale(dpr, dpr);
+            
+            if (dpr !== 1) {
+                ctx.scale(dpr, dpr);
+            }
+            
             canvas.style.display = 'block';
         }
 
@@ -599,155 +381,101 @@
             if (p) {
                 p.x = x;
                 p.y = yStart;
-                p.vx = (Math.random() - 0.5) * 1.2;
-                p.vy = - (12 + Math.random() * 6) * FIREWORK_CONFIG.rocketSpeedMultiplier;
+                p.vx = (Math.random() - 0.5) * 0.8; // Giảm ngang
+                p.vy = - (8 + Math.random() * 4) * FIREWORK_CONFIG.rocketSpeedMultiplier;
                 p.life = 0;
-                p.maxLife = 50 + Math.random() * 20;
+                p.maxLife = 40 + Math.random() * 15; // Ngắn hơn
                 p.color = `hsl(${hue}, 100%, 70%)`;
-                p.size = (2.0 + Math.random() * 1.0) * FIREWORK_CONFIG.particleSizeMultiplier;
+                p.size = (1.5 + Math.random() * 0.8) * FIREWORK_CONFIG.particleSizeMultiplier;
                 p.active = true;
                 p.isRocket = true;
-                p.trailHue = hue;
             }
 
             setTimeout(() => {
                 if (!isRunning) return;
-                const yExplode = window.innerHeight * (0.15 + Math.random() * 0.45);
+                const yExplode = window.innerHeight * (0.2 + Math.random() * 0.4);
                 createExplosion(x, yExplode, hue);
-                
-                if (Math.random() > 0.7) {
-                    playSpecialBassExplosion(1 + Math.random() * 0.5);
-                }
-            }, 1000 + Math.random() * 600);
+            }, 800 + Math.random() * 400); // Bay nhanh hơn
         }
 
         function createExplosion(x, y, baseHue) {
             const activeCount = countActiveParticles();
-            if (activeCount > FIREWORK_CONFIG.maxActiveParticles * 0.8) return;
+            if (activeCount > FIREWORK_CONFIG.maxActiveParticles * 0.7) return;
 
-            const numParticles = Math.floor(80 + Math.random() * 70);
-            const explosionType = Math.random();
+            const numParticles = Math.floor(50 + Math.random() * 40); // Ít hơn
             
-            if (explosionType < 0.5) {
-                const segments = Math.floor(20 + Math.random() * 25);
-                const particlesPerSegment = Math.floor(numParticles / segments);
+            // Chỉ một loại explosion đơn giản
+            for (let i = 0; i < numParticles; i++) {
+                const p = getParticle();
+                if (!p) continue;
                 
-                for (let i = 0; i < segments; i++) {
-                    for (let j = 0; j < particlesPerSegment; j++) {
-                        const p = getParticle();
-                        if (!p) continue;
-                        
-                        const angle = (Math.PI * 2 * i) / segments + (Math.random() - 0.5) * 0.5;
-                        const speed = (5 + Math.random() * 8) * FIREWORK_CONFIG.explosionSpeedMultiplier;
-                        
-                        p.x = x;
-                        p.y = y;
-                        p.vx = Math.cos(angle) * speed;
-                        p.vy = Math.sin(angle) * speed;
-                        p.life = 0;
-                        p.maxLife = 60 + Math.random() * 50;
-                        p.color = `hsl(${baseHue + Math.random()*80 - 40}, 100%, ${60 + Math.random()*30}%)`;
-                        p.size = (1.0 + Math.random() * 1.5) * FIREWORK_CONFIG.particleSizeMultiplier;
-                        p.active = true;
-                        p.trail = true;
-                    }
-                }
-            } else {
-                for (let i = 0; i < numParticles * 1.2; i++) {
-                    const p = getParticle();
-                    if (!p) continue;
-                    
-                    p.x = x;
-                    p.y = y;
-                    const angle = Math.random() * Math.PI * 2;
-                    const speed = (4 + Math.random() * 10) * FIREWORK_CONFIG.explosionSpeedMultiplier;
-                    p.vx = Math.cos(angle) * speed;
-                    p.vy = Math.sin(angle) * speed * 0.8 - 2;
-                    
-                    p.life = 0;
-                    p.maxLife = 50 + Math.random() * 70;
-                    
-                    const hueVariation = Math.random() * 100 - 50;
-                    p.color = `hsl(${baseHue + hueVariation}, ${80 + Math.random()*20}%, ${50 + Math.random()*40}%)`;
-                    
-                    p.size = (0.8 + Math.random() * 2.0) * FIREWORK_CONFIG.particleSizeMultiplier;
-                    p.active = true;
-                    p.trail = true;
-                    p.sparkle = Math.random() > 0.3;
-                    p.trailLength = 2 + Math.random() * 3;
-                }
+                p.x = x;
+                p.y = y;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = (3 + Math.random() * 6) * FIREWORK_CONFIG.explosionSpeedMultiplier;
+                p.vx = Math.cos(angle) * speed;
+                p.vy = Math.sin(angle) * speed * 0.8 - 1.5;
+                
+                p.life = 0;
+                p.maxLife = 40 + Math.random() * 40;
+                
+                const hueVariation = Math.random() * 60 - 30;
+                p.color = `hsl(${baseHue + hueVariation}, ${85 + Math.random()*15}%, ${55 + Math.random()*30}%)`;
+                
+                p.size = (0.6 + Math.random() * 1.5) * FIREWORK_CONFIG.particleSizeMultiplier;
+                p.active = true;
+                p.trail = Math.random() > 0.5;
+                p.trailLength = 1 + Math.random() * 2;
             }
         }
 
         function animate(time) {
             if (!isRunning) return;
-            requestAnimationFrame(animate);
             
-            const delta = lastTime === 0 ? 1 : Math.min((time - lastTime) / (1000 / FIREWORK_CONFIG.targetFPS), 2);
+            // Sử dụng setTimeout thay vì requestAnimationFrame cho in-app browsers
+            setTimeout(() => {
+                requestAnimationFrame(animate);
+            }, 1000 / FIREWORK_CONFIG.targetFPS);
+            
+            const delta = lastTime === 0 ? 1 : Math.min((time - lastTime) / 16, 2); // Fixed delta
             lastTime = time;
 
-            if (time > nextSoundTime) {
-                playBassSound();
-            }
-
-            ctx.fillStyle = 'rgba(0,0,0,0.08)';
+            // Clear với opacity cao hơn để ít particle tồn đọng
+            ctx.fillStyle = 'rgba(0,0,0,0.15)';
             ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
-            ctx.save();
+            // Vẽ particles (giữ đơn giản)
             for (let p of particles) {
                 if (!p.active) continue;
 
                 p.x += p.vx * delta;
                 p.y += p.vy * delta;
-
-                if (!p.isRocket) {
-                    p.vy += 0.10 * delta;
-                }
-
+                p.vy += 0.08 * delta; // Gravity nhẹ hơn
                 p.life += delta;
+                
                 if (p.life >= p.maxLife) {
                     p.active = false;
                     continue;
                 }
 
                 const progress = p.life / p.maxLife;
-                let alpha = p.isRocket ? (1 - progress**1.8) : (1 - progress**1.5);
-
-                if (p.sparkle && !p.isRocket) {
-                    alpha *= 0.6 + 0.4 * Math.sin(progress * 25);
-                }
-
+                const alpha = 1 - progress;
+                
                 ctx.fillStyle = p.color.replace(')', `, ${alpha})`).replace('hsl', 'hsla');
                 ctx.beginPath();
                 
-                if (p.trailLength && progress < 0.4) {
-                    ctx.shadowBlur = p.trailLength;
-                    ctx.shadowColor = p.color;
-                } else if (p.trail && !p.isRocket && progress < 0.3) {
-                    ctx.shadowBlur = 3 + Math.random() * 3;
-                    ctx.shadowColor = p.color;
-                }
-                
-                const currentSize = p.size * (p.isRocket ? 1.1 : (1 - progress * 0.3));
+                const currentSize = p.size * (1 - progress * 0.4);
                 ctx.arc(p.x, p.y, currentSize, 0, Math.PI * 2);
                 ctx.fill();
-                
-                ctx.shadowBlur = 0;
             }
-            ctx.restore();
 
+            // Tạo pháo mới
             if (time > nextExplosionTime) {
-                const intensity = Math.min(1 + (time - startTime) / 20000, FIREWORK_CONFIG.maxIntensity);
-                const minInt = FIREWORK_CONFIG.explosionIntervalMin / intensity;
-                const maxInt = FIREWORK_CONFIG.explosionIntervalMax / intensity;
-                
-                const activeCount = countActiveParticles();
-                const activeFactor = Math.max(1, activeCount / (FIREWORK_CONFIG.maxActiveParticles * 0.6));
-                const adjustedMinInt = minInt * activeFactor;
-                const adjustedMaxInt = maxInt * activeFactor;
+                const minInt = FIREWORK_CONFIG.explosionIntervalMin;
+                const maxInt = FIREWORK_CONFIG.explosionIntervalMax;
                 
                 createRocket();
-                nextExplosionTime = time + Math.random() * (adjustedMaxInt - adjustedMinInt) + adjustedMinInt;
+                nextExplosionTime = time + Math.random() * (maxInt - minInt) + minInt;
             }
         }
 
@@ -755,103 +483,90 @@
         const btn = document.getElementById('startBtn');
         
         async function start() {
-            if (isMobile && isPortrait) {
-                alert("Vui lòng xoay ngang điện thoại để bắt đầu xem pháo hoa!");
-                return;
-            }
-            
             btn.disabled = true;
             btn.textContent = "ĐANG TẢI...";
             
             try {
+                // Khởi tạo nhạc (không bắt lỗi)
                 await initBackgroundMusic();
                 
                 btn.textContent = "BẮT ĐẦU";
                 btn.disabled = false;
                 
+                // Ẩn nút và cảnh báo
                 btn.style.opacity = '0';
                 btn.style.pointerEvents = 'none';
-                setTimeout(() => btn.style.display = 'none', 600);
+                setTimeout(() => {
+                    btn.style.display = 'none';
+                    document.getElementById('orientationWarning').style.display = 'none';
+                }, 600);
 
-                if (!initAudioSystem()) {
-                    alert("Trình duyệt không hỗ trợ Web Audio API. Vui lòng dùng Chrome/Firefox/Safari mới nhất.");
-                    return;
-                }
-                
-                playBackgroundMusic();
-                
+                // Khởi tạo canvas
                 initCanvas();
                 createParticlePool();
 
-                if (masterGain) {
-                    masterGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-                    masterGain.gain.exponentialRampToValueAtTime(SOUND_CONFIG.masterVolume, audioCtx.currentTime + 2.5);
-                }
+                // Thử phát nhạc (không quan trọng nếu không được)
+                playBackgroundMusic();
 
-                setTimeout(() => {
-                    playPowerBass();
-                }, 500);
-
+                // Bắt đầu animation
                 isRunning = true;
                 startTime = performance.now();
                 lastTime = startTime;
-                nextExplosionTime = startTime + 500;
-                nextSoundTime = startTime + 1200;
+                nextExplosionTime = startTime + 300;
 
                 requestAnimationFrame(animate);
                 
             } catch (error) {
-                console.error("Lỗi khởi tạo:", error);
-                alert("Có lỗi xảy ra khi khởi tạo. Vui lòng thử lại.");
+                console.error("Lỗi:", error);
+                // Vẫn tiếp tục dù có lỗi
                 btn.disabled = false;
                 btn.textContent = "BẮT ĐẦU";
+                
+                // Vẫn khởi động pháo hoa
+                if (!isRunning) {
+                    initCanvas();
+                    createParticlePool();
+                    isRunning = true;
+                    startTime = performance.now();
+                    requestAnimationFrame(animate);
+                }
             }
         }
 
         // ====================== EVENT LISTENERS ======================
-        btn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            start();
-        }, { passive: false });
-        
-        btn.addEventListener('pointerdown', start);
-        
-        window.addEventListener('resize', () => {
-            checkOrientation();
-            if (isRunning) initCanvas();
+        document.addEventListener('DOMContentLoaded', function() {
+            // Phát hiện in-app browser
+            const isInApp = detectInAppBrowser();
+            
+            // Thiết lập nút mở trong trình duyệt
+            setupOpenInBrowser();
+            
+            // Nếu không phải in-app browser, hiển thị nút bắt đầu ngay
+            if (!isInApp) {
+                document.getElementById('orientationWarning').style.display = 'none';
+            }
+            
+            // Xử lý nút bắt đầu
+            const btn = document.getElementById('startBtn');
+            btn.addEventListener('click', start);
+            btn.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                start();
+            }, { passive: false });
         });
         
-        window.addEventListener('orientationchange', () => {
-            setTimeout(checkOrientation, 100);
-        });
-        
-        document.addEventListener('DOMContentLoaded', checkOrientation);
-        checkOrientation();
-        
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                isRunning = false;
-                pauseBackgroundMusic();
-                if (masterGain) {
-                    masterGain.gain.setValueAtTime(masterGain.gain.value, audioCtx.currentTime);
-                    masterGain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-                }
-            } else if (startTime > 0) {
-                isRunning = true;
-                if (masterGain) {
-                    masterGain.gain.setValueAtTime(masterGain.gain.value, audioCtx.currentTime);
-                    masterGain.gain.exponentialRampToValueAtTime(SOUND_CONFIG.masterVolume, audioCtx.currentTime + 0.5);
-                }
-                if (backgroundMusic && !isMusicPlaying) {
-                    playBackgroundMusic();
-                }
-                lastTime = performance.now();
-                requestAnimationFrame(animate);
+        // Xử lý resize
+        window.addEventListener('resize', function() {
+            if (isRunning) {
+                initCanvas();
             }
         });
         
-        window.addEventListener('beforeunload', () => {
-            pauseBackgroundMusic();
+        // Xử lý khi thoát tab
+        window.addEventListener('beforeunload', function() {
+            if (backgroundMusic && isMusicPlaying) {
+                backgroundMusic.pause();
+            }
         });
     </script>
 </body>
