@@ -100,8 +100,8 @@
         // ====================== CẤU HÌNH ÂM THANH ======================
         const SOUND_CONFIG = {
             masterVolume: 1.2,
-            baseInterval: 1600,
-            intervalVariation: 1000,
+            baseInterval: 1400, // NHANH HƠN
+            intervalVariation: 800,
             fadeInTime: 0.2,
             fadeOutTime: 1.2,
             frequencyBlend: {
@@ -116,29 +116,29 @@
             }
         };
 
-        // ====================== CẤU HÌNH PHÁO HOA TỐI ƯU LAG ======================
+        // ====================== CẤU HÌNH PHÁO HOA - TĂNG SỐ LƯỢNG & HIỆU ỨNG ======================
         const FIREWORK_CONFIG = {
-            maxParticlesPerExplosion: 100,
-            maxIntensity: 2.5,
+            maxParticlesPerExplosion: 150, // TĂNG: từ 100 lên 150
+            maxIntensity: 3.0, // TĂNG: từ 2.5 lên 3.0
             
-            // Hệ thống điều chỉnh tốc độ với LOOP LẠI sau 15 giây
+            // Hệ thống điều chỉnh tốc độ - TĂNG TẦN SUẤT
             adaptiveExplosionRate: {
-                // Tốc độ bình thường
+                // Tốc độ bình thường - NHANH HƠN
                 normalRate: {
-                    minInterval: 2000,
-                    maxInterval: 3000
+                    minInterval: 1500, // GIẢM: từ 2000 xuống 1500
+                    maxInterval: 2500   // GIẢM: từ 3000 xuống 2500
                 },
                 
-                // Tốc độ cao trào - ĐÃ TỐI ƯU GIẢM LAG
+                // Tốc độ cao trào - DÀY ĐẶC HƠN
                 climaxRate: {
-                    minInterval: 200,
-                    maxInterval: 400,
+                    minInterval: 150,     // GIẢM: từ 200 xuống 150
+                    maxInterval: 350,     // GIẢM: từ 400 xuống 350
                     duration: 8000,
-                    burstCount: 2,
-                    burstDelay: 100
+                    burstCount: 3,        // TĂNG: từ 2 lên 3 rocket
+                    burstDelay: 80        // GIẢM: từ 100 xuống 80
                 },
                 
-                // Các giai đoạn với LOOP LẠI sau 15 giây
+                // Các giai đoạn
                 phases: {
                     buildup: 7000,
                     climax: 8000,
@@ -148,49 +148,63 @@
             },
             
             targetFPS: 60,
-            maxActiveParticles: 1500,
-            particleSizeMultiplier: 0.4,
-            rocketSpeedMultiplier: 0.8,
-            explosionSpeedMultiplier: 0.7,
+            maxActiveParticles: 1800,     // TĂNG: từ 1500 lên 1800
+            particleSizeMultiplier: 0.45, // TĂNG NHẸ: từ 0.4 lên 0.45
+            rocketSpeedMultiplier: 0.85,  // TĂNG: từ 0.8 lên 0.85
+            explosionSpeedMultiplier: 0.75, // TĂNG: từ 0.7 lên 0.75
             
-            // CẤU HÌNH KHOẢNG CÁCH: TỐI ƯU LAG
+            // CẤU HÌNH KHOẢNG CÁCH: ĐA DẠNG XA GẦN XEN KẼ
             distanceDistribution: {
-                near: 0.2,
-                far: 0.8
+                near: 0.4,      // TĂNG: từ 0.2 lên 0.4 (nhiều pháo gần hơn)
+                medium: 0.3,    // THÊM: pháo tầm trung
+                far: 0.3        // GIẢM: từ 0.8 xuống 0.3
             },
             
             distanceSettings: {
                 near: {
-                    minHeight: 0.25,
-                    maxHeight: 0.45,
+                    minHeight: 0.15,      // GIẢM: gần màn hình hơn
+                    maxHeight: 0.35,      // GIẢM
+                    sizeMultiplier: 1.2,  // TĂNG: từ 1.0 lên 1.2
+                    speedMultiplier: 1.15, // TĂNG: từ 1.0 lên 1.15
+                    brightnessBoost: 1.25, // TĂNG: từ 1.0 lên 1.25
+                    glowIntensity: 1.3,   // TĂNG: từ 1.0 lên 1.3
+                    particleMultiplier: 1.4, // THÊM: nhiều hạt hơn
+                    sparkleChance: 0.7    // THÊM: nhiều hiệu ứng lấp lánh
+                },
+                medium: { // THÊM: tầm trung
+                    minHeight: 0.4,
+                    maxHeight: 0.6,
                     sizeMultiplier: 1.0,
                     speedMultiplier: 1.0,
-                    brightnessBoost: 1.0,
-                    glowIntensity: 1.0
+                    brightnessBoost: 1.1,
+                    glowIntensity: 1.0,
+                    particleMultiplier: 1.0,
+                    sparkleChance: 0.5
                 },
                 far: {
-                    minHeight: 0.6,
-                    maxHeight: 0.9,
-                    sizeMultiplier: 0.6,
-                    speedMultiplier: 0.8,
-                    brightnessBoost: 0.8,
-                    glowIntensity: 0.7
+                    minHeight: 0.65,      // TĂNG
+                    maxHeight: 0.95,      // TĂNG
+                    sizeMultiplier: 0.7,  // TĂNG: từ 0.6 lên 0.7
+                    speedMultiplier: 0.85, // TĂNG: từ 0.8 lên 0.85
+                    brightnessBoost: 0.9, // TĂNG: từ 0.8 lên 0.9
+                    glowIntensity: 0.8,   // TĂNG: từ 0.7 lên 0.8
+                    particleMultiplier: 0.8, // THÊM
+                    sparkleChance: 0.3
                 }
             },
             
-            // SAO BĂNG CONFIG - TỐI ƯU CHO MOBILE
+            // SAO BĂNG CONFIG
             shootingStars: {
                 count: 5,
-                speed: 14, // GIẢM tốc độ cho mobile
-                length: 80, // GIẢM độ dài đuôi
+                speed: 14,
+                length: 80,
                 colors: [
                     '#ffffff', '#a7d8ff', '#ffb3ba', '#ffdfba', 
                     '#ffffba', '#baffc9', '#bae1ff', '#f8b3ff'
-                ], // Thêm nhiều màu pastel
-                baseSize: 1.5, // GIẢM đáng kể kích thước
+                ],
+                baseSize: 1.5,
                 fadeDuration: 1200,
                 
-                // Cấu hình riêng cho mobile
                 mobile: {
                     speed: 12,
                     length: 60,
@@ -198,25 +212,41 @@
                 }
             },
             
-            // CÁC LOẠI PHÁO HOA - GIẢM ĐỘ PHỨC TẠP
+            // CÁC LOẠI PHÁO HOA - THÊM NHIỀU LOẠI SINH ĐỘNG
             explosionTypes: {
                 normal: {
-                    chrysanthemum: 0.3,
-                    peony: 0.3,
-                    palm: 0.1,
-                    willow: 0.1,
-                    ring: 0.1,
-                    crossette: 0.1
+                    chrysanthemum: 0.25,
+                    peony: 0.25,
+                    palm: 0.12,
+                    willow: 0.10,
+                    ring: 0.10,
+                    crossette: 0.08,
+                    double_ring: 0.05, // THÊM: vòng kép
+                    spiral: 0.03,      // THÊM: xoắn ốc
+                    heart: 0.02        // THÊM: hình tim
                 },
                 climax: {
-                    chrysanthemum: 0.25,
-                    peony: 0.3,
-                    palm: 0.1,
-                    willow: 0.1,
-                    ring: 0.1,
-                    crossette: 0.1,
-                    special: 0.05
+                    chrysanthemum: 0.20,
+                    peony: 0.20,
+                    palm: 0.10,
+                    willow: 0.10,
+                    ring: 0.10,
+                    crossette: 0.10,
+                    double_ring: 0.08, // THÊM
+                    spiral: 0.06,      // THÊM
+                    heart: 0.04,       // THÊM
+                    special: 0.02
                 }
+            },
+            
+            // HIỆU ỨNG ĐẶC BIỆT - THÊM
+            specialEffects: {
+                sparkleChance: 0.4,     // TĂNG cơ hội lấp lánh
+                glitterChance: 0.3,     // THÊM hiệu ứng kim tuyến
+                trailChance: 0.6,       // TĂNG cơ hội có đuôi
+                colorShiftChance: 0.4,  // THÊM chuyển màu
+                pulseChance: 0.25,      // THÊM nhấp nháy
+                secondaryExplosionChance: 0.2 // THÊM nổ thứ cấp
             }
         };
 
@@ -225,7 +255,7 @@
         let canvas, ctx, audioCtx, masterGain, backgroundMusic;
         let particles = [];
         let shootingStars = [];
-        let particlePoolSize = FIREWORK_CONFIG.maxParticlesPerExplosion * 25;
+        let particlePoolSize = FIREWORK_CONFIG.maxParticlesPerExplosion * 30; // TĂNG: từ 25 lên 30
         let lastTime = 0, startTime = 0;
         let isRunning = false;
         let showShootingStars = true;
@@ -238,7 +268,7 @@
         let isMusicPlaying = false;
         let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         
-        // Hệ thống điều chỉnh cao trào với LOOP
+        // Hệ thống điều chỉnh cao trào
         let climaxSystem = {
             phase: 'buildup',
             phaseStartTime: 0,
@@ -251,10 +281,11 @@
             
             soundIntensity: 1.0,
             lastBassTime: 0,
-            bassInterval: 800
+            bassInterval: 700, // GIẢM: từ 800 xuống 700
+            currentDistanceType: 'near' // THÊM: theo dõi loại khoảng cách hiện tại
         };
 
-        // ====================== HỆ THỐNG SAO BĂNG CẢI TIẾN - TỐI ƯU MOBILE ======================
+        // ====================== HỆ THỐNG SAO BĂNG ======================
         function createShootingStars(count = FIREWORK_CONFIG.shootingStars.count) {
             const starsConfig = FIREWORK_CONFIG.shootingStars;
             const mobileConfig = isMobile ? starsConfig.mobile : {};
@@ -263,53 +294,47 @@
                 setTimeout(() => {
                     if (!isRunning) return;
                     
-                    // TỐI ƯU: Random size category cho mobile - nhỏ hơn
                     const sizeCategory = Math.random();
                     let sizeMultiplier, speedMultiplier, glowIntensity, trailLength, sparkIntensity;
                     
                     if (sizeCategory < 0.5) {
-                        // 50% - Sao rất nhỏ (nhanh, mờ) - cho mobile
-                        sizeMultiplier = 0.3 + Math.random() * 0.3; // 0.3-0.6
-                        speedMultiplier = 1.3 + Math.random() * 0.4; // Nhanh hơn
+                        sizeMultiplier = 0.3 + Math.random() * 0.3;
+                        speedMultiplier = 1.3 + Math.random() * 0.4;
                         glowIntensity = 0.4;
-                        trailLength = 8 + Math.floor(Math.random() * 6); // Đuôi rất ngắn
+                        trailLength = 8 + Math.floor(Math.random() * 6);
                         sparkIntensity = 0.6;
                     } else if (sizeCategory < 0.85) {
-                        // 35% - Sao nhỏ
-                        sizeMultiplier = 0.6 + Math.random() * 0.4; // 0.6-1.0
+                        sizeMultiplier = 0.6 + Math.random() * 0.4;
                         speedMultiplier = 1.0 + Math.random() * 0.3;
                         glowIntensity = 0.6;
                         trailLength = 12 + Math.floor(Math.random() * 8);
                         sparkIntensity = 0.8;
                     } else {
-                        // 15% - Sao trung bình (hiếm hơn cho mobile)
-                        sizeMultiplier = 1.0 + Math.random() * 0.5; // 1.0-1.5
-                        speedMultiplier = 0.7 + Math.random() * 0.3; // Chậm hơn
+                        sizeMultiplier = 1.0 + Math.random() * 0.5;
+                        speedMultiplier = 0.7 + Math.random() * 0.3;
                         glowIntensity = 0.8;
                         trailLength = 18 + Math.floor(Math.random() * 10);
                         sparkIntensity = 1.0;
                     }
                     
-                    // Áp dụng mobile config nếu có
                     if (isMobile) {
                         sizeMultiplier *= 0.8;
                         trailLength *= 0.7;
                     }
                     
-                    // Random góc bay linh hoạt hơn
-                    const baseAngle = Math.PI / 4; // 45°
-                    const angleVariation = Math.PI / 12; // ±15°
+                    const baseAngle = Math.PI / 4;
+                    const angleVariation = Math.PI / 12;
                     const angle = baseAngle + (Math.random() - 0.5) * angleVariation * 2;
                     
                     const baseSpeed = (mobileConfig.speed || starsConfig.speed) * speedMultiplier;
                     
                     const star = {
-                        x: -80 - Math.random() * 150, // Bắt đầu gần hơn cho mobile
-                        y: Math.random() * window.innerHeight * 0.5, // 50% trên cùng
+                        x: -80 - Math.random() * 150,
+                        y: Math.random() * window.innerHeight * 0.5,
                         vx: Math.cos(angle) * baseSpeed,
                         vy: Math.sin(angle) * baseSpeed,
                         life: 0,
-                        maxLife: (800 + Math.random() * 600) / speedMultiplier, // Đời ngắn hơn
+                        maxLife: (800 + Math.random() * 600) / speedMultiplier,
                         color: starsConfig.colors[Math.floor(Math.random() * starsConfig.colors.length)],
                         baseSize: (mobileConfig.baseSize || starsConfig.baseSize) * sizeMultiplier,
                         size: (mobileConfig.baseSize || starsConfig.baseSize) * sizeMultiplier,
@@ -321,320 +346,73 @@
                         sizeMultiplier: sizeMultiplier,
                         sparkIntensity: sparkIntensity,
                         
-                        // Hiệu ứng twinkle nhanh hơn, sinh động hơn
                         twinklePhase: Math.random() * Math.PI * 2,
-                        twinkleSpeed: 0.12 + Math.random() * 0.1, // Nhanh hơn
-                        twinkleAmplitude: 0.2 + Math.random() * 0.15, // Biên độ lớn hơn
+                        twinkleSpeed: 0.12 + Math.random() * 0.1,
+                        twinkleAmplitude: 0.2 + Math.random() * 0.15,
                         
-                        // Hiệu ứng color shift
                         hueShift: (Math.random() - 0.5) * 40,
                         hueShiftSpeed: 0.02 + Math.random() * 0.03,
                         currentHue: 0,
                         
-                        // Hiệu ứng particle - ít hơn cho mobile
                         particleTimer: 0,
                         particleInterval: 80 / speedMultiplier,
                         
-                        // Rotation cho mobile - chậm hơn
                         rotation: 0,
                         rotationSpeed: (0.08 + Math.random() * 0.1) * (sizeMultiplier > 1 ? 0.6 : 1.2),
                         
-                        // Độ trong suốt đuôi - linh hoạt hơn
                         trailOpacity: 0.6 + Math.random() * 0.4,
                         
-                        // Hiệu ứng pulse (nhấp nháy cường độ)
                         pulsePhase: Math.random() * Math.PI * 2,
                         pulseSpeed: 0.05 + Math.random() * 0.05,
                         pulseAmplitude: 0.1 + Math.random() * 0.1,
                         
-                        // Sparkle particles
                         sparkleTimer: 0,
                         sparkleInterval: 40 + Math.random() * 30
                     };
                     
-                    // Extract hue from color
                     const colorMatch = star.color.match(/hsl\((\d+)/);
                     star.currentHue = colorMatch ? parseInt(colorMatch[1]) : Math.random() * 360;
                     
                     shootingStars.push(star);
                     
-                }, i * (180 + Math.random() * 120)); // Stagger nhanh hơn cho mobile
+                }, i * (180 + Math.random() * 120));
             }
         }
 
         function createSparks(x, y, baseColor, intensity = 1.0) {
-            const sparkCount = Math.floor((1 + Math.random() * 3) * intensity); // Ít hơn cho mobile
+            const sparkCount = Math.floor((2 + Math.random() * 4) * intensity); // TĂNG số lượng
             
             for (let i = 0; i < sparkCount; i++) {
                 const spark = getParticle();
                 if (!spark) continue;
                 
-                // Tạo màu lấp lánh
                 const hueShift = (Math.random() - 0.5) * 60;
-                const brightness = 70 + Math.random() * 25;
+                const brightness = 75 + Math.random() * 25; // TĂNG độ sáng
                 const sparkColor = `hsl(${(parseInt(baseColor.match(/\d+/)?.[0] || 200) + hueShift) % 360}, 100%, ${brightness}%)`;
                 
                 const angle = Math.random() * Math.PI * 2;
-                const speed = (0.5 + Math.random() * 2) * intensity; // Chậm hơn cho mobile
+                const speed = (0.8 + Math.random() * 2.5) * intensity; // TĂNG tốc độ
                 
-                spark.x = x + (Math.random() - 0.5) * 8; // Offset nhỏ hơn
-                spark.y = y + (Math.random() - 0.5) * 8;
+                spark.x = x + (Math.random() - 0.5) * 12; // TĂNG offset
+                spark.y = y + (Math.random() - 0.5) * 12;
                 spark.vx = Math.cos(angle) * speed;
                 spark.vy = Math.sin(angle) * speed;
                 spark.life = 0;
-                spark.maxLife = 15 + Math.random() * 25; // Đời ngắn hơn
+                spark.maxLife = 20 + Math.random() * 30; // TĂNG đời sống
                 spark.color = sparkColor;
-                spark.size = (0.4 + Math.random() * 0.6) * intensity; // Nhỏ hơn
+                spark.size = (0.5 + Math.random() * 0.8) * intensity; // TĂNG kích thước
                 spark.active = true;
-                spark.fade = 0.9;
-                spark.drag = 0.96;
-                spark.sparkle = true;
-                spark.glitter = Math.random() > 0.7;
+                spark.fade = 0.92;
+                spark.drag = 0.95;
+                spark.sparkle = Math.random() > 0.4;
+                spark.glitter = Math.random() > 0.6;
                 
-                // Thêm hiệu ứng twinkle cho spark
                 spark.twinklePhase = Math.random() * Math.PI * 2;
-                spark.twinkleSpeed = 0.15 + Math.random() * 0.1;
+                spark.twinkleSpeed = 0.2 + Math.random() * 0.15;
             }
         }
 
-        function updateShootingStars(delta) {
-            for (let i = shootingStars.length - 1; i >= 0; i--) {
-                const star = shootingStars[i];
-                
-                if (!star.active) {
-                    shootingStars.splice(i, 1);
-                    continue;
-                }
-                
-                // Cập nhật vị trí
-                star.x += star.vx * delta;
-                star.y += star.vy * delta;
-                star.life += delta * 16.67;
-                
-                // Cập nhật rotation
-                star.rotation += star.rotationSpeed * delta;
-                
-                // Cập nhật twinkle effect
-                star.twinklePhase += star.twinkleSpeed * delta;
-                const twinkle = 0.8 + Math.sin(star.twinklePhase) * star.twinkleAmplitude;
-                
-                // Cập nhật hue shift
-                star.currentHue = (star.currentHue + star.hueShiftSpeed * delta * 10) % 360;
-                
-                // Cập nhật pulse effect
-                star.pulsePhase += star.pulseSpeed * delta;
-                const pulse = 1 + Math.sin(star.pulsePhase) * star.pulseAmplitude;
-                
-                // Cập nhật size với hiệu ứng tổng hợp
-                if (star.sizeMultiplier > 0.8) {
-                    star.size = star.baseSize * twinkle * pulse;
-                }
-                
-                // Thêm điểm vào đuôi
-                star.trail.push({ 
-                    x: star.x, 
-                    y: star.y,
-                    size: star.size * twinkle,
-                    opacity: star.trailOpacity * star.brightness,
-                    hue: star.currentHue
-                });
-                
-                if (star.trail.length > star.maxTrailLength) {
-                    star.trail.shift();
-                }
-                
-                // Tạo sparkle particles
-                star.sparkleTimer += delta * 16.67;
-                if (star.sparkleTimer >= star.sparkleInterval && star.brightness > 0.5) {
-                    star.sparkleTimer = 0;
-                    if (Math.random() > 0.3) { // Ít sparkle hơn
-                        createSparks(star.x, star.y, `hsl(${star.currentHue}, 100%, 80%)`, star.sparkleIntensity * 0.5);
-                    }
-                }
-                
-                // Tạo particles dọc đường đi
-                star.particleTimer += delta * 16.67;
-                if (star.particleTimer >= star.particleInterval && star.brightness > 0.7) {
-                    star.particleTimer = 0;
-                    if (Math.random() > 0.5) { // Ít particle hơn
-                        createSparks(star.x, star.y, `hsl(${star.currentHue}, 100%, 85%)`, star.sparkIntensity * 0.4);
-                    }
-                }
-                
-                // Fade out mượt mà với easing
-                const fadeStart = 0.65;
-                if (star.life > star.maxLife * fadeStart) {
-                    const fadeProgress = (star.life - star.maxLife * fadeStart) / (star.maxLife * (1 - fadeStart));
-                    star.brightness = Math.pow(1 - fadeProgress, 3); // Ease out cubic
-                    star.trailOpacity = 0.6 * star.brightness;
-                }
-                
-                // Deactivate
-                if (star.life >= star.maxLife || 
-                    star.x > window.innerWidth + 100 || 
-                    star.y > window.innerHeight + 100) {
-                    // Mini explosion khi sao biến mất
-                    if (star.sizeMultiplier > 0.8 && star.brightness > 0.3) {
-                        createSparks(star.x, star.y, `hsl(${star.currentHue}, 100%, 90%)`, star.sparkIntensity * 0.8);
-                    }
-                    star.active = false;
-                }
-            }
-        }
-
-        function renderShootingStars() {
-            ctx.save();
-            ctx.globalCompositeOperation = 'lighter';
-            
-            for (const star of shootingStars) {
-                if (!star.active || star.trail.length < 2) continue;
-                
-                const alpha = star.brightness;
-                const currentColor = `hsl(${star.currentHue}, 100%, 85%)`;
-                
-                // ===== VẼ ĐUÔI SAO BĂNG - TỐI ƯU CHO MOBILE =====
-                
-                // Vẽ đuôi glow trước
-                if (star.glowIntensity > 0.5 && alpha > 0.3) {
-                    ctx.shadowBlur = 8 * star.glowIntensity * alpha;
-                    ctx.shadowColor = currentColor.replace(')', `, ${alpha * 0.5})`);
-                    
-                    ctx.beginPath();
-                    ctx.moveTo(star.trail[0].x, star.trail[0].y);
-                    for (let i = 1; i < star.trail.length; i++) {
-                        ctx.lineTo(star.trail[i].x, star.trail[i].y);
-                    }
-                    ctx.strokeStyle = currentColor.replace(')', `, ${alpha * 0.3})`);
-                    ctx.lineWidth = star.size * 1.5;
-                    ctx.lineCap = 'round';
-                    ctx.stroke();
-                    
-                    ctx.shadowBlur = 0;
-                }
-                
-                // Vẽ đuôi chính
-                for (let i = 0; i < star.trail.length - 1; i++) {
-                    const point1 = star.trail[i];
-                    const point2 = star.trail[i + 1];
-                    const progress = i / star.trail.length;
-                    
-                    // Gradient mượt mà hơn
-                    const segmentAlpha = alpha * point1.opacity * (1 - progress * 0.8);
-                    if (segmentAlpha < 0.05) continue;
-                    
-                    const gradient = ctx.createLinearGradient(
-                        point1.x, point1.y,
-                        point2.x, point2.y
-                    );
-                    
-                    const color1 = `hsl(${point1.hue}, 100%, 85%)`.replace(')', `, ${segmentAlpha * 0.9})`);
-                    const color2 = `hsl(${point2.hue}, 100%, 85%)`.replace(')', `, ${segmentAlpha * 0.6})`);
-                    
-                    gradient.addColorStop(0, color1);
-                    gradient.addColorStop(1, color2);
-                    
-                    ctx.beginPath();
-                    ctx.moveTo(point1.x, point1.y);
-                    ctx.lineTo(point2.x, point2.y);
-                    ctx.strokeStyle = gradient;
-                    ctx.lineWidth = point1.size * (1.5 - progress * 0.7);
-                    ctx.lineCap = 'round';
-                    ctx.stroke();
-                }
-                
-                // ===== VẼ ĐẦU SAO BĂNG - NHỎ VÀ LẤP LÁNH =====
-                
-                // Inner core - sáng nhất
-                ctx.beginPath();
-                ctx.arc(star.x, star.y, star.size * 1.2, 0, Math.PI * 2);
-                const coreGradient = ctx.createRadialGradient(
-                    star.x, star.y, 0,
-                    star.x, star.y, star.size * 1.2
-                );
-                coreGradient.addColorStop(0, '#FFFFFF');
-                coreGradient.addColorStop(0.7, currentColor.replace(')', `, ${alpha * 0.9})`));
-                coreGradient.addColorStop(1, currentColor.replace(')', `, ${alpha * 0.3})`));
-                ctx.fillStyle = coreGradient;
-                ctx.fill();
-                
-                // Star shape cho sao lớn hơn
-                if (star.sizeMultiplier > 0.9 && alpha > 0.5) {
-                    ctx.save();
-                    ctx.translate(star.x, star.y);
-                    ctx.rotate(star.rotation);
-                    
-                    const spikes = Math.random() > 0.5 ? 4 : 5;
-                    const outerRadius = star.size * 1.8;
-                    const innerRadius = star.size * 0.8;
-                    
-                    ctx.beginPath();
-                    for (let i = 0; i < spikes * 2; i++) {
-                        const radius = i % 2 === 0 ? outerRadius : innerRadius;
-                        const angle = (Math.PI * i) / spikes;
-                        const x = Math.cos(angle) * radius;
-                        const y = Math.sin(angle) * radius;
-                        
-                        if (i === 0) {
-                            ctx.moveTo(x, y);
-                        } else {
-                            ctx.lineTo(x, y);
-                        }
-                    }
-                    ctx.closePath();
-                    
-                    const starGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, outerRadius);
-                    starGradient.addColorStop(0, '#FFFFFF');
-                    starGradient.addColorStop(0.3, currentColor.replace(')', `, ${alpha * 0.8})`));
-                    starGradient.addColorStop(1, currentColor.replace(')', `, ${alpha * 0.2})`));
-                    
-                    ctx.fillStyle = starGradient;
-                    ctx.globalAlpha = alpha * 0.7;
-                    ctx.fill();
-                    ctx.restore();
-                }
-                
-                // ===== GLOW EFFECT - NHẸ NHÀNG HƠN =====
-                
-                // Soft glow
-                if (star.glowIntensity > 0.4 && alpha > 0.2) {
-                    ctx.beginPath();
-                    ctx.arc(star.x, star.y, star.size * 2.5 * star.glowIntensity, 0, Math.PI * 2);
-                    const glowGradient = ctx.createRadialGradient(
-                        star.x, star.y, 0,
-                        star.x, star.y, star.size * 2.5 * star.glowIntensity
-                    );
-                    glowGradient.addColorStop(0, currentColor.replace(')', `, ${0.4 * alpha * star.glowIntensity})`));
-                    glowGradient.addColorStop(0.6, currentColor.replace(')', `, ${0.2 * alpha * star.glowIntensity})`));
-                    glowGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                    ctx.fillStyle = glowGradient;
-                    ctx.fill();
-                }
-                
-                // Sparkle effect - thêm hạt lấp lánh nhỏ
-                if (star.brightness > 0.6 && Math.sin(star.twinklePhase) > 0.8) {
-                    const sparkleSize = star.size * 0.8;
-                    const angles = [0, Math.PI/2, Math.PI, 3*Math.PI/2];
-                    
-                    for (const angle of angles) {
-                        const distance = star.size * 2;
-                        const sparkleX = star.x + Math.cos(star.rotation + angle) * distance;
-                        const sparkleY = star.y + Math.sin(star.rotation + angle) * distance;
-                        
-                        ctx.beginPath();
-                        ctx.arc(sparkleX, sparkleY, sparkleSize, 0, Math.PI * 2);
-                        ctx.fillStyle = '#FFFFFF';
-                        ctx.globalAlpha = alpha * 0.4 * star.brightness;
-                        ctx.fill();
-                    }
-                    ctx.globalAlpha = 1.0;
-                }
-            }
-            
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.restore();
-        }
-
-        // ====================== HÀM ĐẾM PHÁO GẦN ======================
+        // ====================== HÀM HỖ TRỢ ======================
         function countNearParticles() {
             let count = 0;
             for (let p of particles) {
@@ -643,7 +421,7 @@
             return count;
         }
 
-        // ====================== HỆ THỐNG ĐIỀU CHỈNH CAO TRÀO VỚI LOOP ======================
+        // ====================== HỆ THỐNG ĐIỀU CHỈNH CAO TRÀO ======================
         function updateClimaxSystem(currentTime) {
             if (!startTime) return 1.0;
             
@@ -656,7 +434,7 @@
             if (cycleTime < phases.buildup) {
                 climaxSystem.phase = 'buildup';
                 const progress = cycleTime / phases.buildup;
-                climaxSystem.climaxIntensity = 1.0 + progress * 0.4;
+                climaxSystem.climaxIntensity = 1.0 + progress * 0.5; // TĂNG tốc độ tăng
                 climaxSystem.soundIntensity = 1.0;
                 
             } else if (cycleTime < phases.buildup + phases.climax) {
@@ -669,23 +447,23 @@
                 const climaxProgress = (cycleTime - phases.buildup) / phases.climax;
                 
                 if (climaxProgress < 0.3) {
-                    climaxSystem.climaxIntensity = 1.4 + climaxProgress * 2.0;
+                    climaxSystem.climaxIntensity = 1.5 + climaxProgress * 3.0;
                 } else if (climaxProgress < 0.7) {
-                    climaxSystem.climaxIntensity = 2.0 + (climaxProgress - 0.3) * 2.0;
+                    climaxSystem.climaxIntensity = 2.4 + (climaxProgress - 0.3) * 3.0;
                 } else {
-                    climaxSystem.climaxIntensity = 2.8 - (climaxProgress - 0.7) * 1.8;
+                    climaxSystem.climaxIntensity = 3.6 - (climaxProgress - 0.7) * 2.5;
                 }
                 
-                climaxSystem.soundIntensity = Math.min(1.8, 1.0 + climaxSystem.climaxIntensity * 0.25);
-                climaxSystem.bassInterval = Math.max(300, 800 - climaxSystem.climaxIntensity * 150);
+                climaxSystem.soundIntensity = Math.min(2.0, 1.0 + climaxSystem.climaxIntensity * 0.3);
+                climaxSystem.bassInterval = Math.max(250, 700 - climaxSystem.climaxIntensity * 180);
                 
             } else if (cycleTime < totalPhaseTime) {
                 climaxSystem.phase = 'cooldown';
                 climaxSystem.isClimaxActive = false;
                 
                 const cooldownProgress = (cycleTime - (phases.buildup + phases.climax)) / phases.cooldown;
-                climaxSystem.climaxIntensity = Math.max(1.0, 1.4 - cooldownProgress * 0.4);
-                climaxSystem.soundIntensity = Math.max(1.0, 1.2 - cooldownProgress * 0.2);
+                climaxSystem.climaxIntensity = Math.max(1.0, 1.5 - cooldownProgress * 0.5);
+                climaxSystem.soundIntensity = Math.max(1.0, 1.3 - cooldownProgress * 0.3);
                 
             } else {
                 climaxSystem.phase = 'waiting';
@@ -711,23 +489,31 @@
             }
         }
 
-        function getExplosionTypeForPhase() {
-            if (climaxSystem.phase === 'climax') {
-                const rand = Math.random();
-                let cumulative = 0;
-                
-                for (let [type, probability] of Object.entries(FIREWORK_CONFIG.explosionTypes.climax)) {
-                    cumulative += probability;
-                    if (rand <= cumulative) {
-                        return type;
-                    }
+        // CHỌN LOẠI KHOẢNG CÁCH XEN KẼ
+        function getDistanceType() {
+            const rand = Math.random();
+            let cumulative = 0;
+            
+            for (let [type, probability] of Object.entries(FIREWORK_CONFIG.distanceDistribution)) {
+                cumulative += probability;
+                if (rand <= cumulative) {
+                    climaxSystem.currentDistanceType = type;
+                    return type;
                 }
             }
+            return 'medium';
+        }
+
+        // CHỌN LOẠI PHÁO HOA SINH ĐỘNG
+        function getExplosionTypeForPhase() {
+            const explosionTypes = climaxSystem.phase === 'climax' 
+                ? FIREWORK_CONFIG.explosionTypes.climax 
+                : FIREWORK_CONFIG.explosionTypes.normal;
             
             const rand = Math.random();
             let cumulative = 0;
             
-            for (let [type, probability] of Object.entries(FIREWORK_CONFIG.explosionTypes.normal)) {
+            for (let [type, probability] of Object.entries(explosionTypes)) {
                 cumulative += probability;
                 if (rand <= cumulative) {
                     return type;
@@ -737,157 +523,7 @@
             return 'peony';
         }
 
-        // ====================== HỆ THỐNG NHẠC NỀN ======================
-        function initBackgroundMusic() {
-            return new Promise((resolve, reject) => {
-                try {
-                    backgroundMusic = new Audio();
-                    backgroundMusic.src = MUSIC_FILE;
-                    backgroundMusic.loop = true;
-                    backgroundMusic.volume = 0.6;
-                    backgroundMusic.preload = 'auto';
-                    
-                    backgroundMusic.addEventListener('loadeddata', () => {
-                        isMusicLoaded = true;
-                        resolve(true);
-                    });
-                    
-                    backgroundMusic.addEventListener('error', (e) => {
-                        console.error("Lỗi tải nhạc:", e);
-                        resolve(false);
-                    });
-                    
-                    backgroundMusic.load();
-                    
-                } catch (e) {
-                    console.error("Lỗi khởi tạo nhạc:", e);
-                    resolve(false);
-                }
-            });
-        }
-
-        function playBackgroundMusic() {
-            if (!backgroundMusic || !isMusicLoaded) {
-                return false;
-            }
-            
-            try {
-                backgroundMusic.volume = 0;
-                const playPromise = backgroundMusic.play();
-                
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        fadeMusicVolume(0, 0.6, 1.5);
-                    }).catch(error => {
-                        console.error("Lỗi phát nhạc:", error);
-                    });
-                }
-                
-                return true;
-            } catch (e) {
-                console.error("Lỗi khi phát nhạc:", e);
-                return false;
-            }
-        }
-
-        function fadeMusicVolume(from, to, duration) {
-            if (!backgroundMusic) return;
-            
-            const startTime = Date.now();
-            const endTime = startTime + duration * 1000;
-            
-            function updateVolume() {
-                const now = Date.now();
-                const progress = Math.min((now - startTime) / (duration * 1000), 1);
-                const currentVolume = from + (to - from) * progress;
-                
-                backgroundMusic.volume = Math.max(0, Math.min(1, currentVolume));
-                
-                if (progress < 1) {
-                    requestAnimationFrame(updateVolume);
-                }
-            }
-            
-            updateVolume();
-        }
-
-        // ====================== HỆ THỐNG ÂM THANH TỐI ƯU ======================
-        function initAudioSystem() {
-            try {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                
-                masterGain = audioCtx.createGain();
-                masterGain.gain.value = SOUND_CONFIG.masterVolume;
-                
-                masterGain.connect(audioCtx.destination);
-                
-                return true;
-            } catch (e) {
-                console.log("Audio không được hỗ trợ, tiếp tục không âm thanh");
-                return false;
-            }
-        }
-
-        function createSimpleBassSound(frequency, duration = 1.0, volume = 1.0) {
-            if (!audioCtx || activeSounds.size > 4) return null;
-            
-            const now = audioCtx.currentTime;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            
-            osc.type = 'sine';
-            osc.frequency.value = frequency;
-            
-            gain.gain.setValueAtTime(0.001, now);
-            gain.gain.exponentialRampToValueAtTime(volume, now + 0.1);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-            
-            osc.connect(gain).connect(masterGain);
-            osc.start(now);
-            osc.stop(now + duration);
-            
-            const soundId = Symbol();
-            activeSounds.add(soundId);
-            
-            setTimeout(() => {
-                activeSounds.delete(soundId);
-            }, duration * 1000);
-            
-            return soundId;
-        }
-
-        function playBassSound() {
-            if (!audioCtx || activeSounds.size > 3) return;
-            
-            const currentTime = performance.now();
-            
-            if (climaxSystem.phase === 'climax' && 
-                currentTime - climaxSystem.lastBassTime > climaxSystem.bassInterval) {
-                climaxSystem.lastBassTime = currentTime;
-                
-                if (Math.random() > 0.6) {
-                    const baseFreq = 40 + Math.random() * 20 * climaxSystem.soundIntensity;
-                    createSimpleBassSound(
-                        baseFreq,
-                        0.8 + Math.random() * 0.4,
-                        SOUND_CONFIG.layers.sub.weight * climaxSystem.soundIntensity * 0.8
-                    );
-                }
-            } else if (currentTime > nextSoundTime) {
-                soundSequence = (soundSequence + 1) % 3;
-                const baseFreq = 45 + Math.random() * 15;
-                
-                createSimpleBassSound(
-                    baseFreq,
-                    1.0 + Math.random() * 0.5,
-                    SOUND_CONFIG.layers.sub.weight * 0.7
-                );
-                
-                nextSoundTime = currentTime + SOUND_CONFIG.baseInterval + (Math.random() - 0.5) * SOUND_CONFIG.intervalVariation;
-            }
-        }
-
-        // ====================== HỆ THỐNG PHÁO HOA TỐI ƯU LAG ======================
+        // ====================== HỆ THỐNG PHÁO HOA MẠNH MẼ ======================
         function createParticlePool() {
             particles = [];
             
@@ -902,16 +538,27 @@
                     isNear: false,
                     isRocket: false,
                     isSpecial: false,
+                    distanceType: 'medium',
                     
+                    // HIỆU ỨNG MỚI
                     trail: false,
                     sparkle: false,
                     glitter: false,
+                    colorShift: false,
+                    pulse: false,
+                    
                     fade: 1.0,
                     gravity: 0.08,
                     drag: 0.97,
                     
                     glowSize: 0,
-                    trailLength: 0
+                    trailLength: 0,
+                    twinklePhase: 0,
+                    twinkleSpeed: 0,
+                    
+                    // HIỆU ỨNG THỨ CẤP
+                    hasSecondaryExplosion: false,
+                    secondaryTimer: 0
                 });
             }
         }
@@ -933,7 +580,7 @@
                 }
             }
             
-            if (oldestParticle && oldestLife > 0.7) {
+            if (oldestParticle && oldestLife > 0.6) {
                 oldestParticle.active = false;
                 return oldestParticle;
             }
@@ -957,218 +604,450 @@
             return count;
         }
 
+        // TẠO ROCKET VỚI KHOẢNG CÁCH XEN KẼ
         function createRocket() {
             const activeCount = countActiveParticles();
-            if (activeCount > FIREWORK_CONFIG.maxActiveParticles * 0.9) return;
+            if (activeCount > FIREWORK_CONFIG.maxActiveParticles * 0.85) return; // GIẢM ngưỡng để tạo nhiều hơn
 
-            const maxNearParticles = FIREWORK_CONFIG.maxActiveParticles * 0.2;
-            const currentNearCount = countNearParticles();
+            // CHỌN KHOẢNG CÁCH XEN KẼ
+            const distanceType = getDistanceType();
+            const settings = FIREWORK_CONFIG.distanceSettings[distanceType];
             
-            let adjustedNearProb = FIREWORK_CONFIG.distanceDistribution.near;
-            if (climaxSystem.phase === 'climax') {
-                adjustedNearProb = currentNearCount > maxNearParticles ? 0.15 : 0.3;
-            } else {
-                adjustedNearProb = currentNearCount > maxNearParticles * 0.6 ? 0.1 : 0.2;
+            // TĂNG SỐ LƯỢNG ROCKET TRONG BURST
+            const climaxConfig = FIREWORK_CONFIG.adaptiveExplosionRate.climaxRate;
+            const burstCount = climaxSystem.phase === 'climax' 
+                ? climaxConfig.burstCount + Math.floor(Math.random() * 2) // THÊM 0-1 rocket nữa
+                : 1;
+            
+            for (let b = 0; b < burstCount; b++) {
+                setTimeout(() => {
+                    if (!isRunning || countActiveParticles() > FIREWORK_CONFIG.maxActiveParticles * 0.9) return;
+                    
+                    const x = Math.random() * window.innerWidth;
+                    const yStart = window.innerHeight;
+                    const hue = Math.random() * 360;
+                    
+                    // BIẾN THỂ MÀU SẮC
+                    const hueVariation = distanceType === 'near' ? 20 : 
+                                       distanceType === 'medium' ? 30 : 40;
+                    const baseHue = (hue + (Math.random() - 0.5) * hueVariation) % 360;
+                    
+                    const p = getParticle();
+                    if (p) {
+                        p.x = x;
+                        p.y = yStart;
+                        p.vx = (Math.random() - 0.5) * 1.5 * climaxSystem.climaxIntensity; // TĂNG độ ngẫu nhiên
+                        p.vy = -(12 + Math.random() * 7) * FIREWORK_CONFIG.rocketSpeedMultiplier * settings.speedMultiplier * climaxSystem.climaxIntensity; // TĂNG tốc độ
+                        p.life = 0;
+                        p.maxLife = 45 + Math.random() * 20; // TĂNG đời sống
+                        p.color = `hsl(${baseHue}, 100%, ${distanceType === 'near' ? 85 : (distanceType === 'medium' ? 75 : 65)}%)`;
+                        p.size = (1.4 + Math.random() * 0.8) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * climaxSystem.climaxIntensity; // TĂNG kích thước
+                        p.active = true;
+                        p.isRocket = true;
+                        p.isNear = distanceType === 'near';
+                        p.distanceType = distanceType;
+                        p.glowSize = p.size * 2.5 * climaxSystem.climaxIntensity * settings.glowIntensity; // TĂNG glow
+                        p.trail = Math.random() < FIREWORK_CONFIG.specialEffects.trailChance;
+                        p.sparkle = Math.random() < settings.sparkleChance;
+                        
+                        // HIỆU ỨNG ĐẶC BIỆT CHO PHÁO GẦN
+                        if (distanceType === 'near') {
+                            p.glitter = Math.random() < FIREWORK_CONFIG.specialEffects.glitterChance;
+                            p.colorShift = Math.random() < FIREWORK_CONFIG.specialEffects.colorShiftChance;
+                            p.pulse = Math.random() < FIREWORK_CONFIG.specialEffects.pulseChance;
+                            p.trailLength = 6 + Math.floor(Math.random() * 4);
+                        }
+                        
+                        p.isSpecial = climaxSystem.phase === 'climax' && Math.random() > 0.7; // TĂNG tỷ lệ đặc biệt
+                    }
+
+                    // TẠO TRAIL ĐẸP HƠN
+                    if (p && p.trail) {
+                        const trailInterval = setInterval(() => {
+                            if (!isRunning || !p || !p.active) {
+                                clearInterval(trailInterval);
+                                return;
+                            }
+                            
+                            const trail = getParticle();
+                            if (trail) {
+                                trail.x = p.x + (Math.random() - 0.5) * 3;
+                                trail.y = p.y + (Math.random() - 0.5) * 3;
+                                trail.vx = p.vx * 0.2 + (Math.random() - 0.5) * 0.6;
+                                trail.vy = p.vy * 0.1 + Math.random() * 1.2;
+                                trail.life = 0;
+                                trail.maxLife = 25 + Math.random() * 20;
+                                trail.color = p.color.replace('%)', '%, 0.8)').replace('hsl', 'hsla');
+                                trail.size = p.size * 0.5;
+                                trail.active = true;
+                                trail.fade = 0.85;
+                                trail.drag = 0.93;
+                                trail.distanceType = distanceType;
+                            }
+                        }, 30); // TĂNG tần suất trail
+                    }
+
+                    // LÊN LỊCH NỔ
+                    setTimeout(() => {
+                        if (!isRunning) return;
+                        
+                        const minHeight = settings.minHeight * window.innerHeight;
+                        const maxHeight = settings.maxHeight * window.innerHeight;
+                        const yExplode = minHeight + Math.random() * (maxHeight - minHeight);
+                        
+                        const explosionType = getExplosionTypeForPhase();
+                        createEnhancedExplosion(x, yExplode, baseHue, distanceType, explosionType);
+                        
+                        // ÂM THANH
+                        if (climaxSystem.phase === 'climax' || Math.random() > 0.4) { // TĂNG tần suất âm thanh
+                            playBassSound();
+                        }
+                    }, (distanceType === 'near' ? 400 : (distanceType === 'medium' ? 600 : 800)) + 
+                       Math.random() * 300 / climaxSystem.climaxIntensity); // GIẢM thời gian
+                    
+                }, b * (climaxConfig.burstDelay || 50));
             }
-            
-            const isNear = Math.random() < adjustedNearProb;
-            const settings = FIREWORK_CONFIG.distanceSettings[isNear ? 'near' : 'far'];
-            
-            const x = Math.random() * window.innerWidth;
-            const yStart = window.innerHeight;
-            const hue = Math.random() * 360;
-
-            const p = getParticle();
-            if (p) {
-                p.x = x;
-                p.y = yStart;
-                p.vx = (Math.random() - 0.5) * 1.2 * climaxSystem.climaxIntensity;
-                p.vy = -(10 + Math.random() * 5) * FIREWORK_CONFIG.rocketSpeedMultiplier * settings.speedMultiplier * climaxSystem.climaxIntensity;
-                p.life = 0;
-                p.maxLife = 40 + Math.random() * 15;
-                p.color = `hsl(${hue}, 100%, ${isNear ? 80 : 70}%)`;
-                p.size = (1.2 + Math.random() * 0.6) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * climaxSystem.climaxIntensity;
-                p.active = true;
-                p.isRocket = true;
-                p.isNear = isNear;
-                p.glowSize = p.size * 2.0 * climaxSystem.climaxIntensity;
-                p.isSpecial = climaxSystem.phase === 'climax' && Math.random() > 0.8;
-            }
-
-            setTimeout(() => {
-                if (!isRunning) return;
-                
-                const minHeight = settings.minHeight * window.innerHeight;
-                const maxHeight = settings.maxHeight * window.innerHeight;
-                const yExplode = minHeight + Math.random() * (maxHeight - minHeight);
-                
-                const explosionType = getExplosionTypeForPhase();
-                createSimpleExplosion(x, yExplode, hue, isNear, explosionType);
-                
-                if (climaxSystem.phase === 'climax' && Math.random() > 0.7) {
-                    playBassSound();
-                }
-            }, (isNear ? 500 : 700) + Math.random() * 400 / climaxSystem.climaxIntensity);
         }
 
-        function createSimpleExplosion(x, y, baseHue, isNear, type = 'peony') {
+        // TẠO VỤ NỔ SINH ĐỘNG VỚI NHIỀU HẠT
+        function createEnhancedExplosion(x, y, baseHue, distanceType, explosionType) {
             const activeCount = countActiveParticles();
-            if (activeCount > FIREWORK_CONFIG.maxActiveParticles * 0.85) return;
+            if (activeCount > FIREWORK_CONFIG.maxActiveParticles * 0.8) return;
 
-            const settings = FIREWORK_CONFIG.distanceSettings[isNear ? 'near' : 'far'];
+            const settings = FIREWORK_CONFIG.distanceSettings[distanceType];
             const intensityMultiplier = climaxSystem.climaxIntensity;
-            const particleMultiplier = 0.7 + intensityMultiplier * 0.3;
             
-            if (type === 'special' && Math.random() > 0.9) {
-                createSpecialExplosion(x, y, baseHue, isNear);
-                return;
+            // TĂNG SỐ LƯỢNG HẠT CƠ BẢN
+            const baseParticleMultiplier = settings.particleMultiplier || 1.0;
+            const particleMultiplier = baseParticleMultiplier * (0.9 + intensityMultiplier * 0.5);
+            
+            switch(explosionType) {
+                case 'peony':
+                    createPeonyExplosion(x, y, baseHue, distanceType, settings, particleMultiplier);
+                    break;
+                case 'chrysanthemum':
+                    createChrysanthemumExplosion(x, y, baseHue, distanceType, settings, particleMultiplier);
+                    break;
+                case 'double_ring':
+                    createDoubleRingExplosion(x, y, baseHue, distanceType, settings, particleMultiplier);
+                    break;
+                case 'spiral':
+                    createSpiralExplosion(x, y, baseHue, distanceType, settings, particleMultiplier);
+                    break;
+                case 'heart':
+                    createHeartExplosion(x, y, baseHue, distanceType, settings, particleMultiplier);
+                    break;
+                case 'special':
+                    createSpecialExplosion(x, y, baseHue, distanceType, settings, particleMultiplier);
+                    break;
+                default:
+                    createPeonyExplosion(x, y, baseHue, distanceType, settings, particleMultiplier);
             }
-            
-            const numParticles = Math.floor(((isNear ? 80 : 70) + Math.random() * 50) * particleMultiplier);
+        }
+
+        // PEONY EXPLOSION - CẢI TIẾN
+        function createPeonyExplosion(x, y, baseHue, distanceType, settings, multiplier = 1.0) {
+            const numParticles = Math.floor(((distanceType === 'near' ? 120 : (distanceType === 'medium' ? 100 : 90)) + 
+                                            Math.random() * 80) * multiplier); // TĂNG số lượng
             
             for (let i = 0; i < numParticles; i++) {
                 const p = getParticle();
                 if (!p) continue;
                 
                 const angle = Math.random() * Math.PI * 2;
-                const speed = (2 + Math.random() * 3) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier * intensityMultiplier;
+                const speed = (3 + Math.random() * 4.5) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier * climaxSystem.climaxIntensity;
                 
                 p.x = x;
                 p.y = y;
                 p.vx = Math.cos(angle) * speed;
                 p.vy = Math.sin(angle) * speed;
                 p.life = 0;
-                p.maxLife = (isNear ? 60 : 50) + Math.random() * 40;
-                p.color = `hsl(${baseHue}, 100%, ${(isNear ? 70 : 60) + Math.random() * 15}%)`;
-                p.size = (0.8 + Math.random() * 0.6) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * intensityMultiplier;
+                p.maxLife = (distanceType === 'near' ? 85 : (distanceType === 'medium' ? 75 : 65)) + Math.random() * 60;
+                
+                // MÀU SẮC PHONG PHÚ HƠN
+                const hueShift = (Math.random() - 0.5) * 60;
+                const saturation = 95 + Math.random() * 5;
+                const brightness = (distanceType === 'near' ? 80 : (distanceType === 'medium' ? 70 : 60)) + Math.random() * 25;
+                p.color = `hsl(${(baseHue + hueShift) % 360}, ${saturation}%, ${brightness}%)`;
+                
+                p.size = (1.3 + Math.random() * 0.9) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * climaxSystem.climaxIntensity;
                 p.active = true;
-                p.isNear = isNear;
-                p.trail = Math.random() > 0.5;
-                p.gravity = 0.1;
-                p.drag = 0.97;
-                p.glowSize = p.size * 1.5 * intensityMultiplier;
+                p.distanceType = distanceType;
+                
+                // THÊM HIỆU ỨNG
+                p.trail = Math.random() < FIREWORK_CONFIG.specialEffects.trailChance;
+                p.sparkle = Math.random() < FIREWORK_CONFIG.specialEffects.sparkleChance;
+                p.glitter = Math.random() < FIREWORK_CONFIG.specialEffects.glitterChance;
+                p.colorShift = Math.random() < 0.3;
+                p.pulse = Math.random() < FIREWORK_CONFIG.specialEffects.pulseChance;
+                
+                p.gravity = 0.09;
+                p.drag = 0.98;
+                p.glowSize = p.size * (distanceType === 'near' ? 2.8 : (distanceType === 'medium' ? 2.3 : 1.8)) * climaxSystem.climaxIntensity;
+                p.twinklePhase = Math.random() * Math.PI * 2;
+                p.twinkleSpeed = 0.08 + Math.random() * 0.12;
+                
+                // NỔ THỨ CẤP
+                if (Math.random() < FIREWORK_CONFIG.specialEffects.secondaryExplosionChance) {
+                    p.hasSecondaryExplosion = true;
+                    p.secondaryTimer = p.maxLife * 0.6;
+                }
             }
         }
 
-        function createSpecialExplosion(x, y, baseHue, isNear) {
-            const activeCount = countActiveParticles();
-            if (activeCount > FIREWORK_CONFIG.maxActiveParticles * 0.8) return;
+        // CHRYSANTHEMUM EXPLOSION - CẢI TIẾN
+        function createChrysanthemumExplosion(x, y, baseHue, distanceType, settings, multiplier = 1.0) {
+            const rays = Math.floor((28 + Math.random() * 22) * multiplier); // TĂNG số tia
+            const particlesPerRay = Math.floor((9 + Math.random() * 7) * multiplier); // TĂNG số hạt mỗi tia
+            
+            for (let i = 0; i < rays; i++) {
+                const angle = (Math.PI * 2 * i) / rays;
+                const rayHueShift = (i / rays) * 120; // Gradient màu theo tia
+                
+                for (let j = 0; j < particlesPerRay; j++) {
+                    const p = getParticle();
+                    if (!p) continue;
+                    
+                    const speed = (6 + j * 0.9 + Math.random() * 2.2) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier * climaxSystem.climaxIntensity;
+                    
+                    p.x = x;
+                    p.y = y;
+                    p.vx = Math.cos(angle) * speed;
+                    p.vy = Math.sin(angle) * speed;
+                    p.life = 0;
+                    p.maxLife = (distanceType === 'near' ? 80 : (distanceType === 'medium' ? 70 : 60)) + Math.random() * 45;
+                    
+                    const hueShift = (Math.random() - 0.5) * 40 + rayHueShift;
+                    const brightness = (distanceType === 'near' ? 75 : (distanceType === 'medium' ? 65 : 55)) + Math.random() * 30;
+                    p.color = `hsl(${(baseHue + hueShift) % 360}, 100%, ${brightness}%)`;
+                    
+                    p.size = (1.0 + Math.random() * 0.8) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * climaxSystem.climaxIntensity;
+                    p.active = true;
+                    p.distanceType = distanceType;
+                    p.trail = true;
+                    p.trailLength = (distanceType === 'near' ? 5 : (distanceType === 'medium' ? 4 : 3)) + Math.random() * 3;
+                    p.sparkle = j % 3 === 0;
+                    p.gravity = 0.08;
+                    p.drag = 0.985;
+                    p.glowSize = p.size * (distanceType === 'near' ? 2.2 : (distanceType === 'medium' ? 1.9 : 1.5)) * climaxSystem.climaxIntensity;
+                }
+            }
+        }
 
-            const settings = FIREWORK_CONFIG.distanceSettings[isNear ? 'near' : 'far'];
-            const numParticles = Math.floor(120 * climaxSystem.climaxIntensity);
+        // VÒNG KÉP - HIỆU ỨNG MỚI
+        function createDoubleRingExplosion(x, y, baseHue, distanceType, settings, multiplier = 1.0) {
+            const numRings = 2;
+            const particlesPerRing = Math.floor((40 + Math.random() * 30) * multiplier);
             
-            const colors = [
-                `hsl(${baseHue}, 100%, 70%)`,
-                `hsl(${(baseHue + 120) % 360}, 100%, 70%)`,
-                `hsl(${(baseHue + 240) % 360}, 100%, 70%)`
-            ];
+            for (let ring = 0; ring < numRings; ring++) {
+                const ringHue = (baseHue + ring * 180) % 360; // Màu đối lập cho vòng thứ 2
+                
+                for (let i = 0; i < particlesPerRing; i++) {
+                    const p = getParticle();
+                    if (!p) continue;
+                    
+                    const angle = (Math.PI * 2 * i) / particlesPerRing;
+                    const ringRadius = (ring + 1) * 3; // Vòng ngoài lớn hơn
+                    const speed = (5 + ring * 0.8) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier * climaxSystem.climaxIntensity;
+                    
+                    p.x = x + Math.cos(angle) * ringRadius;
+                    p.y = y + Math.sin(angle) * ringRadius;
+                    p.vx = Math.cos(angle) * speed;
+                    p.vy = Math.sin(angle) * speed;
+                    p.life = 0;
+                    p.maxLife = (distanceType === 'near' ? 75 : (distanceType === 'medium' ? 65 : 55)) + Math.random() * 50;
+                    p.color = `hsl(${ringHue}, 100%, ${(distanceType === 'near' ? 75 : (distanceType === 'medium' ? 65 : 55)) + Math.random() * 25}%)`;
+                    p.size = (1.1 + Math.random() * 0.7) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * climaxSystem.climaxIntensity;
+                    p.active = true;
+                    p.distanceType = distanceType;
+                    p.trail = true;
+                    p.sparkle = true;
+                    p.gravity = 0.07;
+                    p.drag = 0.985;
+                    p.glowSize = p.size * 2.5 * climaxSystem.climaxIntensity;
+                    
+                    // Vòng ngoài quay ngược chiều
+                    if (ring === 1) {
+                        p.vx *= -0.7;
+                        p.vy *= -0.7;
+                    }
+                }
+            }
+        }
+
+        // XOẮN ỐC - HIỆU ỨNG MỚI
+        function createSpiralExplosion(x, y, baseHue, distanceType, settings, multiplier = 1.0) {
+            const spirals = 3;
+            const particlesPerSpiral = Math.floor((25 + Math.random() * 20) * multiplier);
             
-            for (let i = 0; i < numParticles; i++) {
+            for (let s = 0; s < spirals; s++) {
+                const spiralDirection = s % 2 === 0 ? 1 : -1; // Đảo chiều xoắn
+                const spiralHue = (baseHue + s * 120) % 360;
+                
+                for (let i = 0; i < particlesPerSpiral; i++) {
+                    const p = getParticle();
+                    if (!p) continue;
+                    
+                    const spiralProgress = i / particlesPerSpiral;
+                    const angle = (Math.PI * 2 * spiralProgress * 3) + (s * Math.PI * 2 / spirals);
+                    const radius = 2 + spiralProgress * 8;
+                    const speed = (4 + Math.random() * 3) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier * climaxSystem.climaxIntensity;
+                    
+                    p.x = x + Math.cos(angle) * radius;
+                    p.y = y + Math.sin(angle) * radius;
+                    p.vx = Math.cos(angle + Math.PI/2 * spiralDirection) * speed;
+                    p.vy = Math.sin(angle + Math.PI/2 * spiralDirection) * speed;
+                    p.life = 0;
+                    p.maxLife = (distanceType === 'near' ? 70 : (distanceType === 'medium' ? 60 : 50)) + Math.random() * 40;
+                    p.color = `hsl(${spiralHue}, 100%, ${(distanceType === 'near' ? 70 : (distanceType === 'medium' ? 60 : 50)) + Math.random() * 20}%)`;
+                    p.size = (0.9 + Math.random() * 0.6) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * climaxSystem.climaxIntensity;
+                    p.active = true;
+                    p.distanceType = distanceType;
+                    p.trail = true;
+                    p.gravity = 0.06;
+                    p.drag = 0.99;
+                    p.glowSize = p.size * 2.0 * climaxSystem.climaxIntensity;
+                }
+            }
+        }
+
+        // HÌNH TIM - HIỆU ỨNG ĐẶC BIỆT
+        function createHeartExplosion(x, y, baseHue, distanceType, settings, multiplier = 1.0) {
+            const particles = Math.floor((60 + Math.random() * 40) * multiplier);
+            
+            for (let i = 0; i < particles; i++) {
                 const p = getParticle();
                 if (!p) continue;
                 
-                const angle = Math.random() * Math.PI * 2;
-                const speed = (4 + Math.random() * 5) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier * climaxSystem.climaxIntensity;
+                // Phương trình hình tim
+                const t = (Math.PI * 2 * i) / particles;
+                const heartX = 16 * Math.pow(Math.sin(t), 3);
+                const heartY = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
                 
-                p.x = x;
-                p.y = y;
-                p.vx = Math.cos(angle) * speed;
-                p.vy = Math.sin(angle) * speed * 0.9;
+                const scale = 0.15 * climaxSystem.climaxIntensity;
+                const speed = (3 + Math.random() * 2.5) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier;
+                
+                p.x = x + heartX * scale;
+                p.y = y - heartY * scale; // Trừ y vì canvas y tăng xuống dưới
+                p.vx = (Math.random() - 0.5) * speed;
+                p.vy = (Math.random() - 0.5) * speed;
                 p.life = 0;
-                p.maxLife = (isNear ? 70 : 60) + Math.random() * 40;
-                p.color = colors[Math.floor(Math.random() * colors.length)];
-                p.size = (0.9 + Math.random() * 0.7) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * climaxSystem.climaxIntensity;
+                p.maxLife = (distanceType === 'near' ? 90 : (distanceType === 'medium' ? 80 : 70)) + Math.random() * 50;
+                
+                // Màu đỏ/pink cho hình tim
+                const heartHue = 340 + Math.random() * 20;
+                p.color = `hsl(${heartHue}, 100%, ${(distanceType === 'near' ? 75 : (distanceType === 'medium' ? 65 : 55)) + Math.random() * 25}%)`;
+                
+                p.size = (1.0 + Math.random() * 0.8) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * climaxSystem.climaxIntensity;
                 p.active = true;
-                p.isNear = isNear;
+                p.distanceType = distanceType;
                 p.trail = true;
-                p.gravity = 0.12;
-                p.drag = 0.96;
-                p.glowSize = p.size * 2.0 * climaxSystem.climaxIntensity;
-                p.isSpecial = true;
+                p.sparkle = true;
+                p.gravity = 0.05;
+                p.drag = 0.99;
+                p.glowSize = p.size * 2.8 * climaxSystem.climaxIntensity;
             }
         }
 
-        // ====================== RENDER TỐI ƯU ======================
+        // PHÁO ĐẶC BIỆT
+        function createSpecialExplosion(x, y, baseHue, distanceType, settings, multiplier = 1.0) {
+            // Kết hợp nhiều hiệu ứng
+            createPeonyExplosion(x, y, baseHue, distanceType, settings, multiplier * 0.6);
+            
+            // Thêm vòng
+            setTimeout(() => {
+                if (isRunning) {
+                    createDoubleRingExplosion(x, y, (baseHue + 180) % 360, distanceType, settings, multiplier * 0.4);
+                }
+            }, 200);
+            
+            // Thêm xoắn ốc
+            setTimeout(() => {
+                if (isRunning) {
+                    createSpiralExplosion(x, y, (baseHue + 90) % 360, distanceType, settings, multiplier * 0.3);
+                }
+            }, 400);
+        }
+
+        // ====================== RENDER SINH ĐỘNG ======================
         function renderParticle(p, ctx, progress) {
-            let alpha = p.isRocket ? (1 - progress ** 1.5) : (1 - progress ** 1.2);
+            let alpha = p.isRocket ? (1 - progress ** 1.8) : (1 - progress ** 1.4);
             
             if (climaxSystem.phase === 'climax') {
-                alpha *= 1.1;
+                alpha *= 1.15;
             }
             
-            if (p.isSpecial) {
-                alpha *= 0.8 + 0.3 * Math.sin(progress * 25);
+            // HIỆU ỨNG MÀU SẮC
+            let renderColor = p.color;
+            if (p.colorShift) {
+                const hueShift = Math.sin(p.life * 0.1) * 60;
+                renderColor = renderColor.replace(/hsl\(\d+/, match => 
+                    `hsl(${(parseInt(match.match(/\d+/)[0]) + hueShift) % 360}`);
+            }
+            
+            // HIỆU ỨNG PULSE
+            if (p.pulse) {
+                const pulse = 0.8 + Math.sin(p.life * 0.2) * 0.2;
+                alpha *= pulse;
+            }
+            
+            // HIỆU ỨNG TWINKLE
+            if (p.sparkle) {
+                const twinkle = 0.6 + Math.sin(p.twinklePhase + p.life * 0.3) * 0.4;
+                alpha *= twinkle;
             }
             
             const fadeAlpha = p.fade !== undefined ? p.fade : 1.0;
             alpha *= fadeAlpha;
             
-            if (p.glowSize && progress < 0.5 && alpha > 0.3) {
-                ctx.shadowBlur = p.glowSize * (1 - progress);
-                ctx.shadowColor = p.color;
+            // GLOW EFFECT
+            if (p.glowSize && progress < 0.6 && alpha > 0.3) {
+                const glowAlpha = alpha * (1 - progress * 1.5) * 0.6;
+                ctx.shadowBlur = p.glowSize * (1 - progress * 0.7);
+                ctx.shadowColor = renderColor.replace(')', `, ${glowAlpha})`).replace('hsl', 'hsla');
             }
             
-            ctx.fillStyle = p.color.replace(')', `, ${alpha})`).replace('hsl', 'hsla');
+            // TRAIL EFFECT
+            if (p.trail && p.trailLength && progress < 0.4 && !p.isRocket) {
+                ctx.shadowBlur = p.trailLength * (1 - progress * 2);
+                ctx.shadowColor = renderColor;
+            }
+            
+            // VẼ PARTICLE
+            ctx.fillStyle = renderColor.replace(')', `, ${alpha})`).replace('hsl', 'hsla');
             ctx.beginPath();
             
-            const currentSize = p.size * (p.isRocket ? 1.1 : (1 - progress * 0.3));
+            let currentSize = p.size;
+            if (p.isRocket) {
+                currentSize *= 1.2;
+            } else {
+                currentSize *= (1 - progress * 0.4);
+                
+                // HIỆU ỨNG GLITTER
+                if (p.glitter && alpha > 0.5) {
+                    const glitterSize = currentSize * (0.8 + Math.sin(p.life * 0.5) * 0.4);
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, glitterSize * 0.3, 0, Math.PI * 2);
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.globalAlpha = alpha * 0.7;
+                    ctx.fill();
+                    ctx.globalAlpha = 1.0;
+                }
+            }
+            
             ctx.arc(p.x, p.y, currentSize, 0, Math.PI * 2);
             ctx.fill();
             
             ctx.shadowBlur = 0;
-        }
-
-        // ====================== SAO BĂNG MÀN HÌNH CHỜ ======================
-        let preStartInterval = null;
-
-        function startPreShowShootingStars() {
-            // Tạo sao băng ban đầu (ít hơn cho mobile)
-            const initialCount = isMobile ? 2 : 3;
-            createShootingStars(initialCount);
             
-            // Lặp tạo sao băng với tần suất thấp hơn cho mobile
-            preStartInterval = setInterval(() => {
-                if (!showShootingStars || isRunning) {
-                    clearInterval(preStartInterval);
-                    return;
-                }
-                const randomCount = isMobile ? (1 + Math.floor(Math.random() * 2)) : (1 + Math.floor(Math.random() * 3));
-                createShootingStars(randomCount);
-            }, isMobile ? 3000 + Math.random() * 4000 : 2000 + Math.random() * 3000);
-        }
-
-        function stopPreShowShootingStars() {
-            if (preStartInterval) {
-                clearInterval(preStartInterval);
-                preStartInterval = null;
+            // XỬ LÝ NỔ THỨ CẤP
+            if (p.hasSecondaryExplosion && p.life >= p.secondaryTimer && p.active) {
+                p.hasSecondaryExplosion = false;
+                createSparks(p.x, p.y, p.color, 1.5);
             }
-            createFinalShootingStars();
         }
 
-        function createFinalShootingStars() {
-            if (finalShootingStarsActive) return;
-            
-            finalShootingStarsActive = true;
-            showShootingStars = false;
-            
-            // Tạo loạt sao băng cuối (nhiều hơn cho desktop)
-            const finalCount = isMobile ? 6 : 8;
-            for (let i = 0; i < finalCount; i++) {
-                setTimeout(() => {
-                    const batchSize = isMobile ? 1 : 2;
-                    createShootingStars(batchSize);
-                }, i * (isMobile ? 150 : 200));
-            }
-            
-            // Thời gian fade
-            setTimeout(() => {
-                finalShootingStarsActive = false;
-                // Xóa nhanh các sao băng còn lại
-                shootingStars = shootingStars.filter(star => !star.active);
-            }, isMobile ? 2500 : 3000);
-        }
-
-        // ====================== ANIMATE CHÍNH TỐI ƯU ======================
+        // ====================== ANIMATE MẠNH MẼ ======================
         let frameCount = 0;
         let lastFpsUpdate = 0;
         let fps = 60;
@@ -1183,104 +1062,103 @@
                 lastFpsUpdate = time;
                 
                 if (fps < 30 && isRunning) {
-                    climaxSystem.climaxIntensity *= 0.9;
+                    climaxSystem.climaxIntensity *= 0.95;
+                } else if (fps > 55 && isRunning) {
+                    climaxSystem.climaxIntensity *= 1.02;
                 }
             }
             
             const targetFrameTime = 1000 / FIREWORK_CONFIG.targetFPS;
-            const delta = lastTime === 0 ? 1 : Math.min((time - lastTime) / targetFrameTime, 3.0);
+            const delta = lastTime === 0 ? 1 : Math.min((time - lastTime) / targetFrameTime, 2.5);
             lastTime = time;
 
-            // Clear canvas với opacity phù hợp
-            let clearAlpha = 0.12;
-            if (isMobile) clearAlpha = 0.15;
+            // UPDATE CLIMAX SYSTEM
+            const climaxIntensity = updateClimaxSystem(time);
             
-            if (isRunning) {
-                const climaxIntensity = updateClimaxSystem(time);
-                if (climaxIntensity > 2.0) {
-                    clearAlpha = Math.max(0.08, clearAlpha * 0.7);
-                }
+            // CLEAR CANVAS
+            let clearAlpha = 0.1;
+            if (climaxIntensity > 2.0) {
+                clearAlpha = Math.max(0.04, 0.1 - (climaxIntensity - 2.0) * 0.02);
             }
+            if (isMobile) clearAlpha += 0.05;
             
             ctx.fillStyle = `rgba(0,0,0,${clearAlpha})`;
             ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
-            // Cập nhật và render sao băng
-            if (shootingStars.length > 0) {
-                updateShootingStars(delta);
-                renderShootingStars();
+            // UPDATE PARTICLES
+            ctx.save();
+            
+            let renderedCount = 0;
+            const maxRenderPerFrame = isMobile ? 1000 : 1500;
+            const activeParticles = [];
+            
+            // COLLECT ACTIVE PARTICLES FIRST
+            for (let p of particles) {
+                if (p.active) activeParticles.push(p);
             }
+            
+            // RENDER IN OPTIMAL ORDER (NEAR FIRST)
+            activeParticles.sort((a, b) => {
+                if (a.distanceType === 'near' && b.distanceType !== 'near') return -1;
+                if (b.distanceType === 'near' && a.distanceType !== 'near') return 1;
+                return 0;
+            });
+            
+            for (let p of activeParticles) {
+                if (renderedCount >= maxRenderPerFrame) {
+                    p.active = false;
+                    continue;
+                }
+                
+                // UPDATE POSITION
+                p.x += p.vx * delta;
+                p.y += p.vy * delta;
 
-            if (isRunning) {
-                // Phát âm thanh
-                if (Math.random() < 0.7) {
-                    playBassSound();
+                if (!p.isRocket) {
+                    p.vy += p.gravity * delta * climaxIntensity;
+                    p.vx *= Math.pow(p.drag, delta);
+                    p.vy *= Math.pow(p.drag, delta);
+                    
+                    // UPDATE TWINKLE
+                    if (p.twinkleSpeed) {
+                        p.twinklePhase += p.twinkleSpeed * delta;
+                    }
                 }
 
-                // Render particles
-                ctx.save();
-                
-                let renderedCount = 0;
-                const maxRenderPerFrame = isMobile ? 800 : 1200;
-                
-                for (let p of particles) {
-                    if (!p.active) continue;
-                    
-                    if (renderedCount >= maxRenderPerFrame) {
-                        p.active = false;
-                        continue;
-                    }
-                    
-                    p.x += p.vx * delta;
-                    p.y += p.vy * delta;
-
-                    if (!p.isRocket) {
-                        p.vy += p.gravity * delta * climaxSystem.climaxIntensity;
-                        p.vx *= Math.pow(p.drag, delta);
-                        p.vy *= Math.pow(p.drag, delta);
-                    }
-
-                    p.life += delta;
-                    if (p.life >= p.maxLife) {
-                        p.active = false;
-                        continue;
-                    }
-
-                    const progress = p.life / p.maxLife;
-                    renderParticle(p, ctx, progress);
-                    renderedCount++;
+                p.life += delta;
+                if (p.life >= p.maxLife) {
+                    p.active = false;
+                    continue;
                 }
-                ctx.restore();
 
-                // Tạo pháo mới
-                if (time > nextExplosionTime) {
-                    const interval = getCurrentExplosionInterval();
-                    const climaxConfig = FIREWORK_CONFIG.adaptiveExplosionRate.climaxRate;
-                    
-                    let rocketCount = 1;
-                    if (climaxSystem.phase === 'climax') {
-                        rocketCount = climaxConfig.burstCount;
-                        
-                        if (Math.random() < 0.3) {
-                            rocketCount += 1;
+                const progress = p.life / p.maxLife;
+                renderParticle(p, ctx, progress);
+                renderedCount++;
+            }
+            ctx.restore();
+
+            // CREATE NEW ROCKETS
+            if (time > nextExplosionTime) {
+                const interval = getCurrentExplosionInterval();
+                
+                // TĂNG SỐ LƯỢNG ROCKET Ở CAO TRÀO
+                let explosionCount = 1;
+                if (climaxSystem.phase === 'climax') {
+                    explosionCount = 2 + Math.floor(climaxIntensity / 2);
+                }
+                
+                for (let i = 0; i < explosionCount; i++) {
+                    setTimeout(() => {
+                        if (isRunning && countActiveParticles() < FIREWORK_CONFIG.maxActiveParticles * 0.75) {
+                            createRocket();
                         }
-                    }
-                    
-                    for (let i = 0; i < rocketCount; i++) {
-                        setTimeout(() => {
-                            if (isRunning && countActiveParticles() < FIREWORK_CONFIG.maxActiveParticles * 0.8) {
-                                createRocket();
-                            }
-                        }, i * climaxConfig.burstDelay);
-                    }
-                    
-                    nextExplosionTime = time + interval;
+                    }, i * 50);
                 }
-
-                requestAnimationFrame(animate);
-            } else {
-                requestAnimationFrame(animate);
+                
+                nextExplosionTime = time + interval;
             }
+
+            requestAnimationFrame(animate);
         }
 
         // ====================== KHỞI ĐỘNG ======================
@@ -1288,9 +1166,6 @@
         
         async function start() {
             btn.classList.add('clicked');
-            
-            // Dừng sao băng màn hình chờ
-            stopPreShowShootingStars();
             
             setTimeout(async () => {
                 try {
@@ -1305,7 +1180,7 @@
                     if (masterGain) {
                         masterGain.gain.setValueAtTime(0.001, audioCtx?.currentTime || 0);
                         if (audioCtx) {
-                            masterGain.gain.exponentialRampToValueAtTime(SOUND_CONFIG.masterVolume, audioCtx.currentTime + 2);
+                            masterGain.gain.exponentialRampToValueAtTime(SOUND_CONFIG.masterVolume, audioCtx.currentTime + 1.5);
                         }
                     }
 
@@ -1313,8 +1188,9 @@
                     startTime = performance.now();
                     lastTime = startTime;
                     
-                    nextExplosionTime = startTime + 500;
-                    nextSoundTime = startTime + 1000;
+                    // BẮT ĐẦU MẠNH MẼ
+                    nextExplosionTime = startTime + 300;
+                    nextSoundTime = startTime + 500;
 
                     requestAnimationFrame(animate);
                     
@@ -1325,29 +1201,17 @@
                     isRunning = true;
                     startTime = performance.now();
                     lastTime = startTime;
-                    nextExplosionTime = startTime + 500;
+                    nextExplosionTime = startTime + 300;
                     requestAnimationFrame(animate);
                 }
             }, 800);
         }
 
-        // ====================== KHỞI TẠO MÀN HÌNH CHỜ ======================
-        function initPreShow() {
-            canvas = document.getElementById('canvas');
-            ctx = canvas.getContext('2d');
-            canvas.style.display = 'block';
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            
-            // Bắt đầu hiển thị sao băng
-            startPreShowShootingStars();
-            
-            // Bắt đầu animation loop
-            requestAnimationFrame(animate);
-        }
-
         // ====================== EVENT LISTENERS ======================
-        window.addEventListener('DOMContentLoaded', initPreShow);
+        window.addEventListener('DOMContentLoaded', () => {
+            initCanvas();
+            canvas.style.display = 'block';
+        });
         
         btn.addEventListener('touchstart', (e) => {
             e.preventDefault();
