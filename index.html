@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pháo Hoa Tặng Cốt</title>
+    <title>Pháo Hoa Cao Trào Lặp Lại</title>
     <style>
         body {
             margin: 0;
@@ -36,10 +36,18 @@
             border: 1px solid rgba(0, 0, 0, 0.08);
             border-radius: 28px;
             cursor: pointer;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-            transition: transform 0.35s cubic-bezier(.22,1,.36,1), box-shadow 0.35s ease, background 0.35s ease;
+            box-shadow: 
+                0 10px 25px rgba(0, 0, 0, 0.08), 
+                inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                0 0 0 4px rgba(255, 255, 255, 0.3),
+                0 0 20px rgba(255, 255, 255, 0.5);
+            transition: transform 0.35s cubic-bezier(.22,1,.36,1), 
+                        box-shadow 0.35s ease, 
+                        background 0.35s ease;
             letter-spacing: 0.5px;
-            animation: floatSoft 4s ease-in-out infinite;
+            animation: 
+                pulseGlow 2s ease-in-out infinite,
+                bounceButton 1.5s ease-in-out infinite;
             overflow: hidden;
         }
 
@@ -59,13 +67,21 @@
         }
 
         #startBtn:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 1);
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 
+                0 18px 40px rgba(0, 0, 0, 0.12), 
+                inset 0 1px 0 rgba(255, 255, 255, 1),
+                0 0 0 6px rgba(255, 255, 255, 0.5),
+                0 0 30px rgba(255, 255, 255, 0.8);
+            animation-play-state: paused;
         }
 
         #startBtn:active {
-            transform: scale(0.92);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            transform: scale(0.95);
+            box-shadow: 
+                0 6px 15px rgba(0, 0, 0, 0.15),
+                0 0 0 8px rgba(255, 255, 255, 0.8),
+                0 0 40px rgba(255, 255, 255, 1);
             transition: transform 0.15s ease;
         }
 
@@ -73,73 +89,64 @@
             animation: fadeOutSmooth 0.9s cubic-bezier(.4,0,.2,1) forwards;
         }
 
-        /* ===== VIỀN SÁNG MẶC ĐỊNH ===== */
-        #startBtn::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            padding: 1.5px;
-            border-radius: 32px;
-            background: conic-gradient(
-                from 0deg,
-                transparent 0%,
-                rgba(255,255,255,0.9) 12%,
-                transparent 25%,
-                transparent 55%,
-                rgba(255,255,255,0.8) 65%,
-                transparent 78%,
-                transparent 100%
-            );
-            -webkit-mask:
-                linear-gradient(#000 0 0) content-box,
-                linear-gradient(#000 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            animation: borderGlowIdle 3.5s linear infinite;
-            opacity: 0.7;
-            pointer-events: none;
-        }
-
-        /* ===== KHI CLICK ===== */
-        #startBtn.burst::before {
-            animation: borderGlowBurst 0.6s linear forwards;
-            opacity: 1;
-        }
-
         .btn-text {
             position: relative;
             z-index: 1;
             color: #111;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        @keyframes floatSoft {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
+        /* Hiệu ứng nhấp nháy viền sáng */
+        @keyframes pulseGlow {
+            0%, 100% { 
+                box-shadow: 
+                    0 10px 25px rgba(0, 0, 0, 0.08), 
+                    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                    0 0 0 4px rgba(255, 255, 255, 0.3),
+                    0 0 20px rgba(255, 255, 255, 0.5);
+            }
+            50% { 
+                box-shadow: 
+                    0 10px 25px rgba(0, 0, 0, 0.08), 
+                    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                    0 0 0 8px rgba(255, 255, 255, 0.6),
+                    0 0 30px rgba(255, 255, 255, 0.8),
+                    0 0 50px rgba(255, 255, 255, 0.4);
+            }
+        }
+
+        /* Hiệu ứng nhảy lên xuống */
+        @keyframes bounceButton {
+            0%, 100% { 
+                transform: translateY(0); 
+            }
+            50% { 
+                transform: translateY(-15px); 
+            }
         }
 
         @keyframes fadeOutSmooth {
-            0% { opacity: 1; transform: scale(1) translateY(0); }
-            40% { opacity: 0.8; transform: scale(1.05) translateY(-16px); }
-            100% { opacity: 0; transform: scale(0.7) translateY(60px); visibility: hidden; }
-        }
-
-        @keyframes borderGlowIdle {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes borderGlowBurst {
-            0% {
-                transform: rotate(0deg);
-                opacity: 1;
+            0% { 
+                opacity: 1; 
+                transform: scale(1) translateY(0); 
+                box-shadow: 
+                    0 0 0 12px rgba(255, 255, 255, 0.9),
+                    0 0 60px rgba(255, 255, 255, 1);
             }
-            70% {
-                transform: rotate(720deg); /* chạy rất nhanh */
-                opacity: 1;
+            40% { 
+                opacity: 0.8; 
+                transform: scale(1.2) translateY(-25px); 
+                box-shadow: 
+                    0 0 0 20px rgba(255, 255, 255, 1),
+                    0 0 100px rgba(255, 255, 255, 1);
             }
-            100% {
-                transform: rotate(900deg);
-                opacity: 0; /* tắt */
+            100% { 
+                opacity: 0; 
+                transform: scale(0.8) translateY(80px); 
+                visibility: hidden; 
+                box-shadow: 
+                    0 0 0 0 rgba(255, 255, 255, 0),
+                    0 0 0 0 rgba(255, 255, 255, 0);
             }
         }
     </style>
@@ -260,23 +267,21 @@
                 }
             },
             
-            // CÁC LOẠI PHÁO HOA - GIẢM ĐỘ PHỨC TẠP
+            // CÁC LOẠI PHÁO HOA - BỎ PHÁO HOA WILLOW
             explosionTypes: {
                 normal: {
                     chrysanthemum: 0.3,
-                    peony: 0.3,
-                    palm: 0.1,
-                    willow: 0.1,
+                    peony: 0.4,           // TĂNG tỷ lệ peony
+                    palm: 0.15,
                     ring: 0.1,
-                    crossette: 0.1
+                    crossette: 0.05
                 },
                 climax: {
                     chrysanthemum: 0.25,
-                    peony: 0.3,
-                    palm: 0.1,
-                    willow: 0.1,
+                    peony: 0.4,           // TĂNG tỷ lệ peony
+                    palm: 0.15,
                     ring: 0.1,
-                    crossette: 0.1,
+                    crossette: 0.05,
                     special: 0.05
                 }
             }
@@ -1035,7 +1040,7 @@
             }, (distanceType === 'near' ? 500 : 700) + Math.random() * 400 / climaxSystem.climaxIntensity);
         }
 
-        // ====================== CÁC KIỂU NỔ PHÁO HOA ĐA DẠNG ======================
+        // ====================== CÁC KIỂU NỔ PHÁO HOA ĐA DẠNG (ĐÃ BỎ WILLOW) ======================
 
 function createSimpleExplosion(x, y, baseHue, distanceType, type = 'peony') {
     const activeCount = countActiveParticles();
@@ -1043,7 +1048,6 @@ function createSimpleExplosion(x, y, baseHue, distanceType, type = 'peony') {
 
     const settings = FIREWORK_CONFIG.distanceSettings[distanceType];
     const intensityMultiplier = climaxSystem.climaxIntensity;
-    const isNear = distanceType === 'near';
     
     // Chọn kiểu nổ
     switch(type) {
@@ -1055,9 +1059,6 @@ function createSimpleExplosion(x, y, baseHue, distanceType, type = 'peony') {
             break;
         case 'palm':
             createPalmExplosion(x, y, baseHue, distanceType, settings, intensityMultiplier);
-            break;
-        case 'willow':
-            createWillowExplosion(x, y, baseHue, distanceType, settings, intensityMultiplier);
             break;
         case 'ring':
             createRingExplosion(x, y, baseHue, distanceType, settings, intensityMultiplier);
@@ -1180,45 +1181,7 @@ function createPalmExplosion(x, y, baseHue, distanceType, settings, intensityMul
     }
 }
 
-// 4. WILLOW - Cây liễu (rơi dài như tóc)
-function createWillowExplosion(x, y, baseHue, distanceType, settings, intensityMultiplier) {
-    const strands = Math.floor((15 + Math.random() * 10) * intensityMultiplier);
-    
-    for (let i = 0; i < strands; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const particlesPerStrand = Math.floor((20 + Math.random() * 15) * intensityMultiplier);
-        
-        for (let j = 0; j < particlesPerStrand; j++) {
-            const p = getParticle();
-            if (!p) continue;
-            
-            const speed = (3 + j * 0.2 + Math.random() * 1.5) * FIREWORK_CONFIG.explosionSpeedMultiplier * settings.speedMultiplier * intensityMultiplier;
-            const spreadAngle = angle + (Math.random() - 0.5) * 0.1;
-            
-            p.x = x;
-            p.y = y;
-            p.vx = Math.cos(spreadAngle) * speed;
-            p.vy = Math.sin(spreadAngle) * speed - 1;
-            p.life = 0;
-            p.maxLife = (distanceType === 'near' ? 90 : (distanceType === 'center' ? 85 : 80)) + Math.random() * 60;
-            
-            // Màu bạc/trắng cho willow
-            const brightness = 85 + Math.random() * 10;
-            p.color = `hsl(${baseHue}, 30%, ${brightness}%)`;
-            
-            p.size = (0.5 + Math.random() * 0.4) * FIREWORK_CONFIG.particleSizeMultiplier * settings.sizeMultiplier * intensityMultiplier;
-            p.active = true;
-            p.isNear = distanceType === 'near';
-            p.isCenter = distanceType === 'center';
-            p.trail = true;
-            p.gravity = 0.12;
-            p.drag = 0.985;
-            p.glowSize = p.size * 1.5 * intensityMultiplier;
-        }
-    }
-}
-
-// 5. RING - Vòng tròn
+// 4. RING - Vòng tròn (ĐÃ THAY THẾ WILLOW)
 function createRingExplosion(x, y, baseHue, distanceType, settings, intensityMultiplier) {
     const rings = Math.floor(2 + Math.random() * 2);
     
@@ -1256,7 +1219,7 @@ function createRingExplosion(x, y, baseHue, distanceType, settings, intensityMul
     }
 }
 
-// 6. CROSSETTE - Nổ thành nhiều cụm nhỏ
+// 5. CROSSETTE - Nổ thành nhiều cụm nhỏ
 function createCrossetteExplosion(x, y, baseHue, distanceType, settings, intensityMultiplier) {
     const clusters = Math.floor((6 + Math.random() * 4) * intensityMultiplier);
     
@@ -1300,7 +1263,7 @@ function createCrossetteExplosion(x, y, baseHue, distanceType, settings, intensi
     }
 }
 
-// 7. SPECIAL - Đặc biệt (nhiều màu, nhiều hiệu ứng)
+// 6. SPECIAL - Đặc biệt (nhiều màu, nhiều hiệu ứng)
 function createSpecialExplosion(x, y, baseHue, distanceType) {
     const activeCount = countActiveParticles();
     if (activeCount > FIREWORK_CONFIG.maxActiveParticles * 0.8) return;
@@ -1598,11 +1561,6 @@ function createSpecialExplosion(x, y, baseHue, distanceType) {
         const btn = document.getElementById('startBtn');
         
         async function start() {
-            /* ===== VIỀN SÁNG BURST ===== */
-            btn.classList.remove('burst');
-            void btn.offsetWidth; // reset animation
-            btn.classList.add('burst');
-
             /* ===== HIỆU ỨNG ẨN NÚT ===== */
             btn.classList.add('clicked');
 
@@ -1694,4 +1652,3 @@ function createSpecialExplosion(x, y, baseHue, distanceType) {
     </script>
 </body>
 </html>
-
