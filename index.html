@@ -24,62 +24,124 @@
             z-index: 1;
             display: none;
         }
-       /* ===== VIỀN SÁNG MẶC ĐỊNH ===== */
-#startBtn::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    padding: 1.5px;
-    border-radius: 32px;
-    background: conic-gradient(
-        from 0deg,
-        transparent 0%,
-        rgba(255,255,255,0.9) 12%,
-        transparent 25%,
-        transparent 55%,
-        rgba(255,255,255,0.8) 65%,
-        transparent 78%,
-        transparent 100%
-    );
+        
+        #startBtn {
+            position: relative;
+            z-index: 10;
+            padding: 20px 54px;
+            font-size: 30px;
+            font-weight: 700;
+            color: #111;
+            background: linear-gradient(135deg, #ffffff, #f3f3f3);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 28px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            transition: transform 0.35s cubic-bezier(.22,1,.36,1), box-shadow 0.35s ease, background 0.35s ease;
+            letter-spacing: 0.5px;
+            animation: floatSoft 4s ease-in-out infinite;
+            overflow: hidden;
+        }
 
-    -webkit-mask:
-        linear-gradient(#000 0 0) content-box,
-        linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
+        #startBtn::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -120%;
+            width: 120%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.7), transparent);
+            transition: left 0.6s ease;
+        }
 
-    animation: borderGlowIdle 3.5s linear infinite;
-    opacity: 0.7;
-    pointer-events: none;
-}
+        #startBtn:hover::after {
+            left: 120%;
+        }
 
-/* ===== KHI CLICK ===== */
-#startBtn.burst::before {
-    animation: borderGlowBurst 0.6s linear forwards;
-    opacity: 1;
-}
+        #startBtn:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 1);
+        }
 
-/* ===== ANIMATION ===== */
-@keyframes borderGlowIdle {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-}
+        #startBtn:active {
+            transform: scale(0.92);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            transition: transform 0.15s ease;
+        }
 
-@keyframes borderGlowBurst {
-    0% {
-        transform: rotate(0deg);
-        opacity: 1;
-    }
-    70% {
-        transform: rotate(720deg); /* chạy rất nhanh */
-        opacity: 1;
-    }
-    100% {
-        transform: rotate(900deg);
-        opacity: 0; /* tắt */
-    }
-}
+        #startBtn.clicked {
+            animation: fadeOutSmooth 0.9s cubic-bezier(.4,0,.2,1) forwards;
+        }
 
+        /* ===== VIỀN SÁNG MẶC ĐỊNH ===== */
+        #startBtn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 1.5px;
+            border-radius: 32px;
+            background: conic-gradient(
+                from 0deg,
+                transparent 0%,
+                rgba(255,255,255,0.9) 12%,
+                transparent 25%,
+                transparent 55%,
+                rgba(255,255,255,0.8) 65%,
+                transparent 78%,
+                transparent 100%
+            );
+            -webkit-mask:
+                linear-gradient(#000 0 0) content-box,
+                linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: borderGlowIdle 3.5s linear infinite;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        /* ===== KHI CLICK ===== */
+        #startBtn.burst::before {
+            animation: borderGlowBurst 0.6s linear forwards;
+            opacity: 1;
+        }
+
+        .btn-text {
+            position: relative;
+            z-index: 1;
+            color: #111;
+        }
+
+        @keyframes floatSoft {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes fadeOutSmooth {
+            0% { opacity: 1; transform: scale(1) translateY(0); }
+            40% { opacity: 0.8; transform: scale(1.05) translateY(-16px); }
+            100% { opacity: 0; transform: scale(0.7) translateY(60px); visibility: hidden; }
+        }
+
+        @keyframes borderGlowIdle {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes borderGlowBurst {
+            0% {
+                transform: rotate(0deg);
+                opacity: 1;
+            }
+            70% {
+                transform: rotate(720deg); /* chạy rất nhanh */
+                opacity: 1;
+            }
+            100% {
+                transform: rotate(900deg);
+                opacity: 0; /* tắt */
+            }
+        }
     </style>
 </head>
 <body>
@@ -1533,68 +1595,57 @@ function createSpecialExplosion(x, y, baseHue, distanceType) {
         }
 
         // ====================== KHỞI ĐỘNG ======================
-       const btn = document.getElementById('startBtn');
+        const btn = document.getElementById('startBtn');
+        
+        async function start() {
+            /* ===== VIỀN SÁNG BURST ===== */
+            btn.classList.remove('burst');
+            void btn.offsetWidth; // reset animation
+            btn.classList.add('burst');
 
-async function start() {
-    /* ===== VIỀN SÁNG BURST ===== */
-    btn.classList.remove('burst');
-    void btn.offsetWidth; // reset animation
-    btn.classList.add('burst');
+            /* ===== HIỆU ỨNG ẨN NÚT ===== */
+            btn.classList.add('clicked');
 
-    /* ===== HIỆU ỨNG ẨN NÚT ===== */
-    btn.classList.add('clicked');
+            stopPreShowShootingStars();
+            
+            setTimeout(async () => {
+                try {
+                    await initBackgroundMusic();
+                    
+                    initAudioSystem();
+                    playBackgroundMusic();
+                    
+                    initCanvas();
+                    createParticlePool();
 
-    stopPreShowShootingStars();
+                    if (masterGain) {
+                        masterGain.gain.setValueAtTime(0.001, audioCtx?.currentTime || 0);
+                        if (audioCtx) {
+                            masterGain.gain.exponentialRampToValueAtTime(SOUND_CONFIG.masterVolume, audioCtx.currentTime + 2);
+                        }
+                    }
 
-    setTimeout(async () => {
-        try {
-            await initBackgroundMusic();
+                    isRunning = true;
+                    startTime = performance.now();
+                    lastTime = startTime;
+                    
+                    nextExplosionTime = startTime + 500;
+                    nextSoundTime = startTime + 1000;
 
-            initAudioSystem();
-            playBackgroundMusic();
-
-            initCanvas();
-            createParticlePool();
-
-            if (masterGain) {
-                masterGain.gain.setValueAtTime(
-                    0.001,
-                    audioCtx?.currentTime || 0
-                );
-
-                if (audioCtx) {
-                    masterGain.gain.exponentialRampToValueAtTime(
-                        SOUND_CONFIG.masterVolume,
-                        audioCtx.currentTime + 2
-                    );
+                    requestAnimationFrame(animate);
+                    
+                } catch (error) {
+                    console.error("Lỗi khởi tạo:", error);
+                    initCanvas();
+                    createParticlePool();
+                    isRunning = true;
+                    startTime = performance.now();
+                    lastTime = startTime;
+                    nextExplosionTime = startTime + 500;
+                    requestAnimationFrame(animate);
                 }
-            }
-
-            isRunning = true;
-            startTime = performance.now();
-            lastTime = startTime;
-
-            nextExplosionTime = startTime + 500;
-            nextSoundTime = startTime + 1000;
-
-            requestAnimationFrame(animate);
-
-        } catch (error) {
-            console.error("Lỗi khởi tạo:", error);
-
-            initCanvas();
-            createParticlePool();
-
-            isRunning = true;
-            startTime = performance.now();
-            lastTime = startTime;
-            nextExplosionTime = startTime + 500;
-
-            requestAnimationFrame(animate);
+            }, 800);
         }
-    }, 800); // khớp với fadeOutSmooth
-}
-
 
         // ====================== KHỞI TẠO MÀN HÌNH CHỜ ======================
         function initPreShow() {
@@ -1604,8 +1655,10 @@ async function start() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             
+            // Bắt đầu hiển thị sao băng
             startPreShowShootingStars();
             
+            // Bắt đầu animation loop
             requestAnimationFrame(animate);
         }
 
