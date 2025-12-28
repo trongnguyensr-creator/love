@@ -25,7 +25,7 @@
             display: none;
         }
         
-     /* ====================== GLASS WHITE - CHỮ ĐEN + NHÚN NHẢY RUNG LẮC ====================== */
+  /* ====================== GLASS WHITE - CHỮ ĐEN + NHÚN NHẢY RUNG LẮC MẠNH NHANH ====================== */
 #startBtn {
     position: relative;
     z-index: 10;
@@ -49,10 +49,10 @@
     transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
     animation: 
         glassBreath 10s ease-in-out infinite,
-        bounceShake 3.5s ease-in-out infinite; /* Thêm nhún nhảy rung lắc liên tục */
+        bounceShakeFast 2.2s ease-in-out infinite; /* Tăng tốc độ + mạnh hơn */
 }
 
-/* Lớp kính lỏng trắng chuyển màu chậm (gradient trắng - xám nhạt) */
+/* Lớp kính lỏng trắng chuyển màu chậm (giữ nguyên) */
 #startBtn::before {
     content: '';
     position: absolute;
@@ -73,7 +73,7 @@
     z-index: -2;
 }
 
-/* Lớp nền kính mờ trắng tinh */
+/* Lớp nền kính mờ trắng tinh (giữ nguyên) */
 #startBtn::after {
     content: '';
     position: absolute;
@@ -84,7 +84,7 @@
     backdrop-filter: blur(14px);
 }
 
-/* Text layer - chữ đen với glow trắng nhẹ */
+/* Text layer - chữ đen với glow trắng nhẹ (giữ nguyên) */
 .btn-text {
     position: relative;
     z-index: 2;
@@ -93,7 +93,7 @@
         0 0 16px rgba(255, 255, 255, 0.6);
 }
 
-/* Hover - nâng lên, sáng mạnh hơn */
+/* Hover - nâng lên, sáng mạnh hơn (giữ nguyên) */
 #startBtn:hover {
     transform: translateY(-6px) scale(1.06);
     box-shadow: 
@@ -103,7 +103,7 @@
     animation-play-state: paused;
 }
 
-/* Active / Click - nhấn xuống */
+/* Active / Click - nhấn xuống (giữ nguyên) */
 #startBtn:active {
     transform: scale(0.92);
     box-shadow: 
@@ -111,12 +111,12 @@
         0 0 100px rgba(0, 0, 0, 0.15);
 }
 
-/* Hiệu ứng khi click (bung sáng trắng rồi mờ dần) */
+/* Hiệu ứng khi click (bung sáng trắng rồi mờ dần) - giữ nguyên */
 #startBtn.clicked {
     animation: glassExplodeFade 1.2s cubic-bezier(.25,.46,.45,.94) forwards;
 }
 
-/* Keyframes nhịp thở kính trắng */
+/* Keyframes nhịp thở kính trắng (giữ nguyên) */
 @keyframes glassBreath {
     0%, 100% {
         transform: scale(1);
@@ -138,7 +138,7 @@
     100% { background-position: 0% 50%; }
 }
 
-/* Hiệu ứng bung sáng khi click - kiểu kính trắng vỡ ánh sáng */
+/* Hiệu ứng bung sáng khi click (giữ nguyên) */
 @keyframes glassExplodeFade {
     0% {
         transform: scale(1);
@@ -163,19 +163,22 @@
     }
 }
 
-/* Hiệu ứng nhún nhảy rung lắc (bounce + shake) - chạy liên tục trước khi click */
-@keyframes bounceShake {
+/* Hiệu ứng rung lắc nhanh và mạnh hơn */
+@keyframes bounceShakeFast {
     0%, 100% {
         transform: translateY(0) rotate(0deg);
     }
-    25% {
-        transform: translateY(-12px) rotate(1.5deg);
+    20% {
+        transform: translateY(-18px) rotate(2.5deg); /* Biên độ lớn + góc nghiêng mạnh hơn */
     }
-    50% {
+    40% {
         transform: translateY(0) rotate(0deg);
     }
-    75% {
-        transform: translateY(-8px) rotate(-1.5deg);
+    60% {
+        transform: translateY(-15px) rotate(-2.5deg); /* Nhún xuống mạnh hơn */
+    }
+    80% {
+        transform: translateY(0) rotate(0deg);
     }
 }
     </style>
@@ -1809,3 +1812,4 @@ function createSpecialExplosion(x, y, baseHue, distanceType) {
     </script>
 </body>
 </html>
+
