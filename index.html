@@ -26,6 +26,7 @@
         }
         
         /* ====================== AURORA NEON BREATHING BUTTON ====================== */
+/* ====================== AURORA NEON BREATHING - KÍNH LỎNG XÁM BẠC ====================== */
 #startBtn {
     position: relative;
     z-index: 10;
@@ -41,161 +42,126 @@
     cursor: pointer;
     overflow: hidden;
     box-shadow: 
-        0 0 40px rgba(0, 255, 255, 0.4),
-        0 0 80px rgba(255, 0, 255, 0.3),
-        inset 0 0 30px rgba(0, 255, 255, 0.2);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+        0 0 40px rgba(180, 190, 200, 0.4),
+        0 0 80px rgba(100, 110, 130, 0.3),
+        inset 0 0 30px rgba(220, 230, 255, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-    animation: auroraBreath 8s ease-in-out infinite;
+    animation: glassBreath 10s ease-in-out infinite;
 }
 
-/* Hiệu ứng cực quang chuyển màu chậm */
+/* Lớp kính lỏng xám bạc chuyển màu chậm */
 #startBtn::before {
     content: '';
     position: absolute;
     inset: -2px;
     background: linear-gradient(
         45deg,
-        #00ffff,
-        #ff00ff,
-        #00ff88,
-        #ff00aa,
-        #00ffff
+        #a0b0c0,
+        #e0e8f0,
+        #b0c0d0,
+        #d0d8e8,
+        #a0b0c0
     );
     background-size: 300% 300%;
     border-radius: 50px;
-    filter: blur(20px);
-    opacity: 0.6;
-    animation: auroraFlow 18s linear infinite;
+    filter: blur(24px);
+    opacity: 0.55;
+    animation: glassFlow 20s linear infinite;
     z-index: -2;
 }
 
-/* Lớp nền kính mờ + gradient nhẹ */
+/* Lớp nền kính mờ + gradient lạnh nhẹ */
 #startBtn::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(255, 0, 255, 0.12), rgba(0, 255, 136, 0.1));
+    background: linear-gradient(135deg, rgba(200, 210, 230, 0.18), rgba(140, 150, 170, 0.14), rgba(220, 230, 255, 0.12));
     border-radius: 50px;
     z-index: -1;
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(14px);
 }
 
-/* Text layer */
+/* Text layer - trắng với glow xám bạc lạnh */
 .btn-text {
     position: relative;
     z-index: 2;
     text-shadow: 
-        0 0 10px #00ffff,
-        0 0 20px #ff00ff,
-        0 0 30px #00ff88;
+        0 0 8px rgba(220, 230, 255, 0.7),
+        0 0 16px rgba(180, 190, 200, 0.5),
+        0 0 24px rgba(140, 150, 170, 0.3);
 }
 
-/* Hover */
+/* Hover - nâng lên, sáng mạnh hơn kiểu kính phản chiếu */
 #startBtn:hover {
     transform: translateY(-6px) scale(1.06);
     box-shadow: 
-        0 0 60px rgba(0, 255, 255, 0.7),
-        0 0 120px rgba(255, 0, 255, 0.6),
-        inset 0 0 40px rgba(0, 255, 255, 0.4);
+        0 0 70px rgba(180, 190, 200, 0.7),
+        0 0 140px rgba(100, 110, 130, 0.6),
+        inset 0 0 50px rgba(220, 230, 255, 0.3);
     animation-play-state: paused;
 }
 
-/* Active / Click */
+/* Active / Click - nhấn xuống */
 #startBtn:active {
     transform: scale(0.92);
     box-shadow: 
-        0 0 30px rgba(0, 255, 255, 0.9),
-        0 0 80px rgba(255, 0, 255, 0.8);
+        0 0 40px rgba(220, 230, 255, 0.9),
+        0 0 100px rgba(180, 190, 200, 0.8);
 }
 
-/* Hiệu ứng khi click (bung sáng rồi mờ dần) */
+/* Hiệu ứng khi click (bung sáng kính rồi mờ dần) */
 #startBtn.clicked {
-    animation: explodeFade 1.2s cubic-bezier(.25,.46,.45,.94) forwards;
+    animation: glassExplodeFade 1.2s cubic-bezier(.25,.46,.45,.94) forwards;
 }
 
-/* Keyframes cho nhịp thở cực quang */
-@keyframes auroraBreath {
+/* Keyframes nhịp thở kính lỏng */
+@keyframes glassBreath {
     0%, 100% {
         transform: scale(1);
         box-shadow: 
-            0 0 40px rgba(0, 255, 255, 0.4),
-            0 0 80px rgba(255, 0, 255, 0.3);
+            0 0 40px rgba(180, 190, 200, 0.4),
+            0 0 80px rgba(100, 110, 130, 0.3);
     }
     50% {
         transform: scale(1.04);
         box-shadow: 
-            0 0 70px rgba(0, 255, 255, 0.7),
-            0 0 140px rgba(255, 0, 255, 0.6);
+            0 0 80px rgba(180, 190, 200, 0.7),
+            0 0 160px rgba(100, 110, 130, 0.6);
     }
 }
 
-@keyframes auroraFlow {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+@keyframes glassFlow {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
 
-/* Hiệu ứng nổ bung khi click */
-@keyframes explodeFade {
+/* Hiệu ứng bung sáng khi click - kiểu kính vỡ ánh sáng */
+@keyframes glassExplodeFade {
     0% {
         transform: scale(1);
         opacity: 1;
         box-shadow: 
-            0 0 100px rgba(0, 255, 255, 1),
-            0 0 200px rgba(255, 0, 255, 1),
-            inset 0 0 60px rgba(0, 255, 255, 0.8);
+            0 0 120px rgba(220, 230, 255, 1),
+            0 0 240px rgba(180, 190, 200, 0.9),
+            inset 0 0 80px rgba(220, 230, 255, 0.7);
     }
     40% {
-        transform: scale(1.6);
-        opacity: 0.9;
+        transform: scale(1.55);
+        opacity: 0.92;
         box-shadow: 
-            0 0 200px rgba(0, 255, 255, 1),
-            0 0 400px rgba(255, 0, 255, 1);
+            0 0 280px rgba(220, 230, 255, 1),
+            0 0 500px rgba(180, 190, 200, 0.9);
     }
     100% {
-        transform: scale(0.3);
+        transform: scale(0.4);
         opacity: 0;
         visibility: hidden;
         box-shadow: none;
     }
 }
-
-        /* Hiệu ứng nhảy lên xuống */
-        @keyframes bounceButton {
-            0%, 100% { 
-                transform: translateY(0); 
-            }
-            50% { 
-                transform: translateY(-15px); 
-            }
-        }
-
-        @keyframes fadeOutSmooth {
-            0% { 
-                opacity: 1; 
-                transform: scale(1) translateY(0); 
-                box-shadow: 
-                    0 0 0 12px rgba(255, 255, 255, 0.9),
-                    0 0 60px rgba(255, 255, 255, 1);
-            }
-            40% { 
-                opacity: 0.8; 
-                transform: scale(1.2) translateY(-25px); 
-                box-shadow: 
-                    0 0 0 20px rgba(255, 255, 255, 1),
-                    0 0 100px rgba(255, 255, 255, 1);
-            }
-            100% { 
-                opacity: 0; 
-                transform: scale(0.8) translateY(80px); 
-                visibility: hidden; 
-                box-shadow: 
-                    0 0 0 0 rgba(255, 255, 255, 0),
-                    0 0 0 0 rgba(255, 255, 255, 0);
-            }
-        }
     </style>
 </head>
 <body>
@@ -1699,4 +1665,5 @@ function createSpecialExplosion(x, y, baseHue, distanceType) {
     </script>
 </body>
 </html>
+
 
