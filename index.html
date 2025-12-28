@@ -890,171 +890,176 @@ function showNextNumber() {
             return true;
         }
 
-        // ====================== HỆ THỐNG LOOP NÂNG CAO ======================
-        function updateClimaxLoopSystem(currentTime) {
-            if (!startTime) return 1.0;
-            
-            const loopConfig = FIREWORK_CONFIG.climaxLoopSystem;
-            const totalCycleTime = loopConfig.totalCycleTime;
-            
-            // Khởi tạo lần đầu
-            if (climaxSystem.loopSystem.currentCycleStart === 0) {
-                climaxSystem.loopSystem.currentCycleStart = currentTime;
-                climaxSystem.loopSystem.currentPhaseStart = currentTime;
-                climaxSystem.loopSystem.isInClimax = false;
-                climaxSystem.loopSystem.activeClimaxType = null;
-                climaxSystem.loopSystem.particlesCleared = true;
-                climaxSystem.loopSystem.isFirstCycle = true;
-                climaxSystem.loopSystem.currentClimaxTypes = [...loopConfig.firstClimaxTypes];
-                console.log("🚀 Bắt đầu chu kỳ đầu tiên");
-                console.log("📋 Loại pháo cao trào lần đầu: Peony → Special → Crossette");
-            }
-            
-            // Tính thời gian trong chu kỳ hiện tại
-            const timeInCycle = (currentTime - climaxSystem.loopSystem.currentCycleStart) % totalCycleTime;
-            
-            // PHASE 1: 10 giây đầu bình thường
-            if (timeInCycle < loopConfig.normalDuration) {
-                if (climaxSystem.loopSystem.isInClimax) {
-                    // Chuyển từ cao trào sang bình thường
-                    climaxSystem.loopSystem.isInClimax = false;
-                    climaxSystem.loopSystem.activeClimaxType = null;
-                    climaxSystem.loopSystem.climaxSegmentIndex = -1;
-                    climaxSystem.loopSystem.currentPhaseStart = currentTime;
-                    console.log("⏸️ Kết thúc cao trào");
-                }
-                
-                // Kiểm tra nếu sắp hết phase bình thường và cần chuẩn bị countdown
-                const timeLeftInNormal = loopConfig.normalDuration - timeInCycle;
-                const countdownTime = FIREWORK_CONFIG.timeSystem.countdownDuration;
-                
-                if (timeLeftInNormal <= countdownTime && 
-                    !climaxSystem.loopSystem.isWaitingForCountdown &&
-                    climaxSystem.loopSystem.shouldShowCountdown) {
-                    
-                    // Bắt đầu countdown
-                    climaxSystem.loopSystem.isWaitingForCountdown = true;
-                    climaxSystem.loopSystem.countdownStartTime = currentTime;
-                    
-                    // Show countdown
-                    showCountdown(() => {
-                        console.log("🎆 Countdown hoàn tất, bắt đầu cao trào!");
-                    });
-                }
-                
-                climaxSystem.phase = 'normal';
-                climaxSystem.climaxIntensity = 1.0;
-                
-                // Chuẩn bị loại pháo cho cao trào tiếp theo
-                if (timeInCycle > loopConfig.normalDuration - 3000 && 
-                    !climaxSystem.loopSystem.isFirstCycle &&
-                    climaxSystem.loopSystem.currentClimaxTypes.length === 0) {
-                    
-                    climaxSystem.loopSystem.currentClimaxTypes = selectRandomClimaxTypes();
-                }
-                
-            } 
-            // PHASE 2: 36 giây cao trào
-            else if (timeInCycle < loopConfig.normalDuration + loopConfig.climaxDuration) {
-                if (!climaxSystem.loopSystem.isInClimax) {
-                    // Bắt đầu cao trào
-                    climaxSystem.loopSystem.isInClimax = true;
-                    climaxSystem.loopSystem.currentPhaseStart = currentTime;
-                    climaxSystem.loopSystem.climaxSegmentIndex = 0;
-                    climaxSystem.loopSystem.segmentStartTime = currentTime;
-                    climaxSystem.loopSystem.segmentParticlesFinished = false;
-                    climaxSystem.loopSystem.isWaitingForCountdown = false;
-                    
-                    // Clear particle còn lại
-                    clearAllParticles();
-                    climaxSystem.loopSystem.particlesCleared = true;
-                    
-                    console.log("🎆 BẮT ĐẦU CAO TRÀO 36 GIÂY");
-                    
-                    if (climaxSystem.loopSystem.isFirstCycle) {
-                        climaxSystem.loopSystem.currentClimaxTypes = [...loopConfig.firstClimaxTypes];
-                        loopConfig.firstClimaxTypes.forEach(type => 
-                            climaxSystem.loopSystem.allUsedTypes.add(type));
-                        climaxSystem.loopSystem.usedTypesHistory.push([...loopConfig.firstClimaxTypes]);
-                    }
-                    
-                    climaxSystem.loopSystem.activeClimaxType = 
-                        climaxSystem.loopSystem.currentClimaxTypes[0];
-                    
-                    console.log(`🎇 Segment 1/3: ${climaxSystem.loopSystem.activeClimaxType}`);
-                }
-                
-                climaxSystem.phase = 'climax';
-                
-                // Tính thời gian trong cao trào
-                const timeInClimax = currentTime - climaxSystem.loopSystem.currentPhaseStart;
-                
-                // Xác định segment hiện tại (0, 1, 2)
-                const segmentIndex = Math.floor(timeInClimax / loopConfig.climaxSegmentDuration);
-                
-                // Kiểm tra chuyển segment
-                if (segmentIndex !== climaxSystem.loopSystem.climaxSegmentIndex) {
-                    // Chuyển segment ngay lập tức
-                    climaxSystem.loopSystem.climaxSegmentIndex = segmentIndex;
-                    climaxSystem.loopSystem.segmentStartTime = currentTime;
-                    climaxSystem.loopSystem.segmentParticlesFinished = false;
-                    
-                    // Clear particle còn lại
-                    clearAllParticles();
-                    climaxSystem.loopSystem.particlesCleared = true;
-                    
-                    if (segmentIndex < climaxSystem.loopSystem.currentClimaxTypes.length) {
-                        climaxSystem.loopSystem.activeClimaxType = 
-                            climaxSystem.loopSystem.currentClimaxTypes[segmentIndex];
-                        console.log(`🎇 Segment ${segmentIndex + 1}/3: ${climaxSystem.loopSystem.activeClimaxType}`);
-                    }
-                } else {
-                    // Đang trong segment hiện tại
-                    const timeInSegment = currentTime - climaxSystem.loopSystem.segmentStartTime;
-                    const segmentProgress = timeInSegment / loopConfig.climaxSegmentDuration;
-                    
-                    // Tính toán khi nào ngừng tạo pháo mới (trước khi kết thúc segment)
-                    if (segmentProgress > 0.8 && !climaxSystem.loopSystem.segmentParticlesFinished) {
-                        // Ngừng tạo pháo mới, để particle hiện tại mờ dần
-                        climaxSystem.loopSystem.segmentParticlesFinished = true;
-                    }
-                    
-                    // Tính cường độ trong segment
-                    if (segmentProgress < 0.3) {
-                        climaxSystem.climaxIntensity = 1.0 + segmentProgress * 3.0;
-                    } else if (segmentProgress < 0.7) {
-                        climaxSystem.climaxIntensity = 2.0 + (segmentProgress - 0.3) * 0.5;
-                    } else {
-                        climaxSystem.climaxIntensity = 2.2 - (segmentProgress - 0.7) * 2.0;
-                    }
-                }
-                
-            } 
-            // PHASE 3: 8 giây cuối bình thường
-            else {
-                if (climaxSystem.loopSystem.isInClimax) {
-                    // Kết thúc cao trào
-                    climaxSystem.loopSystem.isInClimax = false;
-                    climaxSystem.loopSystem.activeClimaxType = null;
-                    climaxSystem.loopSystem.climaxSegmentIndex = -1;
-                    climaxSystem.loopSystem.currentPhaseStart = currentTime;
-                    climaxSystem.loopSystem.isFirstCycle = false;
-                    climaxSystem.loopSystem.shouldShowCountdown = true;
-                    
-                    // Reset loại pháo cho lần sau
-                    climaxSystem.loopSystem.currentClimaxTypes = [];
-                    
-                    console.log("✅ Kết thúc cao trào");
-                }
-                
-                climaxSystem.phase = 'normal';
-                climaxSystem.climaxIntensity = 1.0;
-            }
-            
-            climaxSystem.climaxMultiplier = 1.0 / Math.max(climaxSystem.climaxIntensity, 0.5);
-            return climaxSystem.climaxIntensity;
+      // ====================== HỆ THỐNG LOOP NÂNG CAO ======================
+function updateClimaxLoopSystem(currentTime) {
+    if (!startTime) return 1.0;
+    
+    const loopConfig = FIREWORK_CONFIG.climaxLoopSystem;
+    const totalCycleTime = loopConfig.totalCycleTime;
+    
+    // Khởi tạo lần đầu
+    if (climaxSystem.loopSystem.currentCycleStart === 0) {
+        climaxSystem.loopSystem.currentCycleStart = currentTime;
+        climaxSystem.loopSystem.currentPhaseStart = currentTime;
+        climaxSystem.loopSystem.isInClimax = false;
+        climaxSystem.loopSystem.activeClimaxType = null;
+        climaxSystem.loopSystem.particlesCleared = true;
+        climaxSystem.loopSystem.isFirstCycle = true;
+        climaxSystem.loopSystem.currentClimaxTypes = [...loopConfig.firstClimaxTypes];
+        climaxSystem.loopSystem.hasShownFirstCountdown = false; // THÊM DÒNG NÀY
+        console.log("🚀 Bắt đầu chu kỳ đầu tiên");
+        console.log("📋 Loại pháo cao trào lần đầu: Peony → Special → Crossette");
+    }
+    
+    // Tính thời gian trong chu kỳ hiện tại
+    const timeInCycle = (currentTime - climaxSystem.loopSystem.currentCycleStart) % totalCycleTime;
+    
+    // PHASE 1: 10 giây đầu bình thường
+    if (timeInCycle < loopConfig.normalDuration) {
+        if (climaxSystem.loopSystem.isInClimax) {
+            // Chuyển từ cao trào sang bình thường
+            climaxSystem.loopSystem.isInClimax = false;
+            climaxSystem.loopSystem.activeClimaxType = null;
+            climaxSystem.loopSystem.climaxSegmentIndex = -1;
+            climaxSystem.loopSystem.currentPhaseStart = currentTime;
+            console.log("⏸️ Kết thúc cao trào");
         }
-
+        
+        // Chỉ show countdown cho lần đầu tiên
+        const timeLeftInNormal = loopConfig.normalDuration - timeInCycle;
+        const countdownTime = FIREWORK_CONFIG.timeSystem.countdownDuration;
+        
+        if (timeLeftInNormal <= countdownTime && 
+            !climaxSystem.loopSystem.isWaitingForCountdown &&
+            climaxSystem.loopSystem.shouldShowCountdown &&
+            climaxSystem.loopSystem.isFirstCycle && // CHỈ LẦN ĐẦU
+            !climaxSystem.loopSystem.hasShownFirstCountdown) { // CHƯA SHOW COUNTDOWN LẦN ĐẦU
+            
+            // Bắt đầu countdown
+            climaxSystem.loopSystem.isWaitingForCountdown = true;
+            climaxSystem.loopSystem.countdownStartTime = currentTime;
+            
+            // Đánh dấu đã show countdown lần đầu
+            climaxSystem.loopSystem.hasShownFirstCountdown = true;
+            
+            // Show countdown
+            showCountdown(() => {
+                console.log("🎆 Countdown hoàn tất, bắt đầu cao trào!");
+            });
+        }
+        
+        climaxSystem.phase = 'normal';
+        climaxSystem.climaxIntensity = 1.0;
+        
+        // Chuẩn bị loại pháo cho cao trào tiếp theo
+        if (timeInCycle > loopConfig.normalDuration - 3000 && 
+            !climaxSystem.loopSystem.isFirstCycle &&
+            climaxSystem.loopSystem.currentClimaxTypes.length === 0) {
+            
+            climaxSystem.loopSystem.currentClimaxTypes = selectRandomClimaxTypes();
+        }
+        
+    } 
+    // PHASE 2: 36 giây cao trào
+    else if (timeInCycle < loopConfig.normalDuration + loopConfig.climaxDuration) {
+        if (!climaxSystem.loopSystem.isInClimax) {
+            // Bắt đầu cao trào
+            climaxSystem.loopSystem.isInClimax = true;
+            climaxSystem.loopSystem.currentPhaseStart = currentTime;
+            climaxSystem.loopSystem.climaxSegmentIndex = 0;
+            climaxSystem.loopSystem.segmentStartTime = currentTime;
+            climaxSystem.loopSystem.segmentParticlesFinished = false;
+            climaxSystem.loopSystem.isWaitingForCountdown = false;
+            
+            // Clear particle còn lại
+            clearAllParticles();
+            climaxSystem.loopSystem.particlesCleared = true;
+            
+            console.log("🎆 BẮT ĐẦU CAO TRÀO 36 GIÂY");
+            
+            if (climaxSystem.loopSystem.isFirstCycle) {
+                climaxSystem.loopSystem.currentClimaxTypes = [...loopConfig.firstClimaxTypes];
+                loopConfig.firstClimaxTypes.forEach(type => 
+                    climaxSystem.loopSystem.allUsedTypes.add(type));
+                climaxSystem.loopSystem.usedTypesHistory.push([...loopConfig.firstClimaxTypes]);
+            }
+            
+            climaxSystem.loopSystem.activeClimaxType = 
+                climaxSystem.loopSystem.currentClimaxTypes[0];
+            
+            console.log(`🎇 Segment 1/3: ${climaxSystem.loopSystem.activeClimaxType}`);
+        }
+        
+        climaxSystem.phase = 'climax';
+        
+        // Tính thời gian trong cao trào
+        const timeInClimax = currentTime - climaxSystem.loopSystem.currentPhaseStart;
+        
+        // Xác định segment hiện tại (0, 1, 2)
+        const segmentIndex = Math.floor(timeInClimax / loopConfig.climaxSegmentDuration);
+        
+        // Kiểm tra chuyển segment
+        if (segmentIndex !== climaxSystem.loopSystem.climaxSegmentIndex) {
+            // Chuyển segment ngay lập tức
+            climaxSystem.loopSystem.climaxSegmentIndex = segmentIndex;
+            climaxSystem.loopSystem.segmentStartTime = currentTime;
+            climaxSystem.loopSystem.segmentParticlesFinished = false;
+            
+            // Clear particle còn lại
+            clearAllParticles();
+            climaxSystem.loopSystem.particlesCleared = true;
+            
+            if (segmentIndex < climaxSystem.loopSystem.currentClimaxTypes.length) {
+                climaxSystem.loopSystem.activeClimaxType = 
+                    climaxSystem.loopSystem.currentClimaxTypes[segmentIndex];
+                console.log(`🎇 Segment ${segmentIndex + 1}/3: ${climaxSystem.loopSystem.activeClimaxType}`);
+            }
+        } else {
+            // Đang trong segment hiện tại
+            const timeInSegment = currentTime - climaxSystem.loopSystem.segmentStartTime;
+            const segmentProgress = timeInSegment / loopConfig.climaxSegmentDuration;
+            
+            // Tính toán khi nào ngừng tạo pháo mới (trước khi kết thúc segment)
+            if (segmentProgress > 0.8 && !climaxSystem.loopSystem.segmentParticlesFinished) {
+                // Ngừng tạo pháo mới, để particle hiện tại mờ dần
+                climaxSystem.loopSystem.segmentParticlesFinished = true;
+            }
+            
+            // Tính cường độ trong segment
+            if (segmentProgress < 0.3) {
+                climaxSystem.climaxIntensity = 1.0 + segmentProgress * 3.0;
+            } else if (segmentProgress < 0.7) {
+                climaxSystem.climaxIntensity = 2.0 + (segmentProgress - 0.3) * 0.5;
+            } else {
+                climaxSystem.climaxIntensity = 2.2 - (segmentProgress - 0.7) * 2.0;
+            }
+        }
+        
+    } 
+    // PHASE 3: 8 giây cuối bình thường
+    else {
+        if (climaxSystem.loopSystem.isInClimax) {
+            // Kết thúc cao trào
+            climaxSystem.loopSystem.isInClimax = false;
+            climaxSystem.loopSystem.activeClimaxType = null;
+            climaxSystem.loopSystem.climaxSegmentIndex = -1;
+            climaxSystem.loopSystem.currentPhaseStart = currentTime;
+            climaxSystem.loopSystem.isFirstCycle = false;
+            climaxSystem.loopSystem.shouldShowCountdown = false; // TẮT COUNTDOWN CHO CÁC LẦN SAU
+            
+            // Reset loại pháo cho lần sau
+            climaxSystem.loopSystem.currentClimaxTypes = [];
+            
+            console.log("✅ Kết thúc cao trào (không có countdown cho lần sau)");
+        }
+        
+        climaxSystem.phase = 'normal';
+        climaxSystem.climaxIntensity = 1.0;
+    }
+    
+    climaxSystem.climaxMultiplier = 1.0 / Math.max(climaxSystem.climaxIntensity, 0.5);
+    return climaxSystem.climaxIntensity;
+}
         // ====================== HÀM CHỌN LOẠI PHÁO NGẪU NHIÊN ======================
         function selectRandomClimaxTypes() {
             const loopConfig = FIREWORK_CONFIG.climaxLoopSystem;
@@ -1113,16 +1118,19 @@ function showNextNumber() {
             }
         }
 
-        function shouldCreateRocket() {
-            if (countdownSystem.isActive) return false;
-            
-            if (climaxSystem.loopSystem.isInClimax && 
-                climaxSystem.loopSystem.segmentParticlesFinished) {
-                return false;
-            }
-            
-            return true;
-        }
+      function shouldCreateRocket() {
+    // Không tạo pháo khi đang countdown (chỉ lần đầu)
+    if (countdownSystem.isActive && climaxSystem.loopSystem.isFirstCycle) {
+        return false;
+    }
+    
+    if (climaxSystem.loopSystem.isInClimax && 
+        climaxSystem.loopSystem.segmentParticlesFinished) {
+        return false;
+    }
+    
+    return true;
+}
 
         function getExplosionTypeForPhase() {
             if (climaxSystem.loopSystem.isInClimax && 
@@ -1956,6 +1964,7 @@ function showNextNumber() {
                     climaxSystem.loopSystem.currentClimaxTypes = [];
                     climaxSystem.loopSystem.isWaitingForCountdown = false;
                     climaxSystem.loopSystem.shouldShowCountdown = true;
+                    climaxSystem.loopSystem.hasShownFirstCountdown = false; // THÊM DÒNG NÀY
                     
                     nextExplosionTime = startTime + 1000;
                     nextSoundTime = startTime + 1500;
