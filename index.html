@@ -25,15 +25,14 @@
             display: none;
         }
         
-        /* ====================== AURORA NEON BREATHING BUTTON ====================== */
-/* ====================== AURORA NEON BREATHING - KÍNH LỎNG XÁM BẠC ====================== */
+      /* ====================== AURORA GLASS WHITE - NỀN TRẮNG CHỮ ĐEN + NHÚN NHẢY ====================== */
 #startBtn {
     position: relative;
     z-index: 10;
     padding: 24px 68px;
     font-size: 32px;
     font-weight: 800;
-    color: #ffffff;
+    color: #000000;
     text-transform: uppercase;
     letter-spacing: 3px;
     background: transparent;
@@ -42,93 +41,96 @@
     cursor: pointer;
     overflow: hidden;
     box-shadow: 
-        0 0 40px rgba(180, 190, 200, 0.4),
-        0 0 80px rgba(100, 110, 130, 0.3),
-        inset 0 0 30px rgba(220, 230, 255, 0.15);
+        0 0 40px rgba(0, 0, 0, 0.12),
+        0 0 80px rgba(0, 0, 0, 0.08),
+        inset 0 0 30px rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-    animation: glassBreath 10s ease-in-out infinite;
+    animation: 
+        glassBreath 10s ease-in-out infinite,
+        bounceShake 4s ease-in-out infinite; /* Nhún nhảy rung lắc liên tục */
 }
 
-/* Lớp kính lỏng xám bạc chuyển màu chậm */
+/* Lớp kính trắng chuyển màu chậm (gradient nhẹ xám trắng) */
 #startBtn::before {
     content: '';
     position: absolute;
     inset: -2px;
     background: linear-gradient(
         45deg,
-        #a0b0c0,
-        #e0e8f0,
-        #b0c0d0,
-        #d0d8e8,
-        #a0b0c0
+        #ffffff,
+        #f0f0f0,
+        #e8e8e8,
+        #f8f8f8,
+        #ffffff
     );
     background-size: 300% 300%;
     border-radius: 50px;
-    filter: blur(24px);
-    opacity: 0.55;
-    animation: glassFlow 20s linear infinite;
+    filter: blur(20px);
+    opacity: 0.7;
+    animation: glassFlow 18s linear infinite;
     z-index: -2;
 }
 
-/* Lớp nền kính mờ + gradient lạnh nhẹ */
+/* Lớp nền kính mờ trắng + gradient tinh tế */
 #startBtn::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(200, 210, 230, 0.18), rgba(140, 150, 170, 0.14), rgba(220, 230, 255, 0.12));
+    background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(240,240,240,0.85), rgba(255,255,255,0.92));
     border-radius: 50px;
     z-index: -1;
     backdrop-filter: blur(14px);
 }
 
-/* Text layer - trắng với glow xám bạc lạnh */
+/* Text layer - chữ đen với glow nhẹ trắng */
 .btn-text {
     position: relative;
     z-index: 2;
     text-shadow: 
-        0 0 8px rgba(220, 230, 255, 0.7),
-        0 0 16px rgba(180, 190, 200, 0.5),
-        0 0 24px rgba(140, 150, 170, 0.3);
+        0 0 6px rgba(255, 255, 255, 0.8),
+        0 0 12px rgba(255, 255, 255, 0.6);
 }
 
-/* Hover - nâng lên, sáng mạnh hơn kiểu kính phản chiếu */
+/* Hover - nâng lên, sáng mạnh hơn */
 #startBtn:hover {
     transform: translateY(-6px) scale(1.06);
     box-shadow: 
-        0 0 70px rgba(180, 190, 200, 0.7),
-        0 0 140px rgba(100, 110, 130, 0.6),
-        inset 0 0 50px rgba(220, 230, 255, 0.3);
-    animation-play-state: paused;
+        0 0 70px rgba(0, 0, 0, 0.25),
+        0 0 140px rgba(0, 0, 0, 0.18),
+        inset 0 0 50px rgba(255, 255, 255, 1);
+    animation-play-state: paused; /* Tạm dừng nhún nhảy khi hover để tập trung */
 }
 
 /* Active / Click - nhấn xuống */
 #startBtn:active {
     transform: scale(0.92);
     box-shadow: 
-        0 0 40px rgba(220, 230, 255, 0.9),
-        0 0 100px rgba(180, 190, 200, 0.8);
+        0 0 40px rgba(0, 0, 0, 0.4),
+        0 0 100px rgba(0, 0, 0, 0.3);
 }
 
-/* Hiệu ứng khi click (bung sáng kính rồi mờ dần) */
+/* Hiệu ứng khi click (bung sáng trắng rồi mờ dần) */
 #startBtn.clicked {
-    animation: glassExplodeFade 1.2s cubic-bezier(.25,.46,.45,.94) forwards;
+    animation: 
+        glassExplodeFade 1.2s cubic-bezier(.25,.46,.45,.94) forwards,
+        bounceButton 0.6s ease-out; /* Thêm nhún nhẹ cuối cùng khi click */
 }
 
-/* Keyframes nhịp thở kính lỏng */
+/* Keyframes nhịp thở kính trắng */
 @keyframes glassBreath {
     0%, 100% {
         transform: scale(1);
         box-shadow: 
-            0 0 40px rgba(180, 190, 200, 0.4),
-            0 0 80px rgba(100, 110, 130, 0.3);
+            0 0 40px rgba(0, 0, 0, 0.12),
+            0 0 80px rgba(0, 0, 0, 0.08);
     }
     50% {
-        transform: scale(1.04);
+        transform: scale(1.03);
         box-shadow: 
-            0 0 80px rgba(180, 190, 200, 0.7),
-            0 0 160px rgba(100, 110, 130, 0.6);
+            0 0 80px rgba(0, 0, 0, 0.25),
+            0 0 160px rgba(0, 0, 0, 0.18);
     }
 }
 
@@ -138,22 +140,22 @@
     100% { background-position: 0% 50%; }
 }
 
-/* Hiệu ứng bung sáng khi click - kiểu kính vỡ ánh sáng */
+/* Hiệu ứng bung sáng trắng khi click */
 @keyframes glassExplodeFade {
     0% {
         transform: scale(1);
         opacity: 1;
         box-shadow: 
-            0 0 120px rgba(220, 230, 255, 1),
-            0 0 240px rgba(180, 190, 200, 0.9),
-            inset 0 0 80px rgba(220, 230, 255, 0.7);
+            0 0 120px rgba(255, 255, 255, 1),
+            0 0 240px rgba(255, 255, 255, 0.9),
+            inset 0 0 80px rgba(255, 255, 255, 1);
     }
     40% {
         transform: scale(1.55);
         opacity: 0.92;
         box-shadow: 
-            0 0 280px rgba(220, 230, 255, 1),
-            0 0 500px rgba(180, 190, 200, 0.9);
+            0 0 280px rgba(255, 255, 255, 1),
+            0 0 500px rgba(255, 255, 255, 0.9);
     }
     100% {
         transform: scale(0.4);
@@ -161,6 +163,28 @@
         visibility: hidden;
         box-shadow: none;
     }
+}
+
+/* Hiệu ứng nhún nhảy rung lắc (kết hợp bounce + shake nhẹ) */
+@keyframes bounceShake {
+    0%, 100% {
+        transform: translateY(0) rotate(0);
+    }
+    25% {
+        transform: translateY(-12px) rotate(-1.5deg);
+    }
+    50% {
+        transform: translateY(0) rotate(0);
+    }
+    75% {
+        transform: translateY(-8px) rotate(1.5deg);
+    }
+}
+
+/* Hiệu ứng nhún nhẹ khi click (dùng lại cho phần kết thúc) */
+@keyframes bounceButton {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-15px); }
 }
     </style>
 </head>
@@ -1665,5 +1689,6 @@ function createSpecialExplosion(x, y, baseHue, distanceType) {
     </script>
 </body>
 </html>
+
 
 
