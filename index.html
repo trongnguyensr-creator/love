@@ -25,95 +25,142 @@
             display: none;
         }
         
-        #startBtn {
-            position: relative;
-            z-index: 10;
-            padding: 20px 54px;
-            font-size: 30px;
-            font-weight: 700;
-            color: #111;
-            background: linear-gradient(135deg, #ffffff, #f3f3f3);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: 28px;
-            cursor: pointer;
-            box-shadow: 
-                0 10px 25px rgba(0, 0, 0, 0.08), 
-                inset 0 1px 0 rgba(255, 255, 255, 0.9),
-                0 0 0 4px rgba(255, 255, 255, 0.3),
-                0 0 20px rgba(255, 255, 255, 0.5);
-            transition: transform 0.35s cubic-bezier(.22,1,.36,1), 
-                        box-shadow 0.35s ease, 
-                        background 0.35s ease;
-            letter-spacing: 0.5px;
-            animation: 
-                pulseGlow 2s ease-in-out infinite,
-                bounceButton 1.5s ease-in-out infinite;
-            overflow: hidden;
-        }
+        /* ====================== AURORA NEON BREATHING BUTTON ====================== */
+#startBtn {
+    position: relative;
+    z-index: 10;
+    padding: 24px 68px;
+    font-size: 32px;
+    font-weight: 800;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    background: transparent;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    overflow: hidden;
+    box-shadow: 
+        0 0 40px rgba(0, 255, 255, 0.4),
+        0 0 80px rgba(255, 0, 255, 0.3),
+        inset 0 0 30px rgba(0, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    animation: auroraBreath 8s ease-in-out infinite;
+}
 
-        #startBtn::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -120%;
-            width: 120%;
-            height: 100%;
-            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.7), transparent);
-            transition: left 0.6s ease;
-        }
+/* Hiệu ứng cực quang chuyển màu chậm */
+#startBtn::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(
+        45deg,
+        #00ffff,
+        #ff00ff,
+        #00ff88,
+        #ff00aa,
+        #00ffff
+    );
+    background-size: 300% 300%;
+    border-radius: 50px;
+    filter: blur(20px);
+    opacity: 0.6;
+    animation: auroraFlow 18s linear infinite;
+    z-index: -2;
+}
 
-        #startBtn:hover::after {
-            left: 120%;
-        }
+/* Lớp nền kính mờ + gradient nhẹ */
+#startBtn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(255, 0, 255, 0.12), rgba(0, 255, 136, 0.1));
+    border-radius: 50px;
+    z-index: -1;
+    backdrop-filter: blur(12px);
+}
 
-        #startBtn:hover {
-            transform: translateY(-8px) scale(1.05);
-            box-shadow: 
-                0 18px 40px rgba(0, 0, 0, 0.12), 
-                inset 0 1px 0 rgba(255, 255, 255, 1),
-                0 0 0 6px rgba(255, 255, 255, 0.5),
-                0 0 30px rgba(255, 255, 255, 0.8);
-            animation-play-state: paused;
-        }
+/* Text layer */
+.btn-text {
+    position: relative;
+    z-index: 2;
+    text-shadow: 
+        0 0 10px #00ffff,
+        0 0 20px #ff00ff,
+        0 0 30px #00ff88;
+}
 
-        #startBtn:active {
-            transform: scale(0.95);
-            box-shadow: 
-                0 6px 15px rgba(0, 0, 0, 0.15),
-                0 0 0 8px rgba(255, 255, 255, 0.8),
-                0 0 40px rgba(255, 255, 255, 1);
-            transition: transform 0.15s ease;
-        }
+/* Hover */
+#startBtn:hover {
+    transform: translateY(-6px) scale(1.06);
+    box-shadow: 
+        0 0 60px rgba(0, 255, 255, 0.7),
+        0 0 120px rgba(255, 0, 255, 0.6),
+        inset 0 0 40px rgba(0, 255, 255, 0.4);
+    animation-play-state: paused;
+}
 
-        #startBtn.clicked {
-            animation: fadeOutSmooth 0.9s cubic-bezier(.4,0,.2,1) forwards;
-        }
+/* Active / Click */
+#startBtn:active {
+    transform: scale(0.92);
+    box-shadow: 
+        0 0 30px rgba(0, 255, 255, 0.9),
+        0 0 80px rgba(255, 0, 255, 0.8);
+}
 
-        .btn-text {
-            position: relative;
-            z-index: 1;
-            color: #111;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+/* Hiệu ứng khi click (bung sáng rồi mờ dần) */
+#startBtn.clicked {
+    animation: explodeFade 1.2s cubic-bezier(.25,.46,.45,.94) forwards;
+}
 
-        /* Hiệu ứng nhấp nháy viền sáng */
-        @keyframes pulseGlow {
-            0%, 100% { 
-                box-shadow: 
-                    0 10px 25px rgba(0, 0, 0, 0.08), 
-                    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-                    0 0 0 4px rgba(255, 255, 255, 0.3),
-                    0 0 20px rgba(255, 255, 255, 0.5);
-            }
-            50% { 
-                box-shadow: 
-                    0 10px 25px rgba(0, 0, 0, 0.08), 
-                    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-                    0 0 0 8px rgba(255, 255, 255, 0.6),
-                    0 0 30px rgba(255, 255, 255, 0.8),
-                    0 0 50px rgba(255, 255, 255, 0.4);
-            }
-        }
+/* Keyframes cho nhịp thở cực quang */
+@keyframes auroraBreath {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 
+            0 0 40px rgba(0, 255, 255, 0.4),
+            0 0 80px rgba(255, 0, 255, 0.3);
+    }
+    50% {
+        transform: scale(1.04);
+        box-shadow: 
+            0 0 70px rgba(0, 255, 255, 0.7),
+            0 0 140px rgba(255, 0, 255, 0.6);
+    }
+}
+
+@keyframes auroraFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Hiệu ứng nổ bung khi click */
+@keyframes explodeFade {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+        box-shadow: 
+            0 0 100px rgba(0, 255, 255, 1),
+            0 0 200px rgba(255, 0, 255, 1),
+            inset 0 0 60px rgba(0, 255, 255, 0.8);
+    }
+    40% {
+        transform: scale(1.6);
+        opacity: 0.9;
+        box-shadow: 
+            0 0 200px rgba(0, 255, 255, 1),
+            0 0 400px rgba(255, 0, 255, 1);
+    }
+    100% {
+        transform: scale(0.3);
+        opacity: 0;
+        visibility: hidden;
+        box-shadow: none;
+    }
+}
 
         /* Hiệu ứng nhảy lên xuống */
         @keyframes bounceButton {
@@ -1652,3 +1699,4 @@ function createSpecialExplosion(x, y, baseHue, distanceType) {
     </script>
 </body>
 </html>
+
